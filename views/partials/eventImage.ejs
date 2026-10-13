@@ -1,0 +1,4 @@
+<%# event picture: the uploaded photo, or a cover picture for its category %>
+<% const pic = event.imageUrl || ('/images/events/' + event.category + '.jpg'); %>
+<img src="<%= pic %>" alt="" loading="lazy" draggable="false"
+     class="<%= typeof imgClass !== 'undefined' ? imgClass : 'aspect-video w-full rounded-2xl object-cover' %>" width="800" height="600">
