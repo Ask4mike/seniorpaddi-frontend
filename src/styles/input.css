@@ -1,29 +1,88 @@
 @import "tailwindcss";
 @source "../../views";
 @source "../../public/js";
+/* the project docs mention class names and plain words like "inline"; keep them out of the CSS */
+@source not "../../docs";
 
 /*
-  SeniorPadi look: deep indigo with warm coral and sunny accents,
-  soft rounded cards, gentle motion, and readable (not heavy) type.
+  SeniorPadi look: deep indigo with a warm clay accent, soft rounded cards,
+  and readable (not heavy) type, built for readers aged 65 and over.
+
+  THE PALETTE LIVES HERE. Use the semantic names below in new markup.
+  Every pair is measured with docs/ui-revamp/tools/contrast.mjs
+  (results and reasoning: docs/ui-revamp/palette.md). Rules that keep it accessible:
+    - white text goes only on primary, primary-dark, secondary, accent, accent-dark, success, success-dark
+    - body, muted and error text go on background, surface, surface-muted, surface-subtle (and tints)
+    - sun and mint are decorative fills or icons: never white text on them, never the only cue
+    - status is never colour alone: always an icon and a word as well
+    - accent is only a solid fill with a white label (buttons, badges). It sits close to error red for colour-blind
+      readers, so never use accent as text colour and never use error as a fill. Error is text or a border on its tint,
+      with an icon and an "Error:" prefix.
 */
 @theme {
   --font-sans: "Plus Jakarta Sans", "Segoe UI", Roboto, Arial, sans-serif;
 
-  --color-ink: #16213e;
-  --color-indigo: #22407a;
-  --color-indigo-dark: #172d57;
-  --color-mist: #eef2fa;
-  --color-coral: #f2795b;
-  --color-coral-dark: #d9583a;
+  /* brand */
+  --color-primary: #22407a;
+  --color-primary-dark: #172d57;
+  --color-secondary: #5b4aa0;
+  --color-accent: #9c4c16;
+  --color-accent-dark: #7f3e12;
+
+  /* status (each has a solid colour for white labels and a tint for tags) */
+  --color-success: #175a3a;
+  --color-success-dark: #0f4029;
+  --color-success-bg: #ecfdf5;
+  --color-warning-ink: #6b4200;
+  --color-warning-bg: #fff1cc;
+  --color-error: #991c1c;
+  --color-error-bg: #fde8e8;
+
+  /* surfaces */
+  --color-background: #fafbff;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eef2fa;
+  --color-surface-subtle: #f4f6fb;
+
+  /* text and lines */
+  --color-body: #16213e;
+  --color-muted: #465072;
+  --color-on-primary-muted: #dbe4f8;
+  --color-border-strong: #6b7694;
+
+  /* keyboard focus: blue on light surfaces, sun yellow on the dark brand surfaces */
+  --color-focus: #2f5bd6;
+  --color-focus-on-dark: #f6b93b;
+
+  /* decorative only */
   --color-sun: #f6b93b;
-  --color-mint: #3bb89f;
-  --color-lilac: #8e7cc3;
-  --color-leaf: #1f7a5c;
-  --color-leaf-dark: #155c45;
-  --color-amber-tag: #7a4b00;
-  --color-amber-bg: #fdf0d2;
-  --color-full-tag: #9f1d1d;
-  --color-full-bg: #fde8e8;
+  --color-mint: #2a8371;
+}
+
+/*
+  Old names kept as aliases so existing templates keep working while Phase 3 moves
+  them to the semantic names above. Delete an alias once nothing uses it.
+  The three grey overrides pull Tailwind's default greys into the palette:
+  gray-300 is the form field border, gray-500 and gray-600 are muted text.
+*/
+@theme inline {
+  --color-ink: var(--color-body);
+  --color-indigo: var(--color-primary);
+  --color-indigo-dark: var(--color-primary-dark);
+  --color-mist: var(--color-surface-muted);
+  --color-coral: var(--color-accent);
+  --color-coral-dark: var(--color-accent-dark);
+  --color-lilac: var(--color-secondary);
+  --color-leaf: var(--color-success);
+  --color-leaf-dark: var(--color-success-dark);
+  --color-amber-tag: var(--color-warning-ink);
+  --color-amber-bg: var(--color-warning-bg);
+  --color-full-tag: var(--color-error);
+  --color-full-bg: var(--color-error-bg);
+
+  --color-gray-300: var(--color-border-strong);
+  --color-gray-500: var(--color-muted);
+  --color-gray-600: var(--color-muted);
 }
 
 @layer base {
@@ -32,7 +91,7 @@
     -webkit-text-size-adjust: 100%;
   }
   body {
-    @apply bg-[#fafbff] text-ink leading-relaxed antialiased;
+    @apply bg-background text-body leading-relaxed antialiased;
   }
   h1 {
     @apply text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem];
@@ -47,7 +106,14 @@
     @apply text-indigo underline decoration-1 underline-offset-4;
   }
   :focus-visible {
-    @apply outline-3 outline-offset-2 outline-coral;
+    @apply outline-3 outline-offset-2 outline-focus;
+  }
+  /* the blue ring would vanish on the dark brand surfaces (footer, staff sidebar, auth panel), so use sun yellow there */
+  .bg-primary :focus-visible,
+  .bg-primary-dark :focus-visible,
+  .bg-indigo :focus-visible,
+  .bg-indigo-dark :focus-visible {
+    outline-color: var(--color-focus-on-dark);
   }
 }
 
