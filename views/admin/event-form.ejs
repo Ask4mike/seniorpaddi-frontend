@@ -4,118 +4,140 @@
   function err(name) { return errors[name] ? '<span class="error">' + errors[name] + '</span>' : ''; }
 %>
 
-<p class="mb-4"><a href="/admin/events">Back to events</a></p>
+<p class="mb-2"><a href="/admin/events" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i>Back to events</a></p>
 <h1 class="mb-6"><%= event ? 'Edit event' : 'New event' %></h1>
 
 <% if (Object.keys(errors).length > 0) { %>
-  <div role="alert" class="mb-6 rounded-lg border-l-8 border-full-tag bg-full-bg p-4 font-bold">Some things need fixing. They're marked below.</div>
+  <div role="alert" class="alert alert-error"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><span>Some things need fixing. They're marked below.</span></div>
 <% } %>
 
 <%# file upload form, so the CSRF token goes in the URL %>
 <form action="<%= action %>?_csrf=<%= encodeURIComponent(csrfToken) %>" method="post" enctype="multipart/form-data" data-upload>
   <div class="field">
     <label for="title">Title</label>
-    <input type="text" id="title" name="title" value="<%= values.title || '' %>">
-    <%- err('title') %>
+    <input type="text" id="title" name="title" value="<%= values.title || '' %>"
+           aria-describedby="<%= errors.title ? 'title-error' : '' %>"
+           aria-invalid="<%= errors.title ? 'true' : 'false' %>">
+    <div id="title-error"><%- err('title') %></div>
   </div>
 
   <div class="field">
     <label for="description">Description</label>
-    <textarea id="description" name="description" rows="5"><%= values.description || '' %></textarea>
-    <span class="hint">Plain words. What happens, what to bring, who it's for.</span>
-    <%- err('description') %>
+    <textarea id="description" name="description" rows="5"
+              aria-describedby="description-hint<%= errors.description ? ' description-error' : '' %>"
+              aria-invalid="<%= errors.description ? 'true' : 'false' %>"><%= values.description || '' %></textarea>
+    <span class="hint" id="description-hint">Plain words. What happens, what to bring, who it's for.</span>
+    <div id="description-error"><%- err('description') %></div>
   </div>
 
   <div class="field">
     <label for="organizationId">Organization</label>
-    <select id="organizationId" name="organizationId">
+    <select id="organizationId" name="organizationId"
+            aria-describedby="<%= errors.organizationId ? 'organizationId-error' : '' %>"
+            aria-invalid="<%= errors.organizationId ? 'true' : 'false' %>">
       <option value="">Choose one</option>
       <% organizations.forEach(function (org) { %>
         <option value="<%= org.id %>" <%= Number(values.organizationId) === org.id ? 'selected' : '' %>><%= org.name %></option>
       <% }) %>
     </select>
-    <%- err('organizationId') %>
+    <div id="organizationId-error"><%- err('organizationId') %></div>
   </div>
 
   <div class="field">
     <label for="category">Category</label>
-    <select id="category" name="category">
+    <select id="category" name="category"
+            aria-describedby="<%= errors.category ? 'category-error' : '' %>"
+            aria-invalid="<%= errors.category ? 'true' : 'false' %>">
       <option value="">Choose one</option>
       <% categories.forEach(function (c) { %>
         <option value="<%= c %>" <%= values.category === c ? 'selected' : '' %>><%= t('category.' + c) %></option>
       <% }) %>
     </select>
-    <%- err('category') %>
+    <div id="category-error"><%- err('category') %></div>
   </div>
 
   <div class="grid gap-x-4 sm:grid-cols-2">
     <div class="field">
       <label for="startsAt">Starts</label>
-      <input type="datetime-local" id="startsAt" name="startsAt" value="<%= values.startsAt || '' %>">
-      <%- err('startsAt') %>
+      <input type="datetime-local" id="startsAt" name="startsAt" value="<%= values.startsAt || '' %>"
+             aria-describedby="<%= errors.startsAt ? 'startsAt-error' : '' %>"
+             aria-invalid="<%= errors.startsAt ? 'true' : 'false' %>">
+      <div id="startsAt-error"><%- err('startsAt') %></div>
     </div>
     <div class="field">
       <label for="endsAt">Ends</label>
-      <input type="datetime-local" id="endsAt" name="endsAt" value="<%= values.endsAt || '' %>">
-      <%- err('endsAt') %>
+      <input type="datetime-local" id="endsAt" name="endsAt" value="<%= values.endsAt || '' %>"
+             aria-describedby="<%= errors.endsAt ? 'endsAt-error' : '' %>"
+             aria-invalid="<%= errors.endsAt ? 'true' : 'false' %>">
+      <div id="endsAt-error"><%- err('endsAt') %></div>
     </div>
   </div>
 
   <div class="field">
     <label for="registrationDeadline">Registration closes</label>
-    <input type="datetime-local" id="registrationDeadline" name="registrationDeadline" value="<%= values.registrationDeadline || '' %>">
-    <span class="hint">All times are Lagos time.</span>
-    <%- err('registrationDeadline') %>
+    <input type="datetime-local" id="registrationDeadline" name="registrationDeadline" value="<%= values.registrationDeadline || '' %>"
+           aria-describedby="registrationDeadline-hint<%= errors.registrationDeadline ? ' registrationDeadline-error' : '' %>"
+           aria-invalid="<%= errors.registrationDeadline ? 'true' : 'false' %>">
+    <span class="hint" id="registrationDeadline-hint">All times are Lagos time.</span>
+    <div id="registrationDeadline-error"><%- err('registrationDeadline') %></div>
   </div>
 
   <div class="field">
     <label for="locationText">Where</label>
-    <input type="text" id="locationText" name="locationText" value="<%= values.locationText || '' %>">
-    <span class="hint">e.g. Agodi Gardens, main gate, Ibadan</span>
-    <%- err('locationText') %>
+    <input type="text" id="locationText" name="locationText" value="<%= values.locationText || '' %>"
+           aria-describedby="locationText-hint<%= errors.locationText ? ' locationText-error' : '' %>"
+           aria-invalid="<%= errors.locationText ? 'true' : 'false' %>">
+    <span class="hint" id="locationText-hint">e.g. Agodi Gardens, main gate, Ibadan</span>
+    <div id="locationText-error"><%- err('locationText') %></div>
   </div>
 
   <div class="field">
     <label for="locationMapsUrl">Google Maps link (optional)</label>
-    <input type="url" id="locationMapsUrl" name="locationMapsUrl" value="<%= values.locationMapsUrl || '' %>">
-    <%- err('locationMapsUrl') %>
+    <input type="url" id="locationMapsUrl" name="locationMapsUrl" value="<%= values.locationMapsUrl || '' %>"
+           aria-describedby="<%= errors.locationMapsUrl ? 'locationMapsUrl-error' : '' %>"
+           aria-invalid="<%= errors.locationMapsUrl ? 'true' : 'false' %>">
+    <div id="locationMapsUrl-error"><%- err('locationMapsUrl') %></div>
   </div>
 
   <div class="field">
     <label for="capacity">How many seniors can attend?</label>
-    <input type="number" id="capacity" name="capacity" min="1" value="<%= values.capacity || '' %>">
-    <%- err('capacity') %>
+    <input type="number" id="capacity" name="capacity" min="1" value="<%= values.capacity || '' %>"
+           aria-describedby="<%= errors.capacity ? 'capacity-error' : '' %>"
+           aria-invalid="<%= errors.capacity ? 'true' : 'false' %>">
+    <div id="capacity-error"><%- err('capacity') %></div>
   </div>
 
-  <fieldset class="panel mb-5">
+  <fieldset class="panel mb-6">
     <legend class="sr-only">Volunteers</legend>
-    <label class="mb-3 flex items-center gap-3 font-bold">
-      <input type="checkbox" name="volunteerEnabled" value="yes" class="h-6 w-6" <%= values.volunteerEnabled ? 'checked' : '' %>>
-      Volunteers needed
+    <label class="check mb-3">
+      <input type="checkbox" name="volunteerEnabled" value="yes" <%= values.volunteerEnabled ? 'checked' : '' %>>
+      <span>Volunteers needed</span>
     </label>
     <div class="field mb-0">
       <label for="volunteerCapacity">How many volunteers?</label>
-      <input type="number" id="volunteerCapacity" name="volunteerCapacity" min="1" value="<%= values.volunteerCapacity || '' %>">
-      <span class="hint">Separate from the attendee spots.</span>
-      <%- err('volunteerCapacity') %>
+      <input type="number" id="volunteerCapacity" name="volunteerCapacity" min="1" value="<%= values.volunteerCapacity || '' %>"
+             aria-describedby="volunteerCapacity-hint<%= errors.volunteerCapacity ? ' volunteerCapacity-error' : '' %>"
+             aria-invalid="<%= errors.volunteerCapacity ? 'true' : 'false' %>">
+      <span class="hint" id="volunteerCapacity-hint">Separate from the attendee spots.</span>
+      <div id="volunteerCapacity-error"><%- err('volunteerCapacity') %></div>
     </div>
   </fieldset>
 
-  <label class="field flex items-center gap-3 font-bold">
-    <input type="checkbox" name="hostedBySenior" value="yes" class="h-6 w-6" <%= values.hostedBySenior ? 'checked' : '' %>>
-    Hosted by a senior
+  <label class="check mb-6">
+    <input type="checkbox" name="hostedBySenior" value="yes" <%= values.hostedBySenior ? 'checked' : '' %>>
+    <span>Hosted by a senior</span>
   </label>
 
   <%# keep the file last so the text fields are read even if the file is too big %>
   <div class="field">
     <label for="image">Event picture</label>
-    <label for="image" class="flex cursor-pointer flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-indigo/30 bg-mist/50 p-5 text-center transition hover:border-indigo">
-      <img id="image-preview" src="<%= event && event.imageUrl ? event.imageUrl : '/images/events/' + (values.category || 'social') + '.png' %>"
-           alt="Picture preview" class="h-48 w-full max-w-md rounded-2xl object-cover shadow">
-      <span class="font-medium text-indigo"><i class="fa-solid fa-image mr-2" aria-hidden="true"></i>Choose a photo</span>
-      <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp" class="text-[0.9rem]">
+    <label for="image" class="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-primary bg-surface-muted p-5 text-center transition-colors hover:border-primary-dark">
+      <img id="image-preview" src="<%= event && event.imageUrl ? event.imageUrl : '/images/events/' + (values.category || 'social') + '.jpg' %>"
+           alt="Picture preview" class="h-48 w-full max-w-md rounded-xl object-cover">
+      <span class="font-bold text-primary"><i class="fa-solid fa-image mr-2" aria-hidden="true"></i>Choose a photo</span>
+      <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp" aria-describedby="image-hint">
     </label>
-    <span class="hint">JPG, PNG or WebP, up to 3MB. Without one, the event uses a colourful cover for its category.</span>
+    <span class="hint" id="image-hint">JPG, PNG or WebP, up to 3MB. Without one, the event uses a colourful cover for its category.</span>
   </div>
 
   <script>
@@ -129,5 +151,5 @@
   <button class="btn" data-uploading-text="Saving…"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><%= event ? 'Save changes' : 'Publish event' %></button>
 </form>
 
-<script src="/js/upload.js" defer></script>
+<script src="/js/upload.js?v=ui1" defer></script>
 <%- include('../partials/footer') %>

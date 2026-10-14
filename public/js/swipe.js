@@ -63,6 +63,7 @@
 
     // keyboard: left and right arrows
     card.addEventListener('keydown', function (e) {
+      if (e.target !== card) return;
       if (e.key === 'ArrowLeft') go('left');
       if (e.key === 'ArrowRight') go('right');
     });

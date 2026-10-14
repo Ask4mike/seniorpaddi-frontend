@@ -1,10 +1,10 @@
-<%# left side of the log-in and sign-up pages %>
-<div class="relative hidden overflow-hidden bg-gradient-to-br from-indigo to-lilac p-10 text-white md:flex md:flex-col">
-  <p class="relative mb-3 text-[1.6rem] font-semibold leading-tight"><%= t('auth.aside_title') %></p>
-  <ul class="relative space-y-2 text-white/90">
-    <li><i class="fa-solid fa-circle-check mr-2 text-sun" aria-hidden="true"></i><%= t('home.trust_free') %></li>
-    <li><i class="fa-solid fa-circle-check mr-2 text-sun" aria-hidden="true"></i><%= t('home.trust_language') %></li>
-    <li><i class="fa-solid fa-circle-check mr-2 text-sun" aria-hidden="true"></i><%= t('home.trust_safe') %></li>
+<%# left side of the log-in and sign-up pages (decoration and reassurance, solid colour, no movement) %>
+<div class="hidden bg-primary p-10 text-white md:flex md:flex-col">
+  <p class="mb-4 text-3xl font-bold"><%= t('auth.aside_title') %></p>
+  <ul class="mb-8 space-y-3 text-lg text-white">
+    <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-1 shrink-0 text-sun" aria-hidden="true"></i><span><%= t('home.trust_free') %></span></li>
+    <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-1 shrink-0 text-sun" aria-hidden="true"></i><span><%= t('home.trust_language') %></span></li>
+    <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-1 shrink-0 text-sun" aria-hidden="true"></i><span><%= t('home.trust_safe') %></span></li>
   </ul>
-  <img src="/images/hero.png" alt="" class="float relative mx-auto mt-auto w-64 drop-shadow-2xl" width="900" height="1000" aria-hidden="true">
+  <img src="/images/hero.png" alt="" class="mx-auto mt-auto w-64" width="900" height="1000" aria-hidden="true">
 </div>

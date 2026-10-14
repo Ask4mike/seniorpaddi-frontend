@@ -7,17 +7,17 @@
 <% } else { %>
   <ul class="mb-10 space-y-3">
     <% organizations.forEach(function (org) { %>
-      <li class="border-b border-gray-300 pb-3">
+      <li class="border-b border-border-strong pb-3">
         <strong><%= org.name %></strong>
         <% if (org.contactName || org.contactPhone) { %><br><%= [org.contactName, org.contactPhone, org.contactEmail].filter(Boolean).join(', ') %><% } %>
-        <br><a href="/admin/organizations/<%= org.id %>/edit">Edit</a>
+        <br><a href="/admin/organizations/<%= org.id %>/edit" class="btn-link -ml-2"><i class="fa-solid fa-pen" aria-hidden="true"></i>Edit</a>
       </li>
     <% }) %>
   </ul>
 <% } %>
 
 <h2 class="mb-4">Add an organization</h2>
-<% if (error) { %><div role="alert" class="mb-4 rounded-lg border-l-8 border-full-tag bg-full-bg p-4 font-bold"><%= error %></div><% } %>
+<% if (error) { %><div role="alert" class="alert alert-error"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><span><%= error %></span></div><% } %>
 <form action="/admin/organizations" method="post">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <%- include('orgFields', { org: {} }) %>

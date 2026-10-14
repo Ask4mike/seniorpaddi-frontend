@@ -1,16 +1,16 @@
 <%- include('../partials/header') %>
 
-<div class="mb-6 flex flex-wrap items-end justify-between gap-3" data-reveal>
-  <div>
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <div class="min-w-0">
     <h1><%= t('stack.my_tickets') %></h1>
-    <p class="text-gray-600"><%= t('tickets.subtitle') %></p>
+    <p class="text-muted"><%= t('tickets.subtitle') %></p>
   </div>
   <a href="/history" class="btn-plain"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><%= t('registrations.see_past') %></a>
 </div>
 
 <% if (registrations.length === 0) { %>
-  <div class="panel text-center" data-reveal>
-    <span class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl text-indigo shadow"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>
+  <div class="panel text-center">
+    <span class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface text-2xl text-primary"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>
     <p class="mb-5"><%= t('registrations.none') %></p>
     <a href="/events" class="btn"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><%= t('nav.find_events') %></a>
   </div>
@@ -18,30 +18,30 @@
 
 <ul class="grid gap-5 md:grid-cols-2">
   <% registrations.forEach(function (reg, i) { const event = reg.Event; %>
-    <li class="overflow-hidden rounded-[1.75rem] bg-white shadow-md ring-1 ring-gray-200" data-reveal data-reveal-delay="<%= (i % 2) * 120 %>">
+    <li class="card overflow-hidden p-0">
       <div class="relative">
         <%- include('../partials/eventImage', { event, imgClass: 'h-36 w-full object-cover' }) %>
         <span class="absolute left-4 top-4 <%= reg.type === 'volunteer' ? 'tag-leaf' : 'tag-mine' %> shadow"><i class="fa-solid <%= reg.type === 'volunteer' ? 'fa-hand-holding-heart' : 'fa-user-check' %>" aria-hidden="true"></i><%= reg.type === 'volunteer' ? t('registrations.volunteering') : t('registrations.attending') %></span>
       </div>
       <div class="p-5">
-        <h2 class="mb-1 text-[1.2rem]"><a href="/events/<%= event.id %>" class="text-ink no-underline hover:underline"><%= event.title %></a></h2>
-        <p class="text-gray-600"><i class="fa-regular fa-calendar mr-1.5" aria-hidden="true"></i><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %></p>
-        <p class="mb-4 text-gray-600"><i class="fa-solid fa-location-dot mr-1.5" aria-hidden="true"></i><%= event.locationText %></p>
+        <h2 class="mb-1 text-xl"><a href="/events/<%= event.id %>" class="inline-flex min-h-12 items-center text-body"><%= event.title %></a></h2>
+        <p class="text-muted"><i class="fa-regular fa-calendar mr-2" aria-hidden="true"></i><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %></p>
+        <p class="mb-4 text-muted"><i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i><%= event.locationText %></p>
 
         <%# the ticket: a dashed "pass" %>
-        <div class="mb-4 flex items-center justify-between rounded-2xl border-2 border-dashed border-coral/50 bg-coral/5 px-4 py-3">
-          <span class="text-[0.9rem] text-gray-600"><i class="fa-solid fa-ticket mr-1.5 text-coral" aria-hidden="true"></i><%= t('ticket.label') %></span>
-          <span class="text-[1.2rem] font-semibold tracking-widest text-coral-dark"><%= reg.ticketNumber %></span>
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-2xl border-2 border-dashed border-primary bg-surface-muted px-4 py-3">
+          <span class="text-base text-muted"><i class="fa-solid fa-ticket mr-2 text-primary" aria-hidden="true"></i><%= t('ticket.label') %></span>
+          <span class="text-lg font-bold text-primary"><%= reg.ticketNumber %></span>
         </div>
         <%- include('../partials/qr', { qr: reg.qr }) %>
 
         <% if (new Date(event.startsAt) > new Date()) { %>
           <form action="/registrations/<%= reg.id %>/cancel" method="post" class="mt-4">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="inline-flex items-center gap-2 font-medium text-full-tag hover:underline"><i class="fa-solid fa-ban" aria-hidden="true"></i><%= reg.type === 'volunteer' ? t('registrations.cancel_volunteer') : t('registrations.cancel') %></button>
+            <button class="btn-link-danger"><i class="fa-solid fa-ban" aria-hidden="true"></i><%= reg.type === 'volunteer' ? t('registrations.cancel_volunteer') : t('registrations.cancel') %></button>
           </form>
         <% } else { %>
-          <p class="mt-4 font-medium text-leaf"><%= t('registrations.happening_now') %></p>
+          <p class="mt-4 font-bold text-success"><i class="fa-solid fa-circle-play mr-2" aria-hidden="true"></i><%= t('registrations.happening_now') %></p>
         <% } %>
       </div>
     </li>

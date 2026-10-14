@@ -5,15 +5,15 @@
 %>
 
 <h1 class="mb-2"><%= t('verify.title') %></h1>
-<p class="mb-6"><%= t('verify.intro') %></p>
+<p class="measure mb-6"><%= t('verify.intro') %></p>
 
 <ol class="space-y-5">
   <% steps.forEach(function (step, i) { %>
-    <li class="rounded-xl border-2 <%= step.done ? 'border-leaf bg-green-50' : 'border-gray-300' %> p-4">
-      <p class="mb-2 font-bold"><%= i + 1 %>. <%= step.label %></p>
+    <li class="rounded-2xl border-2 p-4 <%= step.done ? 'border-success bg-success-bg' : 'border-border-strong bg-surface' %>">
+      <p class="mb-2 break-words font-bold"><%= i + 1 %>. <%= step.label %></p>
 
       <% if (step.done) { %>
-        <p class="font-bold text-leaf"><%= t('verify.done') %></p>
+        <p class="font-bold text-success"><i class="fa-solid fa-circle-check mr-2" aria-hidden="true"></i><%= t('verify.done') %></p>
       <% } else { %>
         <% if (sent === step.channel) { %>
           <form action="/verify/check" method="post" class="mb-3">
@@ -23,13 +23,13 @@
               <label for="code-<%= step.channel %>"><%= t('verify.enter_code', { minutes: minutes }) %></label>
               <input type="text" id="code-<%= step.channel %>" name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
             </div>
-            <button class="btn w-full sm:w-full"><%= t('verify.confirm') %></button>
+            <button class="btn btn-block"><%= t('verify.confirm') %></button>
           </form>
         <% } %>
         <form action="/verify/send" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <input type="hidden" name="channel" value="<%= step.channel %>">
-          <button class="<%= sent === step.channel ? 'btn-plain' : 'btn' %> w-full sm:w-full">
+          <button class="<%= sent === step.channel ? 'btn-plain' : 'btn' %> btn-block">
             <%= sent === step.channel ? t('verify.send_again') : (step.channel === 'phone' ? t('verify.send_sms') : t('verify.send_email')) %>
           </button>
         </form>
@@ -38,6 +38,6 @@
   <% }) %>
 </ol>
 
-<p class="mt-6 text-base text-gray-700"><%= t('verify.help', { phone: supportPhone }) %></p>
+<p class="measure mt-6 text-muted"><%= t('verify.help', { phone: supportPhone }) %></p>
 
 <%- include('../partials/footer') %>

@@ -1,8 +1,8 @@
 <%- include('../partials/header') %>
 
 <h1 class="mb-4"><%= t('report.title_name', { name: other.firstName() }) %></h1>
-<p class="mb-3"><%= t('report.what_happens') %></p>
-<ul class="mb-6 list-disc space-y-1 pl-6">
+<p class="measure mb-3"><%= t('report.what_happens') %></p>
+<ul class="measure mb-6 list-disc space-y-2 pl-6">
   <li><%= t('report.point_hide', { name: other.firstName() }) %></li>
   <li><%= t('report.point_messages') %></li>
   <li><%= t('report.point_private', { name: other.firstName() }) %></li>
@@ -16,6 +16,6 @@
   </div>
   <button class="btn"><%= t('report.submit') %></button>
 </form>
-<p class="mt-6"><a href="/find-seniors"><%= t("common.go_back") %></a></p>
+<p class="mt-6"><a href="/find-seniors" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i><%= t("common.go_back") %></a></p>
 
 <%- include('../partials/footer') %>

@@ -1,24 +1,24 @@
 <%- include('../partials/header') %>
 
 <h1 class="mb-2">Staff</h1>
-<p class="mb-8">Staff can run everything in this admin area. Only give access to people from the NGO.</p>
+<p class="measure mb-8">Staff can run everything in this admin area. Only give access to people from the NGO.</p>
 
 <ul class="mb-12 space-y-4">
   <% staff.forEach(function (m) { const safeName = m.fullName.replace(/'/g, ''); %>
-    <li class="border-b border-gray-300 pb-4">
-      <strong><%= m.fullName %></strong><% if (m.id === currentUser.id) { %> <span class="tag-mine">You</span><% } %><br>
+    <li class="border-b border-border-strong pb-4">
+      <strong><%= m.fullName %></strong><% if (m.id === currentUser.id) { %> <span class="tag-mine"><i class="fa-solid fa-user-check" aria-hidden="true"></i>You</span><% } %><br>
       <%= m.phone %><%= m.email ? ', ' + m.email : '' %>
       <% if (m.id !== currentUser.id) { %>
-        <div class="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+        <div class="-ml-2 mt-1 flex flex-wrap gap-3">
           <form action="/admin/staff/<%= m.id %>/reset-password" method="post"
                 onsubmit="return confirm('Give <%= safeName %> a new temporary password?');">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="font-bold text-indigo underline">Reset password</button>
+            <button class="btn-link">Reset password</button>
           </form>
           <form action="/admin/staff/<%= m.id %>/remove" method="post"
                 onsubmit="return confirm('Remove staff access for <%= safeName %>?');">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="font-bold text-full-tag underline">Remove access</button>
+            <button class="btn-link-danger">Remove access</button>
           </form>
         </div>
       <% } %>
@@ -31,14 +31,16 @@
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <div class="field">
     <label for="fullName">Full name</label>
-    <input type="text" id="fullName" name="fullName" value="<%= values.fullName || '' %>">
-    <% if (errors.fullName) { %><span class="error"><%= errors.fullName %></span><% } %>
+    <input type="text" id="fullName" name="fullName" value="<%= values.fullName || '' %>"
+           aria-describedby="<%= errors.fullName ? 'fullName-error' : '' %>"
+           aria-invalid="<%= errors.fullName ? 'true' : 'false' %>">
+    <% if (errors.fullName) { %><span class="error" id="fullName-error"><%= errors.fullName %></span><% } %>
   </div>
   <div class="field">
     <label for="phone">Phone number</label>
-    <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone, autocomplete: 'off' }) %>
-    <span class="hint">They log in with this. A temporary password is shown here and sent to them by SMS.</span>
-    <% if (errors.phone) { %><span class="error"><%= errors.phone %></span><% } %>
+    <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone, autocomplete: 'off', describedBy: 'phone-hint' + (errors.phone ? ' phone-server-error' : ''), invalid: Boolean(errors.phone) }) %>
+    <span class="hint" id="phone-hint">They log in with this. A temporary password is shown here and sent to them by SMS.</span>
+    <% if (errors.phone) { %><span class="error" id="phone-server-error"><%= errors.phone %></span><% } %>
   </div>
   <div class="field">
     <label for="email">Email (optional)</label>

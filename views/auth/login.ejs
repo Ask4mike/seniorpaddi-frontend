@@ -1,34 +1,34 @@
 <%- include('../partials/header') %>
 
-<div class="mx-auto grid max-w-4xl overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-indigo/10 ring-1 ring-gray-200 md:grid-cols-2" data-reveal>
+<div class="mx-auto grid max-w-4xl overflow-hidden rounded-3xl border-2 border-gray-200 bg-surface md:grid-cols-2">
   <%- include('../partials/authAside') %>
-  <div class="p-6 sm:p-10">
-<h1 class="mb-6"><%= t('login.title') %></h1>
+  <div class="min-w-0 p-6 sm:p-10">
+    <h1 class="mb-6"><%= t('login.title') %></h1>
 
-<% if (error) { %>
-  <div role="alert" class="mb-6 rounded-2xl border-l-4 border-full-tag bg-full-bg p-4 font-medium"><%= error %></div>
-<% } %>
+    <% if (error) { %>
+      <div role="alert" class="alert alert-error"><i class="fa-solid fa-circle-xmark mt-1 shrink-0" aria-hidden="true"></i><span><%= error %></span></div>
+    <% } %>
 
-<form action="/login" method="post">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <input type="hidden" name="registerEventId" value="<%= typeof after !== 'undefined' ? after.registerEventId : '' %>">
-  <input type="hidden" name="next" value="<%= typeof after !== 'undefined' ? after.next : '' %>">
+    <form action="/login" method="post">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="registerEventId" value="<%= typeof after !== 'undefined' ? after.registerEventId : '' %>">
+      <input type="hidden" name="next" value="<%= typeof after !== 'undefined' ? after.next : '' %>">
 
-  <div class="field">
-    <label for="phone"><%= t('signup.phone') %></label>
-    <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: phone }) %>
-  </div>
+      <div class="field">
+        <label for="phone"><%= t('signup.phone') %></label>
+        <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: phone }) %>
+      </div>
 
-  <div class="field">
-    <label for="password"><%= t('signup.password') %></label>
-    <input type="password" id="password" name="password" autocomplete="current-password" required>
-  </div>
+      <div class="field">
+        <label for="password"><%= t('signup.password') %></label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
 
-  <button class="btn w-full sm:w-full"><%= t('login.submit') %></button>
-</form>
+      <button class="btn btn-block"><%= t('login.submit') %></button>
+    </form>
 
-<p class="mt-6"><a href="/forgot-password"><%= t('login.forgot') %></a></p>
-<p class="mt-2"><%= t('login.no_account') %> <a href="/signup<%= typeof after !== 'undefined' && after.registerEventId ? '?register=' + after.registerEventId : '' %>"><%= t('home.create_account') %></a></p>
+    <p class="mt-6"><a href="/forgot-password" class="inline-flex min-h-12 items-center"><%= t('login.forgot') %></a></p>
+    <p class="mt-2 flex flex-wrap items-center gap-x-2"><%= t('login.no_account') %> <a href="/signup<%= typeof after !== 'undefined' && after.registerEventId ? '?register=' + after.registerEventId : '' %>" class="inline-flex min-h-12 items-center"><%= t('home.create_account') %></a></p>
   </div>
 </div>
 

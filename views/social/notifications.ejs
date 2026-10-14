@@ -8,10 +8,14 @@
 
 <ul class="space-y-3">
   <% notifications.forEach(function (n) { %>
-    <li class="rounded-xl border-2 <%= n.readAt ? 'border-gray-300' : 'border-indigo bg-mist' %> p-4">
-      <p class="font-bold"><%= t('notification.' + n.type, n.payload) %></p>
-      <p class="text-base"><%= formatDate(n.createdAt) %>, <%= formatTime(n.createdAt) %></p>
-      <% if (n.link) { %><a href="<%= n.link %>"><%= t('notifications.open') %></a><% } %>
+    <li class="flex items-start gap-3 rounded-2xl border-2 <%= n.readAt ? 'border-border-strong bg-surface' : 'border-primary bg-surface-muted' %> p-4">
+      <%# unread: a dot (shape, not only colour). Read items keep the same space, so the text lines up %>
+      <span class="flex h-7 w-4 shrink-0 items-center justify-center text-primary <%= n.readAt ? 'invisible' : '' %>" aria-hidden="true"><i class="fa-solid fa-circle fa-2xs" aria-hidden="true"></i></span>
+      <div class="min-w-0 flex-1">
+        <p class="font-bold"><%= t('notification.' + n.type, n.payload) %></p>
+        <p class="text-base text-muted"><%= formatDate(n.createdAt) %>, <%= formatTime(n.createdAt) %></p>
+        <% if (n.link) { %><a href="<%= n.link %>" class="btn-link -ml-2"><%= t('notifications.open') %></a><% } %>
+      </div>
     </li>
   <% }) %>
 </ul>

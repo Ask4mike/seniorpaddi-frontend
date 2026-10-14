@@ -1,18 +1,18 @@
 <%- include('../partials/header') %>
 
 <h1 class="mb-2">Welcome video</h1>
-<p class="mb-8">Seniors see this once after signing up, in their language. The transcript is always shown under the video, and it's all they see if no video is uploaded or it won't play.</p>
+<p class="measure mb-8">Seniors see this once after signing up, in their language. The transcript is always shown under the video, and it's all they see if no video is uploaded or it won't play.</p>
 
 <% [['en', 'English'], ['yo', 'Yorùbá']].forEach(function (lang) { const v = videos[lang[0]]; %>
-  <section class="mb-12">
-    <h2 class="mb-2"><%= lang[1] %></h2>
+  <section class="card mb-8">
+    <h2 class="mb-2 text-xl"><span lang="<%= lang[0] %>"><%= lang[1] %></span></h2>
     <p class="mb-4">
       <% if (v && v.videoPublicId) { %>
-        <span class="tag-leaf">Video uploaded</span> Last changed <%= formatDate(v.updatedAt) %>.
+        <span class="tag-leaf"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Video uploaded</span> Last changed <%= formatDate(v.updatedAt) %>.
       <% } else if (v) { %>
-        <span class="tag-amber">Transcript only</span> No video yet.
+        <span class="tag-amber"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>Transcript only</span> No video yet.
       <% } else { %>
-        <span class="tag-full">Not set up</span>
+        <span class="tag-full"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>Not set up</span>
       <% } %>
     </p>
 
@@ -23,13 +23,13 @@
       </div>
       <div class="field">
         <label for="video-<%= lang[0] %>"><%= v && v.videoPublicId ? 'Replace the video (optional)' : 'Video (optional)' %></label>
-        <input type="file" id="video-<%= lang[0] %>" name="video" accept="video/mp4,video/webm" class="block w-full text-lg">
-        <span class="hint">MP4 or WebM, up to 50MB. Keep it under 3 minutes. It's shown at 480p to save data.</span>
+        <input type="file" id="video-<%= lang[0] %>" name="video" accept="video/mp4,video/webm" aria-describedby="video-hint-<%= lang[0] %>">
+        <span class="hint" id="video-hint-<%= lang[0] %>">MP4 or WebM, up to 50MB. Keep it under 3 minutes. It's shown at 480p to save data.</span>
       </div>
-      <button class="btn" data-uploading-text="Uploading… this can take a minute">Save <%= lang[1] %></button>
+      <button class="btn" data-uploading-text="Uploading… this can take a minute">Save <span lang="<%= lang[0] %>"><%= lang[1] %></span></button>
     </form>
   </section>
 <% }) %>
 
-<script src="/js/upload.js" defer></script>
+<script src="/js/upload.js?v=ui1" defer></script>
 <%- include('../partials/footer') %>

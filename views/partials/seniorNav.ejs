@@ -11,18 +11,16 @@
   const bottom = placement === 'bottom';
 %>
 <nav aria-label="Main"
-     class="<%= bottom ? 'fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white/95 px-1 py-1 backdrop-blur' : '' %>">
-  <ul class="<%= bottom ? 'grid grid-cols-5' : 'flex items-center gap-1' %>">
+     class="<%= bottom ? 'tabbar' : '' %>">
+  <ul class="<%= bottom ? 'flex gap-0 px-0 py-1' : 'flex flex-wrap items-center gap-2' %>">
     <% items.forEach(function (item) { %>
-      <li>
+      <li class="<%= bottom ? 'flex-auto' : '' %>">
         <a href="<%= item.href %>" <%= item.active ? 'aria-current=page' : '' %>
-           class="relative flex items-center rounded-full no-underline transition
-                  <%= bottom ? 'flex-col gap-1 rounded-2xl px-1 py-2 text-[0.75rem]' : 'gap-2 px-3.5 py-2 text-[0.95rem]' %>
-                  <%= item.active ? 'bg-mist font-semibold text-indigo' : 'font-medium text-gray-600 hover:bg-mist hover:text-indigo' %>">
-          <i class="fa-solid <%= item.icon %> <%= bottom ? 'text-lg' : '' %>" aria-hidden="true"></i>
+           class="<%= bottom ? 'tab-link h-full px-0 text-center leading-tight' : 'nav-link relative' %>">
+          <i class="fa-solid <%= item.icon %> <%= bottom ? 'text-xl' : '' %>" aria-hidden="true"></i>
           <span><%= bottom && item.short ? item.short : item.label %></span>
           <% if (item.badge > 0) { %>
-            <span class="absolute right-1 top-0.5 rounded-full bg-coral px-1.5 text-[0.7rem] font-semibold text-white"><%= item.badge %></span>
+            <span class="<%= bottom ? 'absolute right-1 top-1 ' : '' %>min-w-6 rounded-full bg-accent px-1.5 text-center text-sm font-bold text-white"><%= item.badge %></span>
           <% } %>
         </a>
       </li>

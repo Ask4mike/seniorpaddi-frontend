@@ -1,55 +1,63 @@
 <%- include('../partials/header') %>
 
-<div class="mx-auto grid max-w-4xl overflow-hidden rounded-[2rem] bg-white shadow-xl shadow-indigo/10 ring-1 ring-gray-200 md:grid-cols-2" data-reveal>
+<div class="mx-auto grid max-w-4xl overflow-hidden rounded-3xl border-2 border-gray-200 bg-surface md:grid-cols-2">
   <%- include('../partials/authAside') %>
-  <div class="p-6 sm:p-10">
-<h1 class="mb-2"><%= t('signup.title') %></h1>
-<p class="mb-6"><%= t('signup.intro') %></p>
+  <div class="min-w-0 p-6 sm:p-10">
+    <h1 class="mb-2"><%= t('signup.title') %></h1>
+    <p class="mb-6"><%= t('signup.intro') %></p>
 
-<form action="/signup" method="post" novalidate>
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <input type="hidden" name="registerEventId" value="<%= typeof after !== 'undefined' ? after.registerEventId : '' %>">
-  <input type="hidden" name="next" value="<%= typeof after !== 'undefined' ? after.next : '' %>">
+    <form action="/signup" method="post" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="registerEventId" value="<%= typeof after !== 'undefined' ? after.registerEventId : '' %>">
+      <input type="hidden" name="next" value="<%= typeof after !== 'undefined' ? after.next : '' %>">
 
-  <div class="field">
-    <label for="fullName"><%= t('signup.name') %></label>
-    <input type="text" id="fullName" name="fullName" value="<%= values.fullName || '' %>" autocomplete="name" required>
-    <% if (errors.fullName) { %><span class="error"><%= errors.fullName %></span><% } %>
-  </div>
+      <div class="field">
+        <label for="fullName"><%= t('signup.name') %></label>
+        <input type="text" id="fullName" name="fullName" value="<%= values.fullName || '' %>" autocomplete="name" required
+               aria-describedby="<%= errors.fullName ? 'fullName-error' : '' %>"
+               aria-invalid="<%= errors.fullName ? 'true' : 'false' %>">
+        <% if (errors.fullName) { %><span class="error" id="fullName-error"><%= errors.fullName %></span><% } %>
+      </div>
 
-  <div class="field">
-    <label for="phone"><%= t('signup.phone') %></label>
-    <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone }) %>
-    <span class="hint"><%= t('signup.phone_hint') %></span>
-    <% if (errors.phone) { %><span class="error"><%= errors.phone %></span><% } %>
-  </div>
+      <div class="field">
+        <label for="phone"><%= t('signup.phone') %></label>
+        <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone, describedBy: 'phone-hint' + (errors.phone ? ' phone-server-error' : ''), invalid: Boolean(errors.phone) }) %>
+        <span class="hint" id="phone-hint"><%= t('signup.phone_hint') %></span>
+        <% if (errors.phone) { %><span class="error" id="phone-server-error"><%= errors.phone %></span><% } %>
+      </div>
 
-  <div class="field">
-    <label for="email"><%= t('signup.email') %></label>
-    <input type="email" id="email" name="email" value="<%= values.email || '' %>" autocomplete="email">
-    <span class="hint"><%= t('signup.email_hint') %></span>
-    <% if (errors.email) { %><span class="error"><%= errors.email %></span><% } %>
-  </div>
+      <div class="field">
+        <label for="email"><%= t('signup.email') %></label>
+        <input type="email" id="email" name="email" value="<%= values.email || '' %>" autocomplete="email"
+               aria-describedby="email-hint<%= errors.email ? ' email-error' : '' %>"
+               aria-invalid="<%= errors.email ? 'true' : 'false' %>">
+        <span class="hint" id="email-hint"><%= t('signup.email_hint') %></span>
+        <% if (errors.email) { %><span class="error" id="email-error"><%= errors.email %></span><% } %>
+      </div>
 
-  <div class="field">
-    <label for="password"><%= t('signup.password') %></label>
-    <input type="password" id="password" name="password" autocomplete="new-password" required>
-    <span class="hint"><%= t('signup.password_hint') %></span>
-    <% if (errors.password) { %><span class="error"><%= errors.password %></span><% } %>
-  </div>
+      <div class="field">
+        <label for="password"><%= t('signup.password') %></label>
+        <input type="password" id="password" name="password" autocomplete="new-password" required
+               aria-describedby="password-hint<%= errors.password ? ' password-error' : '' %>"
+               aria-invalid="<%= errors.password ? 'true' : 'false' %>">
+        <span class="hint" id="password-hint"><%= t('signup.password_hint') %></span>
+        <% if (errors.password) { %><span class="error" id="password-error"><%= errors.password %></span><% } %>
+      </div>
 
-  <div class="field">
-    <label class="flex items-start gap-3 font-normal">
-      <input type="checkbox" name="ageDeclared" value="yes" class="mt-1 h-7 w-7 shrink-0" <%= values.ageDeclared ? 'checked' : '' %>>
-      <span><strong><%= t('signup.age') %></strong></span>
-    </label>
-    <% if (errors.ageDeclared) { %><span class="error"><%= errors.ageDeclared %></span><% } %>
-  </div>
+      <div class="field">
+        <label class="check mb-0 flex font-normal">
+          <input type="checkbox" name="ageDeclared" value="yes" class="shrink-0" <%= values.ageDeclared ? 'checked' : '' %>
+                 aria-describedby="<%= errors.ageDeclared ? 'ageDeclared-error' : '' %>"
+                 aria-invalid="<%= errors.ageDeclared ? 'true' : 'false' %>">
+          <span><strong><%= t('signup.age') %></strong></span>
+        </label>
+        <% if (errors.ageDeclared) { %><span class="error" id="ageDeclared-error"><%= errors.ageDeclared %></span><% } %>
+      </div>
 
-  <button class="btn w-full sm:w-full"><%= t('signup.submit') %></button>
-</form>
+      <button class="btn btn-block"><%= t('signup.submit') %></button>
+    </form>
 
-<p class="mt-6"><%= t('home.have_account') %> <a href="/login"><%= t('home.login') %></a></p>
+    <p class="mt-6 flex flex-wrap items-center gap-x-2"><%= t('home.have_account') %> <a href="/login" class="inline-flex min-h-12 items-center"><%= t('home.login') %></a></p>
   </div>
 </div>
 

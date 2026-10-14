@@ -1,7 +1,7 @@
 <%- include('../partials/header') %>
 
-<div class="mb-6 rounded-xl border-l-8 <%= type === 'volunteer' ? 'border-leaf' : 'border-indigo' %> bg-mist p-5">
-  <h1 class="mb-2"><%= type === 'volunteer' ? t('confirmed.volunteer_title') : t('confirmed.title') %></h1>
+<div class="mb-6 rounded-2xl border-2 p-5 <%= type === 'volunteer' ? 'border-success bg-success-bg' : 'border-primary bg-surface-muted' %>">
+  <h1 class="mb-2 flex items-start gap-3"><i class="fa-solid fa-circle-check mt-1 shrink-0 text-success" aria-hidden="true"></i><%= type === 'volunteer' ? t('confirmed.volunteer_title') : t('confirmed.title') %></h1>
   <p class="text-xl font-bold"><%= event.title %></p>
   <p><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %></p>
   <p><%= event.locationText %></p>
@@ -20,6 +20,6 @@
   <a href="/registrations" class="btn"><%= t('confirmed.see_mine') %></a>
   <a href="/events" class="btn-plain"><%= t('confirmed.more_events') %></a>
 </div>
-<p class="mt-6 text-base"><%= t('confirmed.cancel_note') %></p>
+<p class="measure mt-6 text-muted"><%= t('confirmed.cancel_note') %></p>
 
 <%- include('../partials/footer') %>

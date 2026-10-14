@@ -44,21 +44,21 @@
 
     var li = document.createElement('li');
     li.id = 'msg-' + msg.id;
-    li.className = 'flex ' + (mine ? 'justify-end' : 'justify-start');
+    li.className = 'flex ' + (mine ? 'justify-end pl-8 sm:pl-16' : 'justify-start pr-8 sm:pr-16');
 
     var bubble = document.createElement('div');
-    bubble.className = 'max-w-[85%] rounded-xl px-4 py-3 ' + (mine ? 'bg-indigo text-white' : 'bg-mist text-ink');
+    bubble.className = 'min-w-0 max-w-full break-words rounded-xl px-4 py-3 ' + (mine ? 'bg-primary text-white' : 'bg-surface-muted text-body');
 
     var who = document.createElement('p');
     who.className = 'sr-only';
     who.textContent = mine ? thread.getAttribute('data-you') : thread.getAttribute('data-other-name') + ':';
 
     var body = document.createElement('p');
-    body.className = 'whitespace-pre-line';
+    body.className = 'whitespace-pre-line text-base';
     body.textContent = msg.body;
 
     var when = document.createElement('p');
-    when.className = 'mt-1 text-base ' + (mine ? 'text-white/80' : 'text-gray-700');
+    when.className = 'mt-1 text-base ' + (mine ? 'text-on-primary-muted' : 'text-muted');
     when.textContent = thread.getAttribute('data-just-now');
 
     bubble.appendChild(who);

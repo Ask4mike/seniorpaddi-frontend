@@ -9,5 +9,6 @@
        data-msg-short="<%= t('phone.short') %>"
        data-msg-start="<%= t('phone.start') %>"
        data-msg-empty="<%= t('phone.empty') %>"
-       aria-describedby="<%= id %>-error">
+       aria-describedby="<%= typeof describedBy !== 'undefined' && describedBy ? describedBy + ' ' : '' %><%= id %>-error"
+       aria-invalid="<%= typeof invalid !== 'undefined' && invalid ? 'true' : 'false' %>">
 <span id="<%= id %>-error" class="error" role="alert" hidden></span>

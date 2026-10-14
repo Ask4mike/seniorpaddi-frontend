@@ -1,14 +1,14 @@
 <%- include('../partials/header') %>
 
 <h1 class="mb-4"><%= t('delete.title') %></h1>
-<p class="mb-3"><%= t('delete.what_happens') %></p>
-<ul class="mb-6 list-disc space-y-1 pl-6">
+<p class="measure mb-3"><%= t('delete.what_happens') %></p>
+<ul class="measure mb-6 list-disc space-y-2 pl-6">
   <li><%= t('delete.point_places') %></li>
   <li><%= t('delete.point_login') %></li>
   <li><%= t('delete.point_find') %></li>
 </ul>
 
-<% if (error) { %><div role="alert" class="mb-6 rounded-lg border-l-8 border-full-tag bg-full-bg p-4 font-bold"><%= error %></div><% } %>
+<% if (error) { %><div role="alert" class="alert alert-error"><i class="fa-solid fa-circle-xmark mt-1" aria-hidden="true"></i><span class="min-w-0"><%= error %></span></div><% } %>
 
 <form action="/account/delete" method="post">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -16,8 +16,8 @@
     <label for="password"><%= t('delete.password') %></label>
     <input type="password" id="password" name="password" autocomplete="current-password" required>
   </div>
-  <button class="btn bg-full-tag hover:bg-full-tag"><%= t('delete.submit') %></button>
+  <button class="btn-danger btn-block"><i class="fa-solid fa-trash" aria-hidden="true"></i><%= t('delete.submit') %></button>
 </form>
-<p class="mt-6"><a href="/settings"><%= t('delete.keep') %></a></p>
+<p class="mt-4"><a href="/settings" class="btn btn-block"><%= t('delete.keep') %></a></p>
 
 <%- include('../partials/footer') %>

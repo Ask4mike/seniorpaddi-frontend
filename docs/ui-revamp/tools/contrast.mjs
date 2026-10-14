@@ -149,6 +149,10 @@ function componentRows(ref, scan) {
   const css = readAt(ref, 'src/styles/input.css'); const map = scan.map;
   const focusBlock = (css.match(/:focus-visible\s*\{([^}]*)\}/) || [])[1] || '';
   const outline = [...focusBlock.matchAll(/outline-([a-z0-9-]+)/g)].map((x) => x[1]).find((n) => colorOf(n, map)) || 'coral';
+  // The component list below is written with the ORIGINAL names. Once the old names and the grey overrides are gone from the theme,
+  // the same components use the semantic tokens, so measure those instead.
+  const migrated = ref === null && !css.includes('--color-ink');
+  const REMAP = { ink: 'body', indigo: 'primary', 'indigo-dark': 'primary-dark', mist: 'surface-muted', coral: 'accent', 'coral-dark': 'accent-dark', lilac: 'secondary', leaf: 'success', 'leaf-dark': 'success-dark', 'amber-tag': 'warning-ink', 'amber-bg': 'warning-bg', 'full-tag': 'error', 'full-bg': 'error-bg', 'gray-300': 'border-strong', 'gray-500': 'muted', 'gray-600': 'muted', 'emerald-50': 'success-bg' };
   const rows = [
     ['.btn label', 'text', 'white', 'indigo'], ['.btn hover', 'text', 'white', 'indigo-dark'], ['.btn-volunteer label', 'text', 'white', 'leaf'],
     ['.btn-volunteer hover', 'text', 'white', 'leaf-dark'], ['.btn-coral label', 'text', 'white', 'coral'], ['.btn-coral hover', 'text', 'white', 'coral-dark'],
@@ -162,9 +166,10 @@ function componentRows(ref, scan) {
   ];
   // the theme switches to the focus-on-dark ring inside dark brand surfaces, so measure that ring there
   const darkRing = css.includes('focus-on-dark') && map['focus-on-dark'] ? 'focus-on-dark' : null;
+  const rn = (n) => (migrated && n && REMAP[n.split('/')[0]] ? REMAP[n.split('/')[0]] + (n.includes('/') ? '/' + n.split('/')[1] : '') : n);
   return rows.map(([label, kind, fgN0, bgN]) => {
-    const fgN = darkRing && label.startsWith('focus outline on primary') ? darkRing : fgN0;
-    const fg = colorOf(fgN, map); const bg = bgN ? colorOf(bgN, map) : scan.page;
+    const fgN = darkRing && label.startsWith('focus outline on primary') ? darkRing : rn(fgN0);
+    const fg = colorOf(fgN, map); const bg = bgN ? colorOf(rn(bgN), map) : scan.page;
     if (!fg || !bg) return { label, kind, missing: true };
     return { label, kind, fg: fgN, bg: bgN || 'page', r: ratio(fg.rgb, bg.rgb) };
   });

@@ -5,22 +5,53 @@
 @source not "../../docs";
 
 /*
-  SeniorPadi look: deep indigo with a warm clay accent, soft rounded cards,
-  and readable (not heavy) type, built for readers aged 65 and over.
+  SeniorPadi look: deep indigo with a warm clay accent, calm rounded cards, large readable type,
+  built for readers aged 65 and over. Plan and reasoning: docs/ui-revamp/ (GUIDE.md, palette.md, design-spec.md).
 
   THE PALETTE LIVES HERE. Use the semantic names below in new markup.
-  Every pair is measured with docs/ui-revamp/tools/contrast.mjs
-  (results and reasoning: docs/ui-revamp/palette.md). Rules that keep it accessible:
+  Every pair is measured with docs/ui-revamp/tools/contrast.mjs. Rules that keep it accessible:
     - white text goes only on primary, primary-dark, secondary, accent, accent-dark, success, success-dark
     - body, muted and error text go on background, surface, surface-muted, surface-subtle (and tints)
     - sun and mint are decorative fills or icons: never white text on them, never the only cue
     - status is never colour alone: always an icon and a word as well
     - accent is only a solid fill with a white label (buttons, badges). It sits close to error red for colour-blind
       readers, so never use accent as text colour and never use error as a fill. Error is text or a border on its tint,
-      with an icon and an "Error:" prefix.
+      always with an icon.
 */
+@font-face {
+  font-family: "Noto Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/noto-sans-variable.woff2") format("woff2");
+}
+
 @theme {
-  --font-sans: "Plus Jakarta Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans: "Noto Sans", "Segoe UI", Roboto, Arial, sans-serif;
+
+  /*
+    Type scale. The page root is 19px (see html below), so 1rem is 19px.
+    Nothing is allowed under text-sm (16.6px). text-xs is kept only so a stray class cannot render smaller.
+    text-base is body text. Never use arbitrary sizes like text-[0.9rem].
+  */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.45;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.35;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 1.25;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 1.15;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1.1;
 
   /* brand */
   --color-primary: #22407a;
@@ -60,50 +91,52 @@
 }
 
 /*
-  Old names kept as aliases so existing templates keep working while Phase 3 moves
-  them to the semantic names above. Delete an alias once nothing uses it.
-  The three grey overrides pull Tailwind's default greys into the palette:
-  gray-300 is the form field border, gray-500 and gray-600 are muted text.
+  Tailwind's default grey scale is still available (gray-200 for quiet card borders, gray-400 and so on),
+  but for text use `muted` or `body`, and for field borders use `border-strong`. The old names
+  (ink, indigo, coral, mist, leaf, lilac, amber-*, full-*) are gone: every template uses the names above.
 */
-@theme inline {
-  --color-ink: var(--color-body);
-  --color-indigo: var(--color-primary);
-  --color-indigo-dark: var(--color-primary-dark);
-  --color-mist: var(--color-surface-muted);
-  --color-coral: var(--color-accent);
-  --color-coral-dark: var(--color-accent-dark);
-  --color-lilac: var(--color-secondary);
-  --color-leaf: var(--color-success);
-  --color-leaf-dark: var(--color-success-dark);
-  --color-amber-tag: var(--color-warning-ink);
-  --color-amber-bg: var(--color-warning-bg);
-  --color-full-tag: var(--color-error);
-  --color-full-bg: var(--color-error-bg);
-
-  --color-gray-300: var(--color-border-strong);
-  --color-gray-500: var(--color-muted);
-  --color-gray-600: var(--color-muted);
-}
 
 @layer base {
   html {
-    font-size: 106.25%; /* 17px body text */
+    font-size: 118.75%; /* 19px: body text a senior can read without zooming */
     -webkit-text-size-adjust: 100%;
+    /* keep the sticky header and bottom bar from covering a focused item */
+    scroll-padding-top: 6rem;
+    scroll-padding-bottom: 7rem;
   }
   body {
-    @apply bg-background text-body leading-relaxed antialiased;
+    @apply bg-background text-base text-body antialiased;
+    /* a very long word (a name, an email address) wraps instead of pushing the page wider than the screen */
+    overflow-wrap: break-word;
   }
   h1 {
-    @apply text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem];
+    @apply text-3xl font-bold md:text-4xl;
   }
   h2 {
-    @apply text-[1.3rem] font-semibold leading-snug;
+    @apply text-2xl font-bold;
   }
   h3 {
-    @apply font-semibold;
+    @apply text-xl font-bold;
+  }
+  h4 {
+    @apply text-lg font-bold;
   }
   a {
-    @apply text-indigo underline decoration-1 underline-offset-4;
+    @apply text-primary underline decoration-2 underline-offset-4;
+  }
+  ::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 1.75rem;
+    height: 1.75rem;
+    accent-color: var(--color-primary);
+  }
+  /* a short word (for example the Yoruba "Wole") must still be a 48px-wide target */
+  .min-h-12 {
+    min-width: 3rem;
   }
   :focus-visible {
     @apply outline-3 outline-offset-2 outline-focus;
@@ -111,57 +144,156 @@
   /* the blue ring would vanish on the dark brand surfaces (footer, staff sidebar, auth panel), so use sun yellow there */
   .bg-primary :focus-visible,
   .bg-primary-dark :focus-visible,
-  .bg-indigo :focus-visible,
-  .bg-indigo-dark :focus-visible {
+  .bg-success :focus-visible,
+  .bg-success-dark :focus-visible,
+  .bg-accent :focus-visible,
+  .bg-accent-dark :focus-visible,
+  .bg-secondary :focus-visible {
     outline-color: var(--color-focus-on-dark);
   }
 }
 
 @layer components {
+  /* ---------- page shells ---------- */
   .page {
-    @apply mx-auto w-full max-w-4xl px-4 py-8;
+    @apply mx-auto w-full max-w-4xl px-4 py-8 md:px-6;
   }
   .page-wide {
-    @apply mx-auto w-full max-w-6xl px-4 py-8 md:py-12;
+    @apply mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-12;
+  }
+  /* readable line length for long text */
+  .measure {
+    max-width: 65ch;
+  }
+  .site-header {
+    @apply sticky top-0 z-30 border-b-2 border-gray-200 bg-surface;
+  }
+  .tabbar {
+    @apply fixed inset-x-0 bottom-0 z-30 border-t-2 border-gray-200 bg-surface;
   }
 
-  /* ---------- buttons ---------- */
+  /* ---------- buttons: always a text label, 48px or taller, solid border, no movement on hover ---------- */
   .btn,
   .btn-volunteer,
   .btn-coral {
-    @apply inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-indigo px-6 py-3 text-center
-      font-semibold text-white no-underline shadow-md shadow-indigo/20 transition hover:-translate-y-0.5 hover:bg-indigo-dark sm:w-auto;
+    @apply inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-transparent bg-primary px-6 py-3
+      text-center text-lg font-bold text-white no-underline transition-colors hover:bg-primary-dark active:bg-primary-dark sm:w-auto;
   }
   .btn-volunteer {
-    @apply bg-leaf shadow-leaf/20 hover:bg-leaf-dark;
+    @apply bg-success hover:bg-success-dark active:bg-success-dark;
   }
   .btn-coral {
-    @apply bg-coral shadow-coral/30 hover:bg-coral-dark;
+    @apply bg-accent hover:bg-accent-dark active:bg-accent-dark;
   }
   .btn-plain {
-    @apply inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-indigo/20 bg-white px-6 py-3
-      text-center font-semibold text-indigo no-underline transition hover:border-indigo hover:bg-mist sm:w-auto;
+    @apply inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-primary bg-surface px-6 py-3
+      text-center text-lg font-bold text-primary no-underline transition-colors hover:bg-surface-muted active:bg-surface-muted sm:w-auto;
   }
+  /* a button that looks like a link, for low-key actions (still 48px tall) */
+  .btn-link {
+    @apply inline-flex min-h-12 cursor-pointer items-center gap-2 border-0 bg-transparent px-2 py-2 text-base font-bold text-primary
+      underline decoration-2 underline-offset-4 hover:text-primary-dark;
+  }
+  .btn-link-danger {
+    @apply inline-flex min-h-12 cursor-pointer items-center gap-2 border-0 bg-transparent px-2 py-2 text-base font-bold text-error
+      underline decoration-2 underline-offset-4 hover:text-error;
+  }
+  /* a serious or one-way action (delete, block): outlined in the error colour, never filled */
+  .btn-danger {
+    @apply inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-error bg-surface px-6 py-3
+      text-center text-lg font-bold text-error no-underline transition-colors hover:bg-error-bg active:bg-error-bg sm:w-auto;
+  }
+  /* full width at every screen size (replaces "btn w-full sm:w-full") */
+  .btn-block {
+    @apply w-full sm:w-full;
+  }
+  /* filter chips and small choices: still 48px tall. Add aria-current="true" for the selected one */
+  .chip {
+    @apply inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-primary bg-surface px-5 py-2 text-base font-bold text-primary
+      no-underline transition-colors hover:bg-surface-muted;
+  }
+  .chip[aria-current="true"],
+  .chip[aria-current="page"] {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+  /* the selected chip also gets a check mark, so it is not just a colour change */
+  .chip[aria-current="true"]::before,
+  .chip[aria-current="page"]::before {
+    content: "";
+    flex: none;
+    width: 1.1em;
+    height: 1.1em;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  /* disabled: readable text, dashed border, no colour change that depends on hue */
   .btn[disabled],
-  .btn-volunteer[disabled] {
-    @apply cursor-not-allowed bg-gray-400 shadow-none hover:translate-y-0 hover:bg-gray-400;
+  .btn-volunteer[disabled],
+  .btn-coral[disabled],
+  .btn-plain[disabled],
+  .btn[aria-disabled="true"],
+  .btn-volunteer[aria-disabled="true"],
+  .btn-plain[aria-disabled="true"] {
+    @apply cursor-not-allowed border-2 border-dashed border-border-strong bg-surface-muted text-muted hover:bg-surface-muted;
+  }
+  .back-link {
+    @apply inline-flex min-h-12 items-center gap-2 text-base font-bold;
+  }
+  /* a short word (for example the Yoruba "Si i") must still be a 48px-wide target */
+  .btn-link,
+  .btn-link-danger,
+  .back-link,
+  .chip,
+  .nav-link,
+  .dialog-close {
+    @apply min-w-12;
   }
 
   /* ---------- surfaces ---------- */
   .panel {
-    @apply rounded-3xl bg-mist p-6;
+    @apply rounded-2xl bg-surface-muted p-6;
   }
   .card {
-    @apply rounded-3xl border border-gray-200 bg-white p-5 shadow-sm;
+    @apply rounded-2xl border-2 border-gray-200 bg-surface p-5 shadow-sm;
+  }
+  .icon-tile {
+    @apply inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-xl text-primary;
+  }
+  .kicker {
+    @apply mb-2 text-base font-bold text-primary;
+  }
+
+  /* ---------- alerts and flash messages: colour + icon (put the icon in the markup) + words ---------- */
+  .alert {
+    @apply mb-6 flex items-start gap-3 rounded-xl border-2 p-4 text-base font-bold;
+  }
+  .alert-success {
+    @apply border-success bg-success-bg text-success;
+  }
+  .alert-error {
+    @apply border-error bg-error-bg text-error;
+  }
+  .alert-warning {
+    @apply border-warning-ink bg-warning-bg text-warning-ink;
+  }
+  .alert-info {
+    @apply border-primary bg-surface-muted text-primary;
+  }
+  /* the leading icon stays its size, the words are allowed to wrap */
+  .alert > i {
+    @apply mt-1 shrink-0;
+  }
+  .alert > span,
+  .alert > div {
+    @apply min-w-0;
   }
 
   /* ---------- forms ---------- */
   .field {
-    @apply mb-5 block;
+    @apply mb-6 block;
   }
   .field label,
   .field .label {
-    @apply mb-1.5 block font-medium;
+    @apply mb-2 block text-base font-bold;
   }
   .field input[type="text"],
   .field input[type="tel"],
@@ -169,81 +301,153 @@
   .field input[type="password"],
   .field input[type="number"],
   .field input[type="url"],
+  .field input[type="search"],
+  .field input[type="date"],
+  .field input[type="time"],
   .field input[type="datetime-local"],
   .field select,
   .field textarea {
-    @apply block min-h-12 w-full rounded-2xl border border-gray-300 bg-white px-4 py-2.5 text-ink shadow-sm
-      transition focus:border-indigo focus:ring-4 focus:ring-indigo/10 focus:outline-none;
+    @apply block min-h-12 w-full rounded-xl border-2 border-border-strong bg-surface px-4 py-3 text-base text-body transition-colors
+      focus:border-focus;
   }
-  .field .hint {
-    @apply mt-1.5 block text-[0.9rem] text-gray-600;
+  .field textarea {
+    @apply min-h-32;
   }
+  .field input[type="file"] {
+    @apply block w-full rounded-xl border-2 border-border-strong bg-surface p-3 text-base text-body file:mr-4 file:min-h-12 file:cursor-pointer
+      file:rounded-xl file:border-0 file:bg-primary file:px-5 file:py-2 file:text-base file:font-bold file:text-white;
+  }
+  /* helper text under a field (also works outside .field) */
+  .hint {
+    @apply mt-2 block text-sm text-muted;
+  }
+  /* error text: red, bold, with a warning icon drawn in CSS so it needs no font */
   .field .error {
-    @apply mt-1.5 block font-medium text-full-tag;
+    @apply mt-2 flex items-start gap-2 text-base font-bold text-error;
+  }
+  .field .error::before {
+    content: "";
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.2rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23991c1c'/%3E%3Cpath d='M12 6v7M12 16.5v1.5' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
   }
   .field .error[hidden] {
     display: none;
   }
-  .field input[aria-invalid="true"] {
-    @apply border-full-tag bg-full-bg;
+  .field input[aria-invalid="true"],
+  .field select[aria-invalid="true"],
+  .field textarea[aria-invalid="true"] {
+    @apply border-error bg-error-bg;
+  }
+  /* a whole row is the click target: checkbox or radio plus its words (works inside or outside .field) */
+  .check,
+  .field .check {
+    @apply mb-0 flex min-h-12 cursor-pointer items-center gap-4 py-2 text-base font-normal;
   }
 
-  /* ---------- tags ---------- */
+  /* ---------- tags: words, an icon in the markup, and a border, never colour alone ---------- */
   .tag-amber,
   .tag-full,
   .tag-mine,
   .tag-leaf {
-    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.85rem] font-medium;
+    @apply inline-flex items-center gap-2 rounded-full border-2 px-3 py-1 text-sm font-bold;
   }
-  .tag-amber { @apply bg-amber-bg text-amber-tag; }
-  .tag-full { @apply bg-full-bg text-full-tag; }
-  .tag-mine { @apply bg-mist text-indigo; }
-  .tag-leaf { @apply bg-emerald-50 text-leaf; }
+  .tag-amber {
+    @apply border-warning-ink bg-warning-bg text-warning-ink;
+  }
+  .tag-full {
+    @apply border-error bg-error-bg text-error;
+  }
+  .tag-mine {
+    @apply border-primary bg-surface-muted text-primary;
+  }
+  .tag-leaf {
+    @apply border-success bg-success-bg text-success;
+  }
 
-  /* ---------- admin tables ---------- */
+  /* ---------- navigation ---------- */
+  .nav-link {
+    @apply inline-flex min-h-12 items-center gap-2 rounded-xl border-b-4 border-transparent px-4 py-2 text-base font-bold text-body no-underline
+      hover:bg-surface-muted;
+  }
+  .nav-link[aria-current="page"] {
+    @apply border-primary bg-surface-muted text-primary;
+  }
+  /* bottom bar item on phones: icon over a word */
+  .tab-link {
+    @apply relative flex min-h-16 min-w-12 flex-col items-center justify-center gap-1 rounded-xl border-t-4 border-transparent px-0 py-1 text-sm font-bold text-body no-underline
+      hover:bg-surface-muted;
+  }
+  .tab-link[aria-current="page"] {
+    @apply border-primary bg-surface-muted text-primary;
+  }
+
+  /* ---------- dialogs: capped height so buttons stay reachable at 400% zoom ---------- */
+  .dialog-backdrop {
+    @apply fixed inset-0 z-40 bg-body/70;
+  }
+  .dialog {
+    @apply fixed inset-x-0 bottom-0 z-50 max-h-[90dvh] overflow-y-auto rounded-t-3xl bg-surface p-6 shadow-2xl
+      md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:w-full md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-3xl md:p-8;
+  }
+  .dialog-close {
+    @apply inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-3xl leading-none text-body no-underline hover:bg-surface-muted;
+  }
+
+  /* ---------- tables (staff area). Wrap wide tables in .table-wrap so the page itself never scrolls sideways ---------- */
+  /* relative: keeps hidden screen-reader words inside the wrapper so they cannot widen the whole page */
+  .table-wrap {
+    @apply relative overflow-x-auto;
+  }
   .admin-table {
-    @apply w-full border-collapse text-[0.95rem];
+    @apply w-full border-collapse text-base;
+  }
+  .admin-table caption {
+    @apply pb-3 text-left text-lg font-bold;
   }
   .admin-table th {
-    @apply border-b border-gray-200 px-3 py-2.5 text-left text-[0.8rem] font-semibold uppercase tracking-wide text-gray-500;
+    @apply border-b-2 border-border-strong bg-surface-muted px-3 py-3 text-left text-base font-bold text-body;
   }
   .admin-table td {
-    @apply border-b border-gray-100 px-3 py-3 text-left align-top;
+    @apply border-b border-gray-200 px-3 py-3 text-left align-top;
   }
-
-  
 }
 
-/* readable weight everywhere: nothing heavier than semibold */
-.font-bold { font-weight: 600; }
+/*
+  "Skip to main content" link: hidden until a keyboard user focuses it, then a big button in the corner.
+  It is written here, outside any layer, on purpose. The Font Awesome stylesheet from the CDN also defines an unlayered
+  .sr-only, and unlayered CSS beats Tailwind's layered focus:not-sr-only, which kept the skip link invisible even when focused.
+*/
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 60;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  padding: 0.75rem 1.25rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: underline;
+  box-shadow: 0 8px 24px rgb(22 33 62 / 0.25);
+}
 
-/* ---------- motion ---------- */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
-}
-@keyframes drift {
-  from { background-position: 0 0; }
-  to { background-position: 56px 56px; }
-}
-.float { animation: float 6s ease-in-out infinite; }
-.float-slow { animation: float 9s ease-in-out infinite; }
-.dots-drift { animation: drift 12s linear infinite; }
-
-/* sections slide in as you scroll (the class is added by public/js/reveal.js) */
-.js [data-reveal] {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.js [data-reveal="left"] { transform: translateX(-36px); }
-.js [data-reveal="right"] { transform: translateX(36px); }
-.js [data-reveal].revealed {
-  opacity: 1;
-  transform: none;
-}
-
-/* ---------- swipe cards (Find events, Find seniors) ---------- */
+/* ---------- swipe cards (Find events, Find seniors). The buttons on the card always work; the swipe is an extra ---------- */
 .swipe-stack {
   position: relative;
 }
@@ -274,11 +478,32 @@
   transition: opacity 0.1s;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .float, .float-slow, .dots-drift { animation: none; }
-  .js [data-reveal] { opacity: 1; transform: none; transition: none; }
-  * { transition: none !important; }
+/* a short, one-time shake when a phone number is wrong (public/js/phone-input.js toggles this class) */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+.phone-shake {
+  animation: shake 0.3s ease-in-out 1;
+}
 
-  .dots-drift { animation: drift 12s linear infinite; }
-  
+/* very short screens (phone on its side, or 400% zoom): bars stop sticking so they cannot cover the page */
+@media (max-height: 30rem) {
+  .site-header,
+  .tabbar {
+    position: static;
+  }
+}
+
+/* people who asked their device for less motion get none */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

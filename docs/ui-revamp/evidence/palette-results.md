@@ -1,13 +1,13 @@
 ## Every text colour pair the templates use
 
-Baseline = commit `f82a8da` (templates and theme). After = working tree. Unique pairs: 42 before, 42 after. Judged as normal text (limits in the script header).
+Baseline = commit `f82a8da` (templates and theme). After = working tree. Unique pairs: 42 before, 23 after. Judged as normal text (limits in the script header).
 
 | | Before | After |
 |---|---|---|
-| Below 3:1 (fails everything) | 13 | 2 |
-| 3:1 to 4.5:1 (large text only) | 9 | 4 |
-| 4.5:1 to 7:1 (AA) | 6 | 9 |
-| 7:1 and above (AAA) | 14 | 27 |
+| Below 3:1 (fails everything) | 13 | 0 |
+| 3:1 to 4.5:1 (large text only) | 9 | 1 |
+| 4.5:1 to 7:1 (AA) | 6 | 2 |
+| 7:1 and above (AAA) | 14 | 20 |
 
 ### Before: pairs below 4.5:1
 
@@ -40,26 +40,14 @@ Baseline = commit `f82a8da` (templates and theme). After = working tree. Unique 
 
 | Ratio | Pair | Uses | First places |
 |---|---|---|---|
-| 1.76 | text-white on bg-coral / bg-sun | 2 | about.ejs:35, home.ejs:118 |
-| 1.76 | text-white on bg-sun | 1 | admin/dashboard.ejs:92 |
-| 4.07 | text-sun on surface (primary, indigo, primary-dark, indigo-dark, secondary, lilac) | 3 | partials/authAside.ejs:5, partials/authAside.ejs:6, partials/authAside.ejs:7 |
-| 4.08 | text-mint on surface (background, white, surface-muted) | 6 | about.ejs:23, about.ejs:24, about.ejs:25 |
-| 4.08 | text-mint on surface (background, white, surface-muted, [#f4f6fb]) | 1 | admin/dashboard.ejs:150 |
-| 4.45 | text-white/70 on surface (primary, indigo, primary-dark, indigo-dark, secondary, lilac) | 1 | partials/nav.ejs:45 |
+| 4.07 | text-sun on surface (primary, primary-dark, secondary) | 3 | partials/authAside.ejs:5, partials/authAside.ejs:6, partials/authAside.ejs:7 |
 
 ### After: pairs between 4.5:1 and 7:1 (AA, short of the AAA target)
 
 | Ratio | Pair | Uses |
 |---|---|---|
-| 4.58 | text-white on bg-mint | 1 |
-| 4.58 | text-white on bg-leaf / bg-mint | 1 |
-| 5.26 | text-white/80 on surface (primary, indigo, primary-dark, indigo-dark, secondary, lilac) | 2 |
-| 5.41 | text-coral on surface (background, white, surface-muted) | 9 |
-| 5.41 | text-coral on surface (background, white, surface-muted, [#f4f6fb]) | 1 |
-| 5.70 | text-white/85 on surface (primary, indigo, primary-dark, indigo-dark, secondary, lilac) | 3 |
-| 6.07 | text-white on bg-coral | 4 |
-| 6.07 | text-coral on bg-white | 4 |
-| 6.17 | text-white/90 on surface (primary, indigo, primary-dark, indigo-dark, secondary, lilac) | 5 |
+| 5.62 | text-on-primary-muted on surface (primary, primary-dark, secondary) | 4 |
+| 6.07 | text-white on bg-accent | 5 |
 
 ## Component classes defined in `src/styles/input.css`
 

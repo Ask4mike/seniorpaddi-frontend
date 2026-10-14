@@ -1,12 +1,12 @@
 <%- include('../partials/header') %>
 
-<p class="mb-4"><a href="/events" class="no-underline"><i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i><%= t('events.back') %></a></p>
+<p class="mb-4"><a href="/events" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i><%= t('events.back') %></a></p>
 
 <div class="grid gap-8 md:grid-cols-2">
-<div data-reveal="left">
-<%- include('../partials/eventImage', { event, imgClass: 'w-full rounded-[2rem] object-cover shadow-xl aspect-[4/3]' }) %>
+<div>
+<%- include('../partials/eventImage', { event, imgClass: 'w-full rounded-2xl object-cover aspect-4/3' }) %>
 </div>
-<div data-reveal="right">
+<div class="min-w-0">
 <h1 class="mb-3"><%= event.tTitle || event.title %></h1>
 <div class="mb-5"><%- include('../partials/eventTags', { event, state, isMine: mine.attendee }) %></div>
 
@@ -18,7 +18,7 @@
   <div>
     <dt class="font-bold"><%= t('event.where') %></dt>
     <dd><%= event.locationText %>
-      <% if (event.locationMapsUrl) { %><br><a href="<%= event.locationMapsUrl %>" rel="noopener" target="_blank"><%= t('event.open_map') %></a><% } %>
+      <% if (event.locationMapsUrl) { %><br><a href="<%= event.locationMapsUrl %>" rel="noopener" target="_blank" class="inline-flex min-h-12 items-center"><%= t('event.open_map') %></a><% } %>
     </dd>
   </div>
   <div>
@@ -33,11 +33,11 @@
   <% } %>
 </dl>
 
-<div class="mb-8 whitespace-pre-line text-gray-700"><%= event.tDescription || event.description %></div>
+<div class="measure mb-8 whitespace-pre-line text-muted"><%= event.tDescription || event.description %></div>
 </div>
 </div>
 
-<section class="panel mt-8" aria-labelledby="join-heading" data-reveal>
+<section class="panel mt-8" aria-labelledby="join-heading">
   <h2 id="join-heading" class="mb-4"><%= t('event.join_title') %></h2>
 
   <% if (state.isCancelled) { %>
@@ -58,14 +58,14 @@
       <%# attend %>
       <div>
         <% if (mine.attendee) { %>
-          <p class="mb-2 font-bold"><%= t('event.you_are_going') %></p>
-          <a href="/registrations" class="btn-plain"><%= t('event.manage') %></a>
+          <p class="mb-2 font-bold"><i class="fa-solid fa-circle-check mr-2 text-success" aria-hidden="true"></i><%= t('event.you_are_going') %></p>
+          <a href="/registrations" class="btn-plain btn-block"><%= t('event.manage') %></a>
         <% } else if (state.attendeeFull) { %>
-          <button class="btn" disabled><%= t('tag.full') %></button>
+          <button class="btn btn-block" disabled><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><%= t('tag.full') %></button>
         <% } else { %>
           <form action="/events/<%= event.id %>/register" method="post">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="btn w-full"><%= t('event.register') %></button>
+            <button class="btn btn-block"><%= t('event.register') %></button>
           </form>
         <% } %>
       </div>
@@ -74,26 +74,26 @@
       <% if (state.volunteerEnabled) { %>
         <div>
           <% if (mine.volunteer) { %>
-            <p class="mb-2 font-bold"><%= t('event.you_are_volunteering') %></p>
-            <a href="/registrations" class="btn-plain"><%= t('event.manage') %></a>
+            <p class="mb-2 font-bold"><i class="fa-solid fa-circle-check mr-2 text-success" aria-hidden="true"></i><%= t('event.you_are_volunteering') %></p>
+            <a href="/registrations" class="btn-plain btn-block"><%= t('event.manage') %></a>
           <% } else if (state.volunteerFull) { %>
-            <button class="btn-volunteer" disabled><%= t('tag.volunteer_full') %></button>
+            <button class="btn-volunteer btn-block" disabled><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><%= t('tag.volunteer_full') %></button>
           <% } else { %>
             <form action="/events/<%= event.id %>/volunteer" method="post">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-              <button class="btn-volunteer w-full"><%= t('event.volunteer') %></button>
+              <button class="btn-volunteer btn-block"><%= t('event.volunteer') %></button>
             </form>
           <% } %>
-          <p class="mt-2 text-base"><%= t('event.volunteer_hint') %></p>
+          <p class="mt-2 text-muted"><%= t('event.volunteer_hint') %></p>
         </div>
       <% } %>
     </div>
 
     <%# calm alternative when it's full %>
     <% if (state.attendeeFull && !mine.attendee) { %>
-      <div class="mt-6 border-t-2 border-white pt-5">
+      <div class="mt-6 border-t-2 border-border-strong pt-5">
         <% if (interested) { %>
-          <p class="font-bold"><%= t('notify_me.already') %></p>
+          <p class="font-bold"><i class="fa-solid fa-circle-check mr-2 text-success" aria-hidden="true"></i><%= t('notify_me.already') %></p>
         <% } else { %>
           <p class="mb-3"><%= t('notify_me.offer') %></p>
           <form action="/events/<%= event.id %>/notify-me" method="post">

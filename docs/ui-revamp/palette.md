@@ -121,7 +121,7 @@ Method: the Machado, Oliveira and Fernandes (2009) simulation matrices at full s
 
 | Pair | Normal vision | Colour-blind | What it means for design |
 |---|---|---|---|
-| accent / error | 24 | 11 to 22 | Both dark warm colours. Rule 5 keeps them in different forms: accent is a solid button fill, error is coloured text or a border on a pale tint with an icon and "Error:" |
+| accent / error | 24 | 11 to 22 | Both dark warm colours. Rule 5 keeps them in different forms: accent is a solid button fill, error is coloured text or a border on a pale tint with an icon |
 | accent / warning-ink | 20 | 8 to 23 | Warning is brown text on a pale yellow tint with a triangle icon and words. Accent is a solid fill. Different forms |
 | success / error | 82 | 11 to 28 (protan, deutan) | Red and green merge. Every status has an icon and a word |
 | success / warning-ink | 51 | 22 to 31 | Same |
@@ -139,7 +139,7 @@ Nothing in the app may depend on telling these apart by colour.
 |---|---|---|
 | Success, registered, saved | `success` on `success-bg` | Check icon and a word ("Registered", "Saved") |
 | Warning, almost full | `warning-ink` on `warning-bg` | Triangle icon and words ("Almost full") |
-| Error | `error` on `error-bg`, a 2px `error` border on the field | Cross icon, the prefix "Error:", message beside the field, `aria-describedby` |
+| Error | `error` on `error-bg`, a 2px `error` border on the field | A warning icon (drawn by the stylesheet), the message beside the field, `aria-describedby`. An "Error:" prefix would need new wording in both languages, so it is a recommendation, not done |
 | Full, unavailable | `error` tag | The word "Full" and disabled controls |
 | Selected or current | `primary` fill | `aria-current`, a check icon, and a thicker border |
 | Unread | `accent` badge | A number or dot icon, and an accessible label |

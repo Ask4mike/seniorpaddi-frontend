@@ -3,7 +3,7 @@
 Accessibility-first redesign of the SeniorPadi web app for adults aged 65 and over.
 Priority order: **readability, simplicity, low cognitive load, then aesthetics.**
 
-Branch: `ui-revamp`. Status: **Phase 0 (plan) awaiting approval.**
+Branch: `ui-revamp`. Status: **Phases 0, 1 and 2 done and committed. Phase 3 (full restyle) built and verified, awaiting review.** Phases 4 to 6 not started.
 
 ---
 
@@ -34,7 +34,7 @@ Branch: `ui-revamp`. Status: **Phase 0 (plan) awaiting approval.**
 | # | Decision | Default if you don't say otherwise |
 |---|---|---|
 | D1 | **Baseline commit.** The repo has **zero commits**, so everything is untracked. To branch and diff-review at all I need a baseline. | Commit the current project as-is on `main` ("baseline before UI revamp"), then branch `ui-revamp`. Local only, no push. |
-| D2 | **A database for live checks and tests.** There is no PostgreSQL, Docker or `.env` on this machine, so the app can't start and the existing Jest suite can't run. | Phases 0 to 3 proceed without it, using a DB-free content-freeze script and static checks. For Phase 4 and 6 (live axe/Lighthouse/screenshots and `npm test`) I need one of: (a) you install PostgreSQL locally, (b) you give me a throwaway Neon `TEST_DATABASE_URL`, (c) I add a dev-only embedded Postgres. (c) changes `package.json`, so I'd ask first. |
+| D2 (**decided 14 Oct: no PostgreSQL for now**) | Verification therefore uses the no-database preview (section 7) instead of the live app. `npm test` (the existing Jest suite) cannot run until a database exists, so Phase 6 will report it as **not run** unless that changes. **A database for live checks and tests.** There is no PostgreSQL, Docker or `.env` on this machine, so the app can't start and the existing Jest suite can't run. | Phases 0 to 3 proceed without it, using a DB-free content-freeze script and static checks. For Phase 4 and 6 (live axe/Lighthouse/screenshots and `npm test`) I need one of: (a) you install PostgreSQL locally, (b) you give me a throwaway Neon `TEST_DATABASE_URL`, (c) I add a dev-only embedded Postgres. (c) changes `package.json`, so I'd ask first. |
 | D3 | Admin screens in scope at full standard (A6). | Yes. |
 | D4 | **Small accessibility-only JS fixes** that touch keyboard or focus handling but add no feature: an `e.target` guard in `swipe.js` (today ArrowLeft/Right on a focused Register button also fires skip or register), Esc to close and focus return in dialogs, and `aria-hidden` on swipe badges. | I do them and list them in the Phase 3 summary. Say "recommend only" if you want them held back. Confirmation prompts, show-password toggles and other new behaviour stay recommendation-only either way. |
 
@@ -101,6 +101,8 @@ Each phase ends with: summary to you, `npm run build:css`, a content-freeze chec
 
 ### Phase 3: Tailwind revamp of the full UI
 
+**Done. Contract: [design-spec.md](design-spec.md). Results, before/after numbers, defects found and what was not verified: [phase3-results.md](phase3-results.md).**
+
 - **Agents:** `ecc:a11y-architect` (spec and implement), `ecc:code-simplifier` (dedupe), `ecc:code-reviewer` (gate each batch). **Skills:** `ecc:frontend-a11y`, `ecc:design-system`.
 - **Batches (each reviewed, built and committed separately):**
   - **3a Foundation:** `src/styles/input.css` (type scale, line height, focus, motion, buttons, forms, tags, tables, cards), shared partials `header`, `nav`, `seniorNav`, `footer`, `flash`, `loginModal`, `phoneInput`, `authAside`, plus new shared partials (button, form field, status tag) where repetition is found.
@@ -150,8 +152,10 @@ Each phase ends with: summary to you, `npm run build:css`, a content-freeze chec
 | Tool | Used for | Install |
 |---|---|---|
 | `@tailwindcss/cli` (already a dependency) | Rebuild `main.css` | none |
-| `docs/ui-revamp/tools/content-freeze.mjs` | Prove no content/behaviour drift, DB-free | none (Node only) |
-| `docs/ui-revamp/tools/contrast.mjs` | WCAG ratios and colour-vision simulation | none (Node only) |
+| `docs/ui-revamp/tools/content-freeze.mjs` | Prove no content/behaviour drift, DB-free. Reviewed intentional differences live in `freeze-approved.json` | none (Node only) |
+| `docs/ui-revamp/tools/contrast.mjs` | WCAG ratios and colour-vision simulation, every colour pair the templates use | none (Node only) |
+| `docs/ui-revamp/tools/preview-server.mjs` (+ `start-preview.bat`) | Look at 39 real pages with made-up data, no database, in English and Yorùbá. `?lang=yo`, `?as=guest\|senior\|admin` | none (uses the project's own `npm install`) |
+| `docs/ui-revamp/tools/page-checks.js` | In-browser checks per page and width: smallest text, targets under 48px, overflow, looping motion, broken images, font, axe-core | none (axe loads from cdnjs) |
 | axe-core via `npx @axe-core/cli` | Automated accessibility checks | `npx`, not saved to `package.json` |
 | Lighthouse (Chrome DevTools MCP, already connected) | Accessibility score before and after | none |
 | Playwright via `ecc:e2e-runner` | Screenshots at 3 widths, keyboard runs | `npx`, not saved |

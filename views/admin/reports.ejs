@@ -8,30 +8,32 @@
 <% } else { %>
   <ul class="mb-10 space-y-3">
     <% pending.forEach(function (r) { %>
-      <li class="border-b border-gray-300 pb-3">
-        <a href="/admin/reports/<%= r.id %>"><strong><%= r.reporter ? r.reporter.fullName : '(deleted)' %></strong> reported <strong><%= r.reported ? r.reported.fullName : '(deleted)' %></strong></a><br>
-        <span class="text-base"><%= formatDate(r.createdAt) %></span>
+      <li class="border-b border-border-strong pb-3">
+        <a href="/admin/reports/<%= r.id %>" class="inline-flex min-h-12 items-center"><span><strong><%= r.reporter ? r.reporter.fullName : '(deleted)' %></strong> reported <strong><%= r.reported ? r.reported.fullName : '(deleted)' %></strong></span></a><br>
+        <span class="text-base text-muted"><%= formatDate(r.createdAt) %></span>
       </li>
     <% }) %>
   </ul>
 <% } %>
 
-<h2 class="mb-3">Recently closed</h2>
+<h2 id="closed-title" class="mb-3">Recently closed</h2>
 <% if (recent.length === 0) { %>
   <p>None yet.</p>
 <% } else { %>
-  <table class="admin-table">
-    <thead><tr><th>Reported</th><th>Outcome</th><th>Closed</th></tr></thead>
-    <tbody>
-      <% recent.forEach(function (r) { %>
-        <tr>
-          <td><a href="/admin/reports/<%= r.id %>"><%= r.reported ? r.reported.fullName : '(deleted)' %></a></td>
-          <td><%= { warned: 'Warned', removed: 'Removed from social', dismissed: 'Dismissed' }[r.status] %></td>
-          <td><%= r.reviewedAt ? formatDate(r.reviewedAt) : '' %></td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+  <div class="table-wrap" role="region" aria-labelledby="closed-title" tabindex="0">
+    <table class="admin-table" aria-labelledby="closed-title">
+      <thead><tr><th scope="col">Reported</th><th scope="col">Outcome</th><th scope="col">Closed</th></tr></thead>
+      <tbody>
+        <% recent.forEach(function (r) { %>
+          <tr>
+            <td><a href="/admin/reports/<%= r.id %>" class="inline-flex min-h-12 items-center"><%= r.reported ? r.reported.fullName : '(deleted)' %></a></td>
+            <td><%= { warned: 'Warned', removed: 'Removed from social', dismissed: 'Dismissed' }[r.status] %></td>
+            <td><%= r.reviewedAt ? formatDate(r.reviewedAt) : '' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
 <% } %>
 
 <%- include('../partials/footer') %>
