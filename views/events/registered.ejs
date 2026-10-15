@@ -8,7 +8,14 @@
 <div class="dialog-backdrop" aria-hidden="true"></div>
 <div id="done" class="dialog" role="dialog" aria-modal="true" aria-labelledby="done-title" aria-describedby="done-desc" data-dialog>
   <%# calm celebration (the "Successful" card, ref 11): a eucalyptus check, no confetti %>
-  <img src="/images/illustrations/success-check.svg" alt="" class="dialog-art" width="112" height="112">
+  <%# same drawing as public/images/illustrations/success-check.svg, inline so the check can draw itself in (CSS only) %>
+  <svg class="success-mark dialog-art" viewBox="0 0 160 160" width="112" height="112" aria-hidden="true" focusable="false">
+    <circle cx="80" cy="80" r="70" fill="#ddf3ea"/>
+    <path d="M30 114c10-22 30-24 36-18-8 14-24 22-36 18zM130 114c-10-22-30-24-36-18 8 14 24 22 36 18z" fill="#2f9e7e"/>
+    <circle class="success-circle" cx="80" cy="74" r="36" fill="#1f7a5f"/>
+    <path class="success-check" d="M62 75l12 12 24-26" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="36" cy="44" r="5" fill="#f5b82e"/><circle cx="126" cy="38" r="4" fill="#5b51c9"/><circle cx="122" cy="58" r="3" fill="#f5b82e"/>
+  </svg>
   <h1 id="done-title" tabindex="-1" class="mb-2 text-center text-3xl md:text-3xl"><%= t('registered.title') %></h1>
   <div id="done-desc" class="mb-4 text-center">
     <p class="text-lg font-bold"><%= event.tTitle || event.title %></p>
@@ -28,12 +35,12 @@
         <img src="/images/illustrations/volunteer.svg" alt="" class="h-16 w-16 shrink-0" width="64" height="64">
         <p class="min-w-0 text-xl font-bold"><%= t('registered.volunteer_question') %></p>
       </div>
-      <form action="/events/<%= event.id %>/volunteer" method="post" class="mb-3">
+      <form action="/events/<%= event.id %>/volunteer" method="post" class="enter-up mb-3">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="hidden" name="from" value="popup">
         <button class="btn-volunteer btn-block btn-lg"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i><%= t('registered.volunteer_yes') %></button>
       </form>
-      <a href="/events" class="btn-plain btn-block btn-lg"><%= t('registered.volunteer_no') %></a>
+      <a href="/events" class="enter-up btn-plain btn-block btn-lg"><%= t('registered.volunteer_no') %></a>
     </div>
   <% } else { %>
     <a href="/events" class="btn btn-block btn-lg"><%= t('registered.continue') %></a>

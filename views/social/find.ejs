@@ -18,9 +18,9 @@
                data-swipe-card tabindex="0" aria-label="<%= next.firstName() %>" data-left="skip-senior" data-right="message-senior">
         <div class="hero-wash relative px-6 pt-6 pb-5 text-center">
           <% if (next.profilePictureUrl) { %>
-            <img src="<%= next.profilePictureUrl %>" alt="<%= next.firstName() %>" draggable="false" class="mx-auto h-36 w-36 rounded-full object-cover ring-8 ring-surface select-none sm:h-44 sm:w-44" width="176" height="176">
+            <img src="<%= next.profilePictureUrl %>" alt="<%= next.firstName() %>" draggable="false" class="mx-auto aspect-square h-auto w-36 max-w-full rounded-full object-cover ring-8 ring-surface select-none sm:w-44" width="176" height="176">
           <% } else { %>
-            <div class="mx-auto flex h-36 w-36 items-center justify-center rounded-full bg-primary text-6xl font-bold text-white ring-8 ring-surface sm:h-44 sm:w-44" aria-hidden="true"><%= next.fullName.charAt(0) %></div>
+            <div class="mx-auto flex aspect-square w-36 max-w-full items-center justify-center rounded-full bg-primary text-6xl font-bold text-white ring-8 ring-surface sm:w-44" aria-hidden="true"><%= next.fullName.charAt(0) %></div>
           <% } %>
           <span class="swipe-badge left-4 rounded-full border-4 border-primary bg-surface px-5 py-1 text-xl font-bold text-primary" data-badge="left" aria-hidden="true"><%= t('find.skip') %></span>
           <span class="swipe-badge right-4 rounded-full border-4 border-success bg-success-bg px-5 py-1 text-xl font-bold text-success" data-badge="right" aria-hidden="true"><%= t('find.message_short') %></span>

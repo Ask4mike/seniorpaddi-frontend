@@ -31,7 +31,7 @@
     data-me="<%= currentUser.id %>" data-other="<%= other.id %>" data-other-name="<%= other.firstName() %>"
     data-you="<%= t('messages.you') %>" data-just-now="<%= t('messages.just_now') %>">
   <% messages.forEach(function (m) { const mine = m.senderId === currentUser.id; %>
-    <li id="msg-<%= m.id %>" class="flex <%= mine ? 'justify-end pl-8 sm:pl-16' : 'justify-start pr-8 sm:pr-16' %>">
+    <li id="msg-<%= m.id %>" class="msg-past flex <%= mine ? 'justify-end pl-8 sm:pl-16' : 'justify-start pr-8 sm:pr-16' %>">
       <div class="min-w-0 max-w-full break-words rounded-xl px-4 py-3 <%= mine ? 'bg-primary text-white' : 'bg-surface-muted text-body' %>">
         <p class="sr-only"><%= mine ? t('messages.you') : other.firstName() + ':' %></p>
         <p class="whitespace-pre-line text-base"><%= m.body %></p>

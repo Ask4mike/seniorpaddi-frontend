@@ -11,8 +11,8 @@
   const bottom = placement === 'bottom';
 %>
 <nav aria-label="Main"
-     class="<%= bottom ? 'tabbar' : '' %>">
-  <ul class="<%= bottom ? 'mx-auto flex max-w-lg gap-0 px-1 py-1' : 'pillnav' %>">
+     class="<%= bottom ? 'tabbar' : 'min-w-0 max-w-full' %>">
+  <ul class="<%= bottom ? 'mx-auto flex max-w-lg gap-0 overflow-x-auto px-1 py-1' : 'pillnav' %>">
     <% items.forEach(function (item) { %>
       <li class="<%= bottom ? 'min-w-0 flex-1' : '' %>">
         <a href="<%= item.href %>" <%= item.active ? 'aria-current=page' : '' %>
@@ -20,10 +20,13 @@
           <% if (bottom) { %>
             <%# icon above the word; the active item's icon sits in an indigo pill %>
             <span class="tab-icon"><i class="fa-solid <%= item.icon %>" aria-hidden="true"></i></span>
+            <span class="tab-label"><%= item.short ? item.short : item.label %></span>
           <% } else { %>
-            <i class="fa-solid <%= item.icon %>" aria-hidden="true"></i>
+            <i class="fa-solid <%= item.icon %> header-icon" aria-hidden="true"></i>
+            <%# in the one-line header: the short word on tablets and small laptops, the full words from 1280px %>
+            <span class="whitespace-nowrap <%= item.short ? 'xl:hidden' : '' %>"><%= item.short ? item.short : item.label %></span>
+            <% if (item.short) { %><span class="hidden whitespace-nowrap xl:inline"><%= item.label %></span><% } %>
           <% } %>
-          <span class="<%= bottom ? 'tab-label' : '' %>"><%= bottom && item.short ? item.short : item.label %></span>
           <% if (item.badge > 0) { %>
             <span class="count-badge <%= bottom ? 'absolute right-0.5 top-0.5' : '' %>"><%= item.badge %></span>
           <% } %>

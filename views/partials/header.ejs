@@ -9,19 +9,24 @@
 <html lang="<%= lang %>">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <%# viewport-fit=cover lets the top bar and bottom bar use the safe-area padding on notched phones %>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title><%= title %> | SeniorPadi</title>
   <meta name="theme-color" content="#fff9f0">
   <script>document.documentElement.classList.add('js');</script>
   <%# Outfit: one self-hosted variable file (400 to 700) covers every weight, so it is the only font file to preload %>
   <link rel="preload" href="/fonts/outfit-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="stylesheet" href="/css/main.css?v=ui2">
+  <link rel="stylesheet" href="/css/main.css?v=ui3">
   <script src="/js/phone-input.js?v=ui1" defer></script>
+  <%# page-change progress bar; the page works the same without it %>
+  <script src="/js/top-loader.js?v=ui1" defer></script>
 </head>
 
 <% if (isAdmin) { %>
-<body class="min-h-screen bg-surface-subtle font-sans md:flex">
+<body class="admin-area min-h-screen bg-surface-subtle font-sans md:flex">
+  <%# thin page-loading bar at the very top (public/js/top-loader.js). Decorative: the browser shows its own loading state to screen readers %>
+  <div id="top-loader" class="top-loader" role="progressbar" aria-hidden="true"></div>
   <a href="#main" class="skip-link">Skip to main content</a>
   <%- include('nav') %>
   <div class="flex min-h-screen min-w-0 flex-1 flex-col">
@@ -29,37 +34,35 @@
       <%- include('flash') %>
 <% } else { %>
 <body class="flex min-h-screen flex-col pb-28 font-sans md:pb-0">
+  <div id="top-loader" class="top-loader" role="progressbar" aria-hidden="true"></div>
   <a href="#main" class="skip-link"><%= t('nav.skip') %></a>
 
-  <%# pill top bar: logo left, language and (on wide screens) Call and Log in on the right %>
+  <%#
+    ONE line at every width (pure CSS, no measuring script):
+    phones: logo + wordmark | language. md and up: logo | five-item pill menu | language.
+    It shrinks instead of wrapping: smaller gaps, then a smaller logo, then fluid text sizes (.header-text, .nav-text).
+  %>
   <header class="site-header">
     <div class="topbar">
-      <a href="/" class="brand">
-        <span class="brand-mark"><i class="fa-solid fa-hand-holding-heart text-base" aria-hidden="true"></i></span>
-        SeniorPadi
+      <a href="/" class="brand" aria-label="SeniorPadi">
+        <span class="brand-mark"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i></span>
+        <%# the wordmark is the least important item: it hides on tablet widths where the menu needs the room %>
+        <span class="brand-word md:max-lg:sr-only">SeniorPadi</span>
       </a>
 
-      <div class="flex items-center gap-2">
-        <% if (!currentUser) { %>
-          <a href="/login" class="nav-link hidden sm:inline-flex"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><%= t('home.login') %></a>
-        <% } %>
-        <a href="/call" class="nav-link hidden lg:inline-flex">
-          <i class="fa-solid fa-phone" aria-hidden="true"></i><%= t('call.title') %>
-        </a>
-        <%# one button that always shows the OTHER language %>
-        <form action="/language" method="post">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <input type="hidden" name="back" value="<%= currentPath %>">
-          <button name="lang" value="<%= otherLang %>" lang="<%= otherLang %>" class="lang-pill">
-            <i class="fa-solid fa-language" aria-hidden="true"></i>
-            <%= otherLang === 'yo' ? 'Yorùbá' : 'English' %>
-          </button>
-        </form>
-      </div>
-    </div>
+      <%# on computers the same five-item menu sits in the middle of this one line %>
+      <div class="hidden min-w-0 justify-center md:flex md:flex-1"><%- include('seniorNav', { placement: 'top' }) %></div>
 
-    <%# on computers the same five-item menu is a pill bar under the top bar %>
-    <div class="mx-auto mt-3 hidden max-w-6xl md:block"><%- include('seniorNav', { placement: 'top' }) %></div>
+      <%# one button that always shows the OTHER language %>
+      <form action="/language" method="post" class="shrink-0">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="back" value="<%= currentPath %>">
+        <button name="lang" value="<%= otherLang %>" lang="<%= otherLang %>" class="lang-pill">
+          <i class="fa-solid fa-language header-icon max-[359px]:hidden md:max-lg:hidden" aria-hidden="true"></i>
+          <%= otherLang === 'yo' ? 'Yorùbá' : 'English' %>
+        </button>
+      </form>
+    </div>
   </header>
 
   <%# on phones the same menu sits at the bottom of the screen %>

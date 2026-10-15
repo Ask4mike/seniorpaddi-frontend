@@ -123,6 +123,95 @@
   --radius-4xl: 2rem;
   --shadow-soft: 0 1px 2px rgb(31 27 46 / 0.06), 0 6px 20px -6px rgb(59 50 144 / 0.14);
   --shadow-lift: 0 2px 4px rgb(31 27 46 / 0.06), 0 16px 36px -12px rgb(59 50 144 / 0.28);
+
+  /*
+    ---------- motion ----------
+    Motion explains what is happening (loading, opening, success); it is never decoration.
+    Only transform and opacity animate (plus short colour changes on buttons). Ease-out to enter, ease-in to leave.
+    No bounce, no spin, nothing loops. Everything is switched off under prefers-reduced-motion (end of this file).
+  */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  --animate-page-in: page-in 250ms var(--ease-out) backwards; /* main content: fade + 8px rise */
+  --animate-fade-in: fade-in 200ms var(--ease-out) backwards; /* backdrops, success states */
+  --animate-fade-up: fade-up 260ms var(--ease-out) backwards; /* Home tiles, pop-up buttons */
+  --animate-sheet-up: sheet-up 250ms var(--ease-out) backwards; /* pop-up on phones: slides up 24px */
+  --animate-dialog-in: dialog-in 250ms var(--ease-out) backwards; /* pop-up on md+: scale 0.96 to 1 */
+  --animate-slide-in-x: slide-in-x 220ms var(--ease-out) backwards; /* the next event / senior card */
+  --animate-pop-in: pop-in 180ms var(--ease-out) backwards; /* a new chat bubble */
+  --animate-drop-in: drop-in 200ms var(--ease-out) backwards; /* flash messages */
+  --animate-nudge-in: nudge-in 150ms var(--ease-out) backwards; /* inline form errors */
+  --animate-scale-in: scale-in 300ms var(--ease-out) backwards; /* the success circle */
+  --animate-draw: draw 400ms var(--ease-out) backwards; /* the success check mark */
+
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(8px); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+  }
+  @keyframes sheet-up {
+    from { opacity: 0; transform: translateY(24px); }
+  }
+  @keyframes dialog-in {
+    from { opacity: 0; transform: scale(0.96); }
+  }
+  @keyframes slide-in-x {
+    from { opacity: 0; transform: translateX(12px); }
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  }
+  @keyframes drop-in {
+    from { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes nudge-in {
+    from { opacity: 0; transform: translateY(-4px); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.85); }
+  }
+  @keyframes draw {
+    from { stroke-dashoffset: 48; }
+  }
+}
+
+/* durations, shared by transitions and the top loader */
+:root {
+  --duration-micro: 150ms; /* buttons, pills, presses */
+  --duration-enter: 250ms; /* pop-ups and page entrance */
+  --duration-leave: 150ms;
+}
+
+/*
+  Fluid header sizes: defined once, used only inside the one-line top bar.
+  header-text is the ONE place text may go under 16px: 14px at 320px wide, 16px from 360px, 18px from 400px.
+  nav-text is the menu inside the bar (md and up): 16px at 768px, growing to 18px by 1024px.
+*/
+@utility header-text {
+  font-size: clamp(0.778rem, 5vw - 0.11rem, 1rem);
+  line-height: 1.2;
+}
+@utility nav-text {
+  font-size: clamp(0.889rem, 0.35rem + 1.15vw, 1rem);
+  line-height: 1.2;
+}
+@utility header-icon {
+  font-size: clamp(0.889rem, 0.5rem + 1vw, 1.125rem);
+}
+/* small stagger steps for lists that enter one after another */
+@utility enter-delay-1 {
+  animation-delay: 60ms;
+}
+@utility enter-delay-2 {
+  animation-delay: 120ms;
+}
+@utility enter-delay-3 {
+  animation-delay: 180ms;
 }
 
 @layer base {
@@ -212,23 +301,37 @@
     max-width: 65ch;
   }
 
-  /* pill top bar (Home Care pill nav, ref 7): a white rounded bar floating on the cream page */
+  /*
+    Pill top bar (Home Care pill nav, ref 7): ONE line at every width, from 320px phones to wide monitors.
+    It never wraps; it shrinks, in this order: gaps and padding, then the logo, then fluid text (header-text, nav-text)
+    and icons (header-icon). Sticky everywhere, with safe-area padding for notched phones.
+  */
   .site-header {
-    @apply relative z-30 bg-background/95 px-3 pt-3 pb-2 md:sticky md:top-0 md:backdrop-blur-sm;
+    @apply sticky top-0 z-30 bg-background/95 pb-2 backdrop-blur-sm;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
   }
   .topbar {
-    @apply mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full bg-surface py-2 pr-2 pl-4 shadow-soft;
+    @apply mx-auto flex max-w-6xl flex-nowrap items-center justify-between gap-1 rounded-full bg-surface py-1.5 pr-1.5 pl-2 shadow-soft
+      sm:gap-2 sm:pl-3 lg:gap-4 lg:py-2 lg:pr-2 lg:pl-4;
   }
   .brand {
-    @apply flex min-h-12 items-center gap-2 text-xl font-bold tracking-tight text-body no-underline;
+    @apply flex min-h-12 min-w-0 items-center gap-1.5 font-bold tracking-tight whitespace-nowrap text-body no-underline sm:gap-2;
+  }
+  /* the wordmark: 14px at 320px, 16px from 360px, up to 22.5px on wide screens. It is the least important item, so under
+     very large text zoom it is the only thing that gets cut short (the link keeps the full name in its aria-label) */
+  .brand-word {
+    @apply min-w-0 truncate;
+    font-size: clamp(0.778rem, 5vw - 0.11rem, 1.25rem);
   }
   .brand-mark {
-    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white;
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm text-white sm:h-10 sm:w-10 sm:text-base;
   }
-  /* the language toggle: a pill that always shows the OTHER language */
+  /* the language toggle: a pill that always shows the OTHER language. 48px tall at every width */
   .lang-pill {
-    @apply inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-primary bg-surface px-4 text-base font-semibold text-primary
-      transition-colors hover:bg-indigo-50 active:bg-indigo-100;
+    @apply header-text inline-flex min-h-12 shrink-0 items-center gap-1.5 rounded-full border-2 border-primary bg-surface px-3 font-semibold
+      whitespace-nowrap text-primary transition-colors duration-150 hover:bg-indigo-50 active:bg-indigo-100 sm:gap-2 sm:px-4;
   }
 
   /* bottom navigation on phones (ref 9 doctor app): icon over a word, the active item sits in an indigo pill */
@@ -256,16 +359,29 @@
   .tab-link[aria-current="page"] .tab-icon {
     @apply bg-primary text-white;
   }
-  /* the same five items as a pill bar on computers */
+  /*
+    The same five items as a compact pill inside the one-line top bar (md and up). Never wraps. If huge text zoom ever
+    makes it wider than its space, it scrolls sideways inside itself instead of pushing the page wider.
+  */
   .pillnav {
-    @apply flex flex-wrap items-center gap-1 rounded-full bg-surface p-1.5 shadow-soft;
+    @apply flex max-w-full min-w-0 flex-nowrap items-center gap-0.5 overflow-x-auto rounded-full bg-lavender p-1 lg:gap-1;
+    scrollbar-width: none;
   }
   .nav-link {
-    @apply relative inline-flex min-h-12 items-center gap-2 rounded-full px-4 py-2 text-base font-semibold text-body no-underline transition-colors
-      hover:bg-lavender active:bg-indigo-50;
+    @apply nav-text relative inline-flex min-h-12 shrink-0 items-center gap-1.5 rounded-full px-2.5 py-2 font-semibold whitespace-nowrap text-body
+      no-underline transition-colors duration-150 hover:bg-surface active:bg-indigo-100 lg:px-3.5 xl:gap-2 xl:px-4;
   }
   .nav-link[aria-current="page"] {
     @apply bg-primary text-white hover:bg-primary-dark;
+  }
+  /* the active icon grows a little; it is transform-only, so nothing around it moves */
+  .nav-link .header-icon,
+  .tab-link .tab-icon i {
+    transition: transform var(--duration-micro) var(--ease-out);
+  }
+  .nav-link[aria-current="page"] .header-icon,
+  .tab-link[aria-current="page"] .tab-icon i {
+    transform: scale(1.08);
   }
   .count-badge {
     @apply inline-flex min-w-7 items-center justify-center rounded-full bg-yolk-400 px-1.5 text-sm leading-6 font-bold text-charcoal;
@@ -731,14 +847,226 @@
   }
 }
 
-/* people who asked their device for less motion get none */
+/*
+  =================================================================================================================
+  MOTION. Every effect below is CSS only: with JavaScript off the pages look and work the same, just without the
+  top loader. Entrance animations use fill-mode "backwards" so they hold nothing once finished (the swipe script's
+  own transforms and the pop-ups' positioning are never overridden).
+  =================================================================================================================
+*/
+
+/* ---------- top loader: a 3px (4px on computers) bar above everything while the next page loads ---------- */
+.top-loader {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  z-index: 70;
+  height: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--color-yolk-400), var(--color-indigo-600));
+  /* hiding: a quick fade, then the bar resets to nothing while invisible */
+  transition: opacity 200ms var(--ease-in), transform 0s linear 200ms;
+}
+@media (min-width: 48rem) {
+  .top-loader {
+    height: 4px;
+  }
+}
+/* started (public/js/top-loader.js): appears at once and eases towards 90% over a few seconds, never reaching the end */
+.top-loader.is-loading {
+  opacity: 1;
+  transform: scaleX(0.9);
+  transition: opacity 120ms var(--ease-out), transform 8s cubic-bezier(0.08, 0.6, 0.2, 1);
+}
+/* the next page is arriving: fill to 100%, then fade */
+.top-loader.is-done {
+  opacity: 0;
+  transform: scaleX(1);
+  transition: transform 150ms var(--ease-out), opacity 250ms var(--ease-in) 150ms;
+}
+
+/* ---------- page entrance: the main content fades in with an 8px rise. The bars never animate ---------- */
+#main {
+  animation: var(--animate-page-in);
+}
+/*
+  A pop-up page does not animate the main area: an ancestor with a transform would, for that moment, make the
+  pop-up position itself inside the main area instead of on the screen. The pop-up has its own entrance instead.
+*/
+#main:has([data-dialog]) {
+  animation: none;
+}
+
+/* ---------- pop-ups: backdrop fades, the sheet slides up on phones and scales in on computers ---------- */
+.dialog-backdrop {
+  animation: var(--animate-fade-in);
+}
+.dialog {
+  animation: var(--animate-sheet-up);
+}
+@media (min-width: 48rem) {
+  .dialog {
+    animation: var(--animate-dialog-in);
+  }
+}
+/* Registered pop-up: the circle scales in, the check draws itself, then the two volunteer buttons rise in turn */
+.success-mark .success-circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: var(--animate-scale-in);
+  animation-delay: 120ms;
+}
+.success-mark .success-check {
+  stroke-dasharray: 48;
+  animation: var(--animate-draw);
+  animation-delay: 300ms;
+}
+.dialog .enter-up {
+  animation: var(--animate-fade-up);
+  animation-delay: 420ms;
+}
+.dialog .enter-up + .enter-up {
+  animation-delay: 480ms;
+}
+
+/* ---------- buttons: colour and a gentle press. Focus rings appear at once (outline is never transitioned) ---------- */
+.btn,
+.btn-primary,
+.btn-accent,
+.btn-coral,
+.btn-volunteer,
+.btn-plain,
+.btn-secondary,
+.btn-ghost,
+.btn-danger,
+.btn-danger-soft,
+.lang-pill,
+.chip {
+  transition:
+    background-color var(--duration-micro) var(--ease-out),
+    color var(--duration-micro) var(--ease-out),
+    border-color var(--duration-micro) var(--ease-out),
+    transform var(--duration-micro) var(--ease-out);
+}
+:is(.btn, .btn-primary, .btn-accent, .btn-coral, .btn-volunteer, .btn-plain, .btn-secondary, .btn-ghost, .btn-danger, .btn-danger-soft, .lang-pill, .chip):active:not([disabled], [aria-disabled="true"]) {
+  transform: scale(0.97);
+}
+/* list rows, menu items and tiles: pressed state only */
+.tab-link .tab-icon {
+  transition: background-color var(--duration-micro) var(--ease-out), color var(--duration-micro) var(--ease-out);
+}
+
+/* ---------- Home tiles: rise in one after another, press to 0.98, lift 2px under a mouse ---------- */
+.tile-list > li {
+  animation: var(--animate-fade-up);
+}
+.tile-list > li:nth-child(2) {
+  animation-delay: 70ms;
+}
+.tile-list > li:nth-child(3) {
+  animation-delay: 140ms;
+}
+.tile {
+  position: relative;
+  transition:
+    transform var(--duration-micro) var(--ease-out),
+    border-color var(--duration-micro) var(--ease-out),
+    background-color var(--duration-micro) var(--ease-out);
+}
+/* the bigger shadow sits on a pseudo-element and only its opacity changes (blur is never animated) */
+.tile::after,
+.lift::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--shadow-lift);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-micro) var(--ease-out);
+}
+.tile:active {
+  transform: scale(0.98);
+}
+/* links that look like cards (event previews, conversation rows, account cards): press feedback, lift under a mouse */
+.lift {
+  position: relative;
+  transition: transform var(--duration-micro) var(--ease-out), background-color var(--duration-micro) var(--ease-out);
+}
+.lift:active {
+  transform: scale(0.99);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tile:hover,
+  .lift:hover {
+    transform: translateY(-2px);
+  }
+  .tile:hover::after,
+  .lift:hover::after {
+    opacity: 1;
+  }
+}
+
+/* ---------- Find events / Find seniors: the next card slides in a little from the right ---------- */
+.swipe-card {
+  animation: var(--animate-slide-in-x);
+}
+
+/* ---------- chat: only NEW bubbles (added live by chat.js) pop in; messages already on the page do not move ---------- */
+#thread > li:not(.msg-past) {
+  animation: var(--animate-pop-in);
+}
+
+/* ---------- forms and messages ---------- */
+.field .error:not([hidden]) {
+  animation: var(--animate-nudge-in);
+}
+.alert {
+  animation: var(--animate-drop-in);
+}
+.alert-success {
+  animation: var(--animate-fade-in);
+}
+
+/* ---------- staff area: calmer still. Page fade, button press, pop-ups and the loader only ---------- */
+.admin-area .lift:hover,
+.admin-area .lift:active {
+  transform: none;
+}
+.admin-area .lift:hover::after {
+  opacity: 0;
+}
+.admin-area .alert {
+  animation: none;
+}
+
+/* ---------- people who asked their device for less motion: no movement at all, the loader is a still bar ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
     scroll-behavior: auto !important;
+  }
+  /* presses and hovers change colour only, never size or position */
+  :is(.btn, .btn-primary, .btn-accent, .btn-coral, .btn-volunteer, .btn-plain, .btn-secondary, .btn-ghost, .btn-danger, .btn-danger-soft, .lang-pill, .chip, .tile, .lift):is(:active, :hover),
+  .nav-link[aria-current="page"] .header-icon,
+  .tab-link[aria-current="page"] .tab-icon i {
+    transform: none !important;
+  }
+  /* the loader shows as a full, still bar while the next page loads: no growing, no fading */
+  .top-loader {
+    transition: none !important;
+  }
+  .top-loader.is-loading {
+    transform: scaleX(1);
   }
 }

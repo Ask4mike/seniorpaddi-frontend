@@ -190,3 +190,113 @@ Gradients appear only as the mint-to-lavender `.hero-wash` and the cream-to-peac
 - **Assets:** `public/fonts/outfit-variable.woff2` (new), `public/fonts/noto-sans-variable.woff2` (removed), `public/fonts/README.txt`, 9 SVGs in `public/images/illustrations/`, `public/images/README.md`.
 - **Docs and tools:** `DESIGN-NOTES.md`, `docs/ui-revamp/tools/make-illustrations.mjs`.
 - **Not touched:** routes, controllers, services, models, migrations, sockets, `public/js/*`, `locales/*`, `package.json`, tests. Confirmed with `git diff ui-revamp --name-only`.
+
+## 12. Header and motion (second pass, 15 Oct 2026)
+
+Skills: the same two (`ecc:frontend-design-direction` for deciding where motion helps, `ecc:frontend-a11y` for focus, ARIA and reduced motion), plus EJS practice (no new logic or data, escaped output). There is still no EJS or Tailwind skill installed. Tailwind is v4: "tailwind.config" tokens live in the `@theme` block, plus `@utility` and `:root` in `src/styles/input.css`.
+
+### 12.1 The one-line header
+
+**Layout.** One `flex-nowrap` row inside the pill top bar (`.topbar`). The brand link is `min-w-0`; the logo mark and the language pill are `shrink-0`. Below md: logo mark + wordmark | language. From md: logo | the five-item menu as a compact pill (`.pillnav`) in the middle | language. The old second menu row is gone. The bottom menu on phones is unchanged.
+
+**Removed from the header:** the "Log in" link (logged-out visitors) and the "Call SeniorPadi" link (wide screens only). With them, the line cannot fit at 768px. Log in is still one tap away (Account sends a logged-out visitor to the log-in page, and Register opens the log-in pop-up), and Call is still the yolk Home tile and a footer link.
+
+**Shrink order, CSS only (no measuring script):**
+1. Gaps and padding step down: `gap-1 sm:gap-2 lg:gap-4`, bar padding `pl-2 sm:pl-3 lg:pl-4`, menu items `px-2.5 lg:px-3.5 xl:px-4`.
+2. The logo mark is 36px below sm, 40px from sm. The wordmark is visually hidden from md to lg (`md:max-lg:sr-only`), where the menu needs the room. The link keeps `aria-label="SeniorPadi"`.
+3. Fluid text, defined once as utilities:
+   - `header-text` = `clamp(0.778rem, 5vw - 0.11rem, 1rem)`: **14px at 320, 16px at 360, 18px from 400** (language pill).
+   - `.brand-word` uses the same curve with a 1.25rem cap (22.5px).
+   - `nav-text` = `clamp(0.889rem, 0.35rem + 1.15vw, 1rem)`: **16px at 768, 18px by 1024** (menu items).
+4. Fluid icons: `header-icon` = `clamp(0.889rem, 0.5rem + 1vw, 1.125rem)`. The language icon hides below 360px and from md to lg.
+
+Menu labels use the existing short words (Events, Seniors / Ètò, Àwọn àgbà) up to 1280px and the full words (Find events, Find seniors / Wá ètò, Wá àwọn àgbà) from 1280px. Both are existing i18n keys, and the hidden one is `display:none`, so the accessible name always matches what is shown.
+
+**The 14px exception** is limited to the header: only `header-text` and `.brand-word` can go under 16px, and only between 320 and 359px wide. Everything else keeps the 16px floor (checked: the smallest text on every page at 360 and 1280 is 16.2px).
+
+**Kept:** sticky at every width (it was not sticky on phones after the first pass; now it is one 67px line, so it can be), a 95% cream background with a soft blur, safe-area padding (`viewport-fit=cover` added to the viewport meta so `env(safe-area-inset-*)` works on notched phones, which also activates the bottom bar's existing safe-area padding), `scroll-padding-top: 6rem`, the skip link, `aria-label="Main"`, `aria-current="page"`, the language form exactly as before (same action, fields and value; it still shows the OTHER language), and focus rings.
+
+**Graceful degradation:** if very large text ever makes the five items wider than their space, the menu scrolls sideways inside its own pill (`overflow-x-auto`, scrollbar hidden). The page never widens and nothing overlaps. Only the wordmark may be cut short (with an ellipsis), and its full name stays in the link's `aria-label`.
+
+### 12.2 Header test results
+
+Measured in the browser with real layout (one line = every control's vertical centre within 2px), for logged out and logged in, in English and Yorùbá, on Find seniors (active item "Seniors", the longest Yorùbá label):
+
+| Width | One line | Page sideways scroll | Controls under 48px | Active item fully visible | Language pill text | Menu text | Result |
+|---|---|---|---|---|---|---|---|
+| 320 | yes | 0 | 0 | n/a (bottom bar) | 14px | n/a | PASS |
+| 360 | yes | 0 | 0 | n/a | 16px | n/a | PASS |
+| 390 | yes | 0 | 0 | n/a | 17.5px | n/a | PASS |
+| 412 | yes | 0 | 0 | n/a | 18px | n/a | PASS |
+| 600 | yes | 0 | 0 | n/a | 18px | n/a | PASS |
+| 768 | yes | 0 | 0 | yes | 18px | 16px | PASS |
+| 1024 | yes | 0 | 0 | yes | 18px | 18px | PASS |
+| 1280 | yes | 0 | 0 | yes | 18px | 18px (full labels) | PASS |
+| 1536 | yes | 0 | 0 | yes | 18px | 18px | PASS |
+| 1920 | yes | 0 | 0 | yes | 18px | 18px | PASS |
+
+All 40 combinations (10 widths x 2 languages x logged out/in) pass. The language pill is 54px tall everywhere. The bar is 67px tall on phones and 76 to 81px on wider screens.
+
+**Zoom.** Browser page zoom (Ctrl +) narrows the CSS viewport (150% on a 1280 screen behaves like 853px, 200% like 640px), so it is covered by the width table. **Text zoom** (the browser's font-size setting) was tested by scaling the root size to 150% and 200%:
+- 150%, at 320, 360, 768, 1024 and 1280: one line, no overlap, no page scroll. From 768 up the menu scrolls inside its pill.
+- 200%: the header stays on one line with no overlap at every width; the menu scrolls inside its pill on md+. **On 320 and 360 phones the page itself becomes wider at 200%, but not because of the header**: it is the page content (a senior's name in 1.75rem, two side-by-side buttons, the footer). That is outside this pass and is noted as a follow-up. The bottom menu now scrolls inside itself at such sizes instead of widening the page, and the profile photo is capped at the screen width.
+
+### 12.3 Motion
+
+**Tokens** (`@theme` in `input.css`): `--ease-out: cubic-bezier(0.22, 1, 0.36, 1)`, `--ease-in: cubic-bezier(0.4, 0, 1, 1)`, `--duration-micro: 150ms`, `--duration-enter: 250ms`, `--duration-leave: 150ms`, and named animations `--animate-*` with their `@keyframes`. Only transform and opacity animate (plus colour on buttons). Entrance animations use fill-mode `backwards`, so they hold nothing once finished (the swipe script's own transforms and the pop-ups' centring are never overridden). Nothing loops.
+
+| Where | What | Duration, easing |
+|---|---|---|
+| Every page | main content fades in with an 8px rise (bars do not animate). Skipped on pages showing a pop-up (see below) | 250ms ease-out |
+| Pop-up backdrop | fades in | 200ms ease-out |
+| Pop-up, phones | slides up 24px and fades in | 250ms ease-out |
+| Pop-up, md and up | scales 0.96 to 1 and fades in | 250ms ease-out |
+| Registered pop-up | circle scales in (from 120ms), white check draws itself with stroke-dashoffset (from 300ms), "Yes, volunteer" and "Not now" rise in at 420 and 480ms. No confetti | 300ms / 400ms / 260ms ease-out |
+| Buttons, language pill, filter chips | colour change and press to 0.97 (not when disabled). Focus rings appear at once (outline is never transitioned) | 150ms ease-out |
+| Menus (top pill and bottom bar) | active pill background changes colour; the active icon is scaled to 1.08 (transform only, layout never moves) | 150ms ease-out |
+| Home tiles | rise in one after another (0, 70, 140ms), press to 0.98, lift 2px under a mouse only (`@media (hover: hover) and (pointer: fine)`). The bigger shadow is on a pseudo-element whose opacity changes; blur is never animated | 260ms / 150ms |
+| Home "Coming up" cards | press feedback, 2px lift under a mouse only | 150ms |
+| Find events / Find seniors card | the card slides in 12px from the right on each page load (after Skip the next card arrives this way). Register and Skip get the button press | 220ms ease-out |
+| Chat | only new bubbles added live by `chat.js` pop in (opacity, 6px rise, scale 0.98). Messages already on the page carry a `msg-past` class and do not move. Send button gets the press | 180ms ease-out |
+| Form errors | slide down 4px and fade in with their icon (also when `phone-input.js` un-hides one) | 150ms ease-out |
+| Flash messages | slide down 8px and fade in; success messages just fade in | 200ms ease-out |
+| Lists and account rows | pressed background colour only | 150ms |
+| Staff area | page fade, button press, pop-ups and the top loader only: no lifts, no list or table entrances (`.admin-area` on the staff body) | |
+
+Status chips, date and time blocks and plain cards do **not** lift on hover. They are not tappable, and a lift would suggest to an older reader that they are.
+
+**Modal exit animations: skipped.** The pop-ups are server-rendered: closing one follows a link to another page (the close link, Escape via `dialog.js`, or a form), so the pop-up never fades out in place. Only the entrance animates, with CSS that runs when the page loads. `dialog.js` is unchanged: focus still moves to the title, the page behind is still made inert (7 regions on the Registered page), and `aria-modal`, `aria-labelledby` and Escape behave as before (all checked).
+
+**Why pop-up pages skip the main fade:** during the 250ms rise, `#main` would have a transform, and that would make the fixed-position pop-up position itself inside the main area for that moment. `#main:has([data-dialog]) { animation: none }` prevents the jump.
+
+**Reduced motion** (`@media (prefers-reduced-motion: reduce)`): every animation and transition is cut to 0.01ms with no delay, presses and hovers change colour only (no scale or lift), the active-icon scale is removed, and the top loader becomes a full, still bar while loading (no growing, no fading). Checked by applying the exact rules from that block: all animations become instant, and the loader shows at 100% width, fully opaque. Nothing relies on motion to convey information.
+
+### 12.4 The top loader
+
+- **Element:** `<div id="top-loader" class="top-loader" role="progressbar" aria-hidden="true">` added once in `views/partials/header.ejs`, in both the senior and staff branches, so every page has it (including error pages). It is 3px tall (4px from md), fixed at the very top above the sticky header (z-index 70, top offset `env(safe-area-inset-top)`), yolk-to-indigo gradient, `pointer-events: none`, and only `transform: scaleX` and opacity change.
+- **It stays `aria-hidden` while loading too.** An unnamed progress bar appearing for half a second would only be noise to a screen-reader user, and the browser already reports page loading. A spoken label would also need a new i18n key, which is out of scope.
+- **Script:** `public/js/top-loader.js`, 1.9 KB with comments (about 1.2 KB of code, under 1 KB gzipped), no dependencies, loaded with `defer` from the header partial. Passive listeners on `document` for `click` and `submit`, plus `pagehide` and `pageshow` on `window`. Everything is wrapped in try/catch.
+- **Behaviour:** an internal link click or a form submit shows the bar at once and eases it towards 90% over about 8 seconds. When the page unloads it fills to 100% and fades. On `pageshow` (including back/forward cache restores) it resets and hides. A 15-second safety timer hides it if no new page ever comes (for example a file download).
+- **Ignored:** clicks already handled by a script (`defaultPrevented`), ctrl/cmd/shift/alt and middle clicks, `target="_blank"` (and any other target), `download` links, same-page hash links, `tel:` (the Call SeniorPadi button), `mailto:` and other origins. For forms: a submit another script cancels (the live chat sends over the socket, a wrong phone number is stopped by `phone-input.js`, the swipe card waits for its slide) and forms with a target.
+- **Never** calls `preventDefault` or `stopPropagation`, never delays anything, never reads or touches form data, and no existing script was edited.
+- **Checked:** every case above in the browser (internal link and form show it; the seven ignore cases do not; a cancelled form does not; pageshow resets; pagehide fills). A real click on "Events" started the next page 11ms after the click, the bar was idle on arrival, and Back restored a page with the bar hidden.
+
+### 12.5 Verification for this pass
+
+| Check | Result |
+|---|---|
+| Header, 10 widths x 2 languages x logged out/in | 40 of 40 pass (12.2) |
+| Text zoom 150% and 200% | header one line, no overlap at every width; page content (not the header) widens at 200% on 320 and 360 phones (12.2) |
+| Accessibility sweep (axe 4.10 WCAG A/AA + best practice, text size, target size, sideways scroll, looping motion, broken images, font) on all 80 page variants at 360 and 1280 | 0 sideways scroll, 0 controls under 48px, 0 text under 16px, 0 looping animations, Outfit everywhere. axe flagged "no level-one heading" on the 8 pop-up variants only while animations were frozen at their first frame in the hidden test frame; with the animations finished it passes (checked) |
+| Every animation's end state (Web Animations API `finish()`) | content fully visible, no leftover transform, on Home, Find events, both pop-ups, chat and admin |
+| JavaScript off (sandboxed frames with scripts blocked) | header one line, loader invisible, no sideways scroll, pop-ups present; entrances are CSS and end visible. Pages, links and forms are plain HTML as before |
+| Reduced motion | all motion instant, loader a still full bar (12.3) |
+| Top loader cases and real navigation | all pass (12.4) |
+| Content freeze against the previous commit | only the reviewed differences: header Log in and Call links removed, top-loader script and viewport-fit added, menu label spans, Registered check now inline SVG. No form, field, id, data-* hook or locale key changed |
+| Jest suite (`npm test`, with the local database running) | 59 of 59 pass |
+| Home weight | estimated: + 1.9 KB for the loader script on top of the measured 335 KB (phone) and 386 KB (computer), uncompressed |
+| Layout shift from animation | none by construction: only transform and opacity animate, and fill-mode backwards holds no layout. A Lighthouse run was not possible because the browser pane does not paint while hidden |
+
+**Not checked by eye:** the browser pane stopped painting during this pass, so animations were verified by their computed timings and end states rather than watched. Please look at them once on a phone (Home tiles, Registered pop-up, the loader on a slow connection) before shipping.
+
+**Files changed in this pass:** `views/partials/header.ejs`, `views/partials/seniorNav.ejs`, `views/events/registered.ejs` (inline success mark, `enter-up` classes), `views/home.ejs` (`tile-list`, `lift` classes), `views/social/thread.ejs` (`msg-past` class on server-rendered bubbles), `views/social/find.ejs` (profile photo capped at screen width), `src/styles/input.css`, rebuilt `public/css/main.css` (`?v=ui3`), new `public/js/top-loader.js`, and this file. **No existing file in `public/js` was modified**, and no route, controller, service, model, migration, socket, locale or test file was touched.
