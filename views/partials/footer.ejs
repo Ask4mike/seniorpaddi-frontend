@@ -3,11 +3,11 @@
 <% if (isAdminFooter) { %>
   </div>
 <% } else { %>
-  <footer class="mt-16 bg-primary text-white">
-    <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-2">
+  <footer class="mt-16 rounded-t-4xl bg-secondary text-white">
+    <div class="mx-auto grid max-w-6xl gap-8 px-5 py-12 md:grid-cols-2">
       <div>
-        <p class="mb-2 flex items-center gap-2 text-xl font-bold">
-          <i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>SeniorPadi
+        <p class="mb-2 flex items-center gap-3 text-xl font-bold">
+          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-yolk-400 text-charcoal"><i class="fa-solid fa-hand-holding-heart text-base" aria-hidden="true"></i></span>SeniorPadi
         </p>
         <p class="measure text-on-primary-muted"><%= t('footer.about') %></p>
       </div>

@@ -2,9 +2,9 @@
 <%
   const statCards = [
     { key: 'events', label: 'Events listed', icon: 'fa-calendar-days', color: 'bg-primary text-white' },
-    { key: 'registrations', label: 'Registrations', icon: 'fa-ticket', color: 'bg-accent text-white' },
+    { key: 'registrations', label: 'Registrations', icon: 'fa-ticket', color: 'bg-yolk-400 text-charcoal' },
     { key: 'attendees', label: 'Attendees', icon: 'fa-user-check', color: 'bg-success text-white' },
-    { key: 'seniors', label: 'Seniors signed up', icon: 'fa-users', color: 'bg-secondary text-white' }
+    { key: 'seniors', label: 'Seniors signed up', icon: 'fa-users', color: 'bg-indigo-900 text-white' }
   ];
   const maxDay = Math.max(1, ...stats.days.map((d) => d.total));
   const maxCat = Math.max(1, ...stats.categories.map((c) => c.total));
@@ -33,12 +33,12 @@
 <%# ---------- the big numbers (refresh themselves every 20 seconds; not announced, they are bare numbers) ---------- %>
 <div id="live-stats" class="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-live="off">
   <% statCards.forEach(function (card) { %>
-    <div class="card">
+    <div class="stat-card">
       <div class="mb-3 flex items-center justify-between gap-3">
         <span class="min-w-0 text-base text-muted"><%= card.label %></span>
         <span class="icon-tile <%= card.color %>"><i class="fa-solid <%= card.icon %>" aria-hidden="true"></i></span>
       </div>
-      <p class="text-4xl font-bold leading-none" data-stat="<%= card.key %>"><%= stats.totals[card.key] %></p>
+      <p class="rounded-lg text-4xl leading-none font-bold tracking-tight" data-stat="<%= card.key %>"><%= stats.totals[card.key] %></p>
     </div>
   <% }) %>
 </div>
@@ -93,7 +93,7 @@
     <span><span class="block text-2xl font-bold"><%= pendingIds %></span><span class="text-muted underline decoration-2 underline-offset-4">ID(s) waiting to be checked</span></span>
   </a>
   <a href="/admin/reports" class="card flex items-center gap-4 text-body no-underline transition-colors hover:bg-surface-muted">
-    <span class="icon-tile <%= openReports > 0 ? 'bg-accent text-white' : 'bg-surface-muted text-primary' %>"><i class="fa-solid fa-flag" aria-hidden="true"></i></span>
+    <span class="icon-tile <%= openReports > 0 ? 'bg-terracotta-100 text-terracotta-700' : 'bg-surface-muted text-primary' %>"><i class="fa-solid fa-flag" aria-hidden="true"></i></span>
     <span><span class="block text-2xl font-bold"><%= openReports %></span><span class="text-muted underline decoration-2 underline-offset-4">open report(s)</span></span>
   </a>
 </div>
@@ -131,7 +131,7 @@
               <td><%= formatDate(event.startsAt) %><br><span class="text-sm text-muted"><%= formatTime(event.startsAt) %></span></td>
               <td class="min-w-36">
                 <span class="text-base"><%= event.taken %> / <%= event.capacity %></span>
-                <div class="mt-1 h-3 overflow-hidden rounded-full border-2 border-border-strong bg-surface-muted"><div class="h-full rounded-full <%= pct >= 90 ? 'bg-accent' : 'bg-primary' %>" style="width: <%= pct %>%"></div></div>
+                <div class="mt-1 h-3 overflow-hidden rounded-full border-2 border-border-strong bg-surface-muted"><div class="h-full rounded-full <%= pct >= 90 ? 'bg-terracotta-600' : 'bg-primary' %>" style="width: <%= pct %>%"></div></div>
               </td>
               <td><%= event.volunteerEnabled ? event.volunteersTaken + ' / ' + event.volunteerCapacity : '–' %></td>
               <td><a href="/admin/events/<%= event.id %>/attendance" class="btn-link whitespace-nowrap"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>Attendance</a></td>

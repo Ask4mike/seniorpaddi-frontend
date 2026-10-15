@@ -1,35 +1,44 @@
-<%# one event: picture first, details underneath (side by side on bigger screens).
+<%# one event: picture first, details underneath (photo left, details right on bigger screens).
+    Look: rounded picture with an arch top on computers (Lightyear, ref 5), floating category chip, big date and time
+    blocks (Aether date chips, ref 1), Skip (secondary) and Register (yolk, the one main action).
     needs: event, showButtons (true on the Find events stack), category (optional) %>
 <% const swipe = typeof showButtons !== 'undefined' && showButtons; %>
-<article class="<%= swipe ? 'swipe-card' : '' %> card overflow-hidden p-0 md:grid md:grid-cols-2"
+<article class="<%= swipe ? 'swipe-card' : '' %> card overflow-hidden p-3 md:grid md:grid-cols-2 md:gap-2 md:p-3"
   <% if (swipe) { %>data-swipe-card tabindex="0" aria-label="<%= event.tTitle || event.title %>" data-left="skip-<%= event.id %>" data-right="register-<%= event.id %>"<% } %>>
 
-  <div class="relative">
-    <%- include('eventImage', { event, imgClass: 'h-64 w-full object-cover select-none md:h-full md:min-h-96' }) %>
-    <span class="tag-mine absolute left-4 top-4 shadow">
-      <i class="fa-solid fa-tag" aria-hidden="true"></i><%= t('category.' + event.category) %>
+  <div class="relative overflow-hidden rounded-3xl md:arch">
+    <%- include('eventImage', { event, imgClass: 'h-60 w-full object-cover select-none sm:h-72 md:h-full md:min-h-96' }) %>
+    <span class="tag-mine tag-float absolute top-4 left-4">
+      <i class="fa-solid fa-tag text-primary" aria-hidden="true"></i><%= t('category.' + event.category) %>
     </span>
     <% if (event.hostedBySenior) { %>
-      <span class="absolute bottom-4 left-4 tag-leaf shadow"><i class="fa-solid fa-star" aria-hidden="true"></i><%= t('tag.hosted_by_senior') %></span>
+      <span class="tag-leaf absolute bottom-4 left-4 shadow-soft"><i class="fa-solid fa-star" aria-hidden="true"></i><%= t('tag.hosted_by_senior') %></span>
     <% } %>
     <% if (swipe) { %>
-      <span class="swipe-badge left-4 rounded-2xl border-4 border-primary bg-surface px-4 py-1 text-xl font-bold text-primary" data-badge="left" aria-hidden="true"><%= t('stack.skip') %></span>
-      <span class="swipe-badge right-4 rounded-2xl border-4 border-success bg-surface px-4 py-1 text-xl font-bold text-success" data-badge="right" aria-hidden="true"><%= t('stack.register') %></span>
+      <span class="swipe-badge left-4 rounded-full border-4 border-primary bg-surface px-5 py-1 text-xl font-bold text-primary" data-badge="left" aria-hidden="true"><%= t('stack.skip') %></span>
+      <span class="swipe-badge right-4 rounded-full border-4 border-success bg-surface px-5 py-1 text-xl font-bold text-success" data-badge="right" aria-hidden="true"><%= t('stack.register') %></span>
     <% } %>
   </div>
 
-  <div class="flex min-w-0 flex-col p-5 md:p-8">
-    <h2 class="mb-4"><%= event.tTitle || event.title %></h2>
+  <div class="flex min-w-0 flex-col px-2 pt-5 pb-2 md:px-6 md:pt-6">
+    <h2 class="mb-4 text-3xl md:text-4xl"><%= event.tTitle || event.title %></h2>
 
-    <ul class="mb-5 space-y-3">
-      <li class="flex items-center gap-3"><span class="icon-tile"><i class="fa-solid fa-calendar-day" aria-hidden="true"></i></span><span class="min-w-0 font-bold"><%= formatDate(event.startsAt) %></span></li>
-      <li class="flex items-center gap-3"><span class="icon-tile"><i class="fa-regular fa-clock" aria-hidden="true"></i></span><span class="min-w-0"><%= formatTime(event.startsAt) %> – <%= formatTime(event.endsAt) %></span></li>
-      <li class="flex items-start gap-3"><span class="icon-tile"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
-        <span class="min-w-0 break-words"><%= event.locationText %>
-          <% if (event.locationMapsUrl) { %><br><a href="<%= event.locationMapsUrl %>" rel="noopener" target="_blank" class="inline-flex min-h-12 items-center text-base"><%= t('event.open_map') %></a><% } %>
-        </span>
-      </li>
-    </ul>
+    <%# when: two big blocks, date then time %>
+    <div class="mb-4 flex flex-wrap gap-3">
+      <span class="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-primary px-4 py-2 text-lg font-bold text-white">
+        <i class="fa-solid fa-calendar-day text-yolk-400" aria-hidden="true"></i><span class="min-w-0"><%= formatDate(event.startsAt) %></span>
+      </span>
+      <span class="time-chip min-h-14">
+        <i class="fa-regular fa-clock text-primary" aria-hidden="true"></i><span class="min-w-0"><%= formatTime(event.startsAt) %> – <%= formatTime(event.endsAt) %></span>
+      </span>
+    </div>
+
+    <p class="mb-5 flex items-start gap-3">
+      <span class="icon-tile h-10 w-10 text-lg"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+      <span class="min-w-0 pt-1 break-words"><span class="font-semibold"><%= event.locationText %></span>
+        <% if (event.locationMapsUrl) { %><br><a href="<%= event.locationMapsUrl %>" rel="noopener" target="_blank" class="inline-flex min-h-12 items-center text-base"><%= t('event.open_map') %></a><% } %>
+      </span>
+    </p>
 
     <h3 class="mb-1 text-lg"><%= t('stack.about') %></h3>
     <p class="mb-4 whitespace-pre-line"><%= event.tDescription || event.description %></p>
@@ -43,17 +52,17 @@
         <form id="skip-<%= event.id %>" action="/events/<%= event.id %>/skip" method="post">
           <input type="hidden" name="category" value="<%= typeof category !== 'undefined' ? category : '' %>">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <button class="btn-plain btn-block"><i class="fa-solid fa-xmark" aria-hidden="true"></i><%= t('stack.skip') %></button>
+          <button class="btn-plain btn-block btn-lg"><i class="fa-solid fa-xmark" aria-hidden="true"></i><%= t('stack.skip') %></button>
         </form>
         <% if (currentUser) { %>
           <form id="register-<%= event.id %>" action="/events/<%= event.id %>/register" method="post">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="btn btn-block"><i class="fa-solid fa-check" aria-hidden="true"></i><%= t('stack.register') %></button>
+            <button class="btn-accent btn-block btn-lg"><span class="btn-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span><%= t('stack.register') %></button>
           </form>
         <% } else { %>
           <%# not logged in: the sign-up pop-up opens for this event %>
           <div>
-            <a id="register-<%= event.id %>" href="/events?login=<%= event.id %>#login" class="btn btn-block"><i class="fa-solid fa-check" aria-hidden="true"></i><%= t('stack.register') %></a>
+            <a id="register-<%= event.id %>" href="/events?login=<%= event.id %>#login" class="btn-accent btn-block btn-lg"><span class="btn-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span><%= t('stack.register') %></a>
           </div>
         <% } %>
       </div>

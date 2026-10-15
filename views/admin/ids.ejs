@@ -4,14 +4,21 @@
 <p class="measure mb-6">Check that the name matches and the person looks 60 or older. Rejecting never affects their events.</p>
 
 <% if (pending.length === 0) { %>
-  <p class="panel">No IDs waiting.</p>
+  <p class="empty-state"><i class="fa-solid fa-circle-check mr-2 text-success" aria-hidden="true"></i>No IDs waiting.</p>
 <% } %>
 
-<ul class="space-y-6">
+<%# queue list (Halden decision queue, ref 3, in the light theme): one row per person, status chip, actions %>
+<ul class="space-y-4">
   <% pending.forEach(function (s) { %>
     <li class="card">
-      <h2 class="mb-1 text-xl"><%= s.fullName %></h2>
-      <p class="mb-3"><%= s.phone %>. Sent <%= formatDate(s.updatedAt) %>.</p>
+      <div class="mb-3 flex flex-wrap items-center gap-4">
+        <span class="avatar h-12 w-12 text-xl" aria-hidden="true"><%= s.fullName.charAt(0) %></span>
+        <div class="min-w-0 flex-1">
+          <h2 class="text-xl"><%= s.fullName %></h2>
+          <p class="text-muted"><%= s.phone %>. Sent <%= formatDate(s.updatedAt) %>.</p>
+        </div>
+        <span class="chip-status chip-pending"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>ID pending</span>
+      </div>
 
       <%# no auto-loading: the link makes a 5-minute signed URL and is logged %>
       <a href="/admin/ids/<%= s.id %>/view" target="_blank" rel="noopener" class="btn-plain mb-4"><i class="fa-solid fa-id-card" aria-hidden="true"></i>View ID</a>

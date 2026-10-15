@@ -4,13 +4,16 @@
 
 <h2 class="mb-3">Waiting for review</h2>
 <% if (pending.length === 0) { %>
-  <p class="panel mb-10">No open reports.</p>
+  <p class="empty-state mb-10"><i class="fa-solid fa-circle-check mr-2 text-success" aria-hidden="true"></i>No open reports.</p>
 <% } else { %>
   <ul class="mb-10 space-y-3">
     <% pending.forEach(function (r) { %>
-      <li class="border-b border-border-strong pb-3">
-        <a href="/admin/reports/<%= r.id %>" class="inline-flex min-h-12 items-center"><span><strong><%= r.reporter ? r.reporter.fullName : '(deleted)' %></strong> reported <strong><%= r.reported ? r.reported.fullName : '(deleted)' %></strong></span></a><br>
-        <span class="text-base text-muted"><%= formatDate(r.createdAt) %></span>
+      <li class="queue-row">
+        <span class="chip-status chip-danger"><i class="fa-solid fa-flag" aria-hidden="true"></i>Reported</span>
+        <span class="min-w-0 flex-1">
+          <a href="/admin/reports/<%= r.id %>" class="inline-flex min-h-12 items-center"><span><strong><%= r.reporter ? r.reporter.fullName : '(deleted)' %></strong> reported <strong><%= r.reported ? r.reported.fullName : '(deleted)' %></strong></span></a><br>
+          <span class="text-base text-muted"><%= formatDate(r.createdAt) %></span>
+        </span>
       </li>
     <% }) %>
   </ul>

@@ -1,122 +1,124 @@
 <%- include('partials/header') %>
 
-<%# ================= HERO ================= %>
-<section>
-  <div class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:grid-cols-2 md:py-20">
-    <div class="min-w-0">
-      <span class="mb-5 inline-flex items-center gap-2 rounded-full bg-surface-muted px-4 py-2 text-base font-bold text-primary">
-        <i class="fa-solid fa-location-dot" aria-hidden="true"></i><%= t('home.eyebrow') %>
-      </span>
-      <h1 class="mb-5 text-4xl font-bold md:text-5xl">
-        <%= currentUser ? t('home.welcome_back', { name: currentUser.firstName() }) : t('home.hero_title') %>
-        <span class="block text-primary"><%= t('home.hero_highlight') %></span>
-      </h1>
-      <p class="measure mb-8 text-lg text-muted"><%= t('home.tagline') %></p>
-      <div class="flex flex-col gap-3 sm:flex-row">
-        <a href="/events" class="btn"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><%= t('nav.find_events') %></a>
-        <a href="/find-seniors" class="btn-plain"><i class="fa-solid fa-user-group" aria-hidden="true"></i><%= t('nav.find_seniors') %></a>
+<%# ================= HERO: greeting on a mint-to-lavender wash, arch-masked photo (Lightyear, ref 5; Eldora greeting, ref 8) ================= %>
+<section class="mx-auto max-w-6xl px-3 pt-2 md:px-4">
+  <div class="hero-wash relative overflow-hidden rounded-4xl px-5 py-6 md:px-12 md:py-14">
+    <%# faint Ankara diamonds in one corner only, never behind words %>
+    <div class="pattern-ankara pointer-events-none absolute -top-6 -right-6 h-40 w-40 rounded-full opacity-80 md:h-64 md:w-64" aria-hidden="true"></div>
+    <div class="relative grid items-center gap-8 md:grid-cols-5">
+      <div class="min-w-0 md:col-span-3">
+        <span class="mb-4 inline-flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-base font-semibold text-primary shadow-soft md:mb-5">
+          <i class="fa-solid fa-location-dot" aria-hidden="true"></i><%= t('home.eyebrow') %>
+        </span>
+        <h1 class="mb-3 text-3xl md:mb-4 md:text-5xl">
+          <%= currentUser ? t('home.welcome_back', { name: currentUser.firstName() }) : t('home.hero_title') %>
+          <span class="block text-primary"><%= t('home.hero_highlight') %></span>
+        </h1>
+        <p class="measure text-lg text-muted md:mb-6"><%= t('home.tagline') %></p>
+        <ul class="hidden flex-wrap gap-2 text-base md:flex">
+          <li class="inline-flex items-center gap-2 rounded-full bg-surface/80 px-3 py-1"><i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i><%= t('home.trust_free') %></li>
+          <li class="inline-flex items-center gap-2 rounded-full bg-surface/80 px-3 py-1"><i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i><%= t('home.trust_language') %></li>
+          <li class="inline-flex items-center gap-2 rounded-full bg-surface/80 px-3 py-1"><i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i><%= t('home.trust_safe') %></li>
+        </ul>
       </div>
-      <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-base text-muted">
-        <li><i class="fa-solid fa-circle-check mr-2 text-success" aria-hidden="true"></i><%= t('home.trust_free') %></li>
-        <li><i class="fa-solid fa-circle-check mr-2 text-success" aria-hidden="true"></i><%= t('home.trust_language') %></li>
-        <li><i class="fa-solid fa-circle-check mr-2 text-success" aria-hidden="true"></i><%= t('home.trust_safe') %></li>
-      </ul>
-    </div>
-
-    <div>
-      <img src="/images/hero.png" alt="<%= t('home.hero_alt') %>" class="mx-auto w-full max-w-md drop-shadow-xl" width="900" height="1000">
+      <div class="hidden md:col-span-2 md:block">
+        <div class="arch mx-auto w-full max-w-xs border-8 border-surface shadow-lift">
+          <%# lazy: phones never show this photo, so they never download it; on computers it is on screen and loads at once %>
+          <img src="/images/events/fitness.jpg" alt="" class="aspect-4/5 w-full object-cover" width="720" height="540" loading="lazy" decoding="async">
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<%# ================= THREE THINGS YOU CAN DO ================= %>
-<section class="mx-auto max-w-6xl px-4 py-12" aria-labelledby="what-title">
-  <div class="mb-8 max-w-xl">
-    <p class="kicker"><%= t('home.what_kicker') %></p>
-    <h2 id="what-title" class="text-2xl md:text-3xl"><%= t('home.what_title') %></h2>
-  </div>
-  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+<%# ================= THE THREE CHOICES (Eldora tiles, ref 8). Call uses the yolk accent ================= %>
+<section class="mx-auto max-w-6xl px-4 pt-6 pb-6 md:pt-10" aria-labelledby="what-title">
+  <h2 id="what-title" class="mb-1"><%= t('home.what_kicker') %></h2>
+  <p class="mb-5 text-lg text-muted"><%= t('home.what_title') %></p>
+  <ul class="grid gap-4 md:grid-cols-3 md:gap-6">
     <% [
-         { href: '/events', icon: 'fa-calendar-days', title: t('nav.find_events'), text: t('home.card_events'), style: 'bg-primary text-white hover:bg-primary-dark', iconBg: 'bg-primary-dark text-white' },
-         { href: '/find-seniors', icon: 'fa-user-group', title: t('nav.find_seniors'), text: t('home.card_seniors'), style: 'bg-surface border-2 border-border-strong text-body hover:bg-surface-muted', iconBg: 'bg-surface-muted text-primary' },
-         { href: '/call', icon: 'fa-phone-volume', title: t('call.title'), text: t('home.card_call'), style: 'bg-accent text-white hover:bg-accent-dark', iconBg: 'bg-accent-dark text-white' }
-       ].forEach(function (card, i) { %>
-      <a href="<%= card.href %>"
-         class="flex flex-col gap-4 rounded-2xl p-7 no-underline transition-colors <%= card.style %>">
-        <span class="flex h-14 w-14 items-center justify-center rounded-xl text-2xl <%= card.iconBg %>"><i class="fa-solid <%= card.icon %>" aria-hidden="true"></i></span>
-        <span class="text-xl font-bold"><%= card.title %></span>
-        <span class="text-lg <%= i === 0 ? 'text-on-primary-muted' : '' %>"><%= card.text %></span>
-        <span class="mt-auto inline-flex items-center gap-2 text-lg font-bold underline decoration-2 underline-offset-4"><%= t('home.open') %><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
-      </a>
-    <% }) %>
-  </div>
-</section>
-
-<%# ================= COMING UP ================= %>
-<% if (upcoming.length > 0) { %>
-<section class="bg-surface-muted py-14" aria-labelledby="upcoming-title">
-  <div class="mx-auto max-w-6xl px-4">
-    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <p class="kicker"><%= t('home.upcoming_kicker') %></p>
-        <h2 id="upcoming-title" class="text-2xl md:text-3xl"><%= t('home.upcoming_title') %></h2>
-      </div>
-      <a href="/events" class="btn-plain"><%= t('home.see_all') %><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-    </div>
-    <div class="grid gap-6 lg:grid-cols-2">
-      <% upcoming.forEach(function (event, i) { %>
-        <a href="/events/<%= event.id %>"
-           class="flex flex-col overflow-hidden rounded-2xl border-2 border-gray-200 bg-surface text-body no-underline shadow-sm transition-colors hover:bg-surface-subtle sm:flex-row">
-          <%- include('partials/eventImage', { event, imgClass: 'h-40 w-full shrink-0 object-cover sm:h-auto sm:w-44' }) %>
-          <span class="flex min-w-0 flex-col justify-center gap-2 break-words p-5">
-            <span class="tag-mine self-start"><i class="fa-solid fa-tag" aria-hidden="true"></i><%= t('category.' + event.category) %></span>
-            <span class="text-xl font-bold"><%= event.tTitle || event.title %></span>
-            <span class="text-base text-muted"><i class="fa-regular fa-calendar mr-2" aria-hidden="true"></i><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %></span>
-            <span class="text-base text-muted"><i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i><%= event.locationText %></span>
+         { href: '/events', art: 'elders-exercise', title: t('nav.find_events'), text: t('home.card_events'), accent: false },
+         { href: '/find-seniors', art: 'elders-chat', title: t('nav.find_seniors'), text: t('home.card_seniors'), accent: false },
+         { href: '/call', art: 'phone-call', title: t('call.title'), text: t('home.card_call'), accent: true }
+       ].forEach(function (card) { %>
+      <li>
+        <a href="<%= card.href %>" class="tile h-full <%= card.accent ? 'tile-accent' : '' %>">
+          <span class="tile-art"><img src="/images/illustrations/<%= card.art %>.svg" alt="" class="h-full w-full" width="112" height="112"></span>
+          <span class="flex min-w-0 flex-1 flex-col gap-1">
+            <span class="text-2xl font-bold tracking-tight"><%= card.title %></span>
+            <span class="text-base <%= card.accent ? 'text-charcoal' : 'text-muted' %>"><%= card.text %></span>
+          </span>
+          <span class="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full <%= card.accent ? 'bg-charcoal text-yolk-400' : 'bg-primary text-white' %> sm:flex md:mt-auto md:self-end" aria-hidden="true">
+            <i class="fa-solid fa-arrow-right"></i>
           </span>
         </a>
-      <% }) %>
+      </li>
+    <% }) %>
+  </ul>
+</section>
+
+<%# ================= COMING UP (existing data only) ================= %>
+<% if (upcoming.length > 0) { %>
+<section class="mx-auto max-w-6xl px-4 py-8" aria-labelledby="upcoming-title">
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <p class="kicker"><%= t('home.upcoming_kicker') %></p>
+      <h2 id="upcoming-title"><%= t('home.upcoming_title') %></h2>
     </div>
+    <a href="/events" class="btn-ghost w-auto"><%= t('home.see_all') %><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+  </div>
+  <div class="grid gap-4 lg:grid-cols-2">
+    <% upcoming.forEach(function (event, i) { %>
+      <a href="/events/<%= event.id %>"
+         class="flex gap-4 rounded-3xl bg-surface p-3 text-body no-underline shadow-soft transition-colors hover:bg-lavender">
+        <%- include('partials/eventImage', { event, imgClass: 'h-28 w-24 shrink-0 rounded-2xl object-cover sm:h-32 sm:w-32' }) %>
+        <span class="flex min-w-0 flex-col justify-center gap-1 py-1 break-words">
+          <span class="tag-mine self-start"><i class="fa-solid fa-tag" aria-hidden="true"></i><%= t('category.' + event.category) %></span>
+          <span class="text-xl font-bold"><%= event.tTitle || event.title %></span>
+          <span class="text-base text-muted"><i class="fa-regular fa-calendar mr-2" aria-hidden="true"></i><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %></span>
+          <span class="text-base text-muted"><i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i><%= event.locationText %></span>
+        </span>
+      </a>
+    <% }) %>
   </div>
 </section>
 <% } %>
 
 <%# ================= HOW IT WORKS ================= %>
-<section class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2" aria-labelledby="how-title">
-  <div class="order-last grid grid-cols-2 gap-4 md:order-first" aria-hidden="true">
-    <img src="/images/events/fitness.jpg" alt="" class="rounded-2xl" width="800" height="600">
-    <img src="/images/events/skills.jpg" alt="" class="mt-10 rounded-2xl" width="800" height="600">
-    <img src="/images/events/social.jpg" alt="" class="-mt-6 rounded-2xl" width="800" height="600">
-    <img src="/images/events/faith.jpg" alt="" class="mt-4 rounded-2xl" width="800" height="600">
-  </div>
-  <div class="min-w-0">
-    <p class="kicker"><%= t('home.how_kicker') %></p>
-    <h2 id="how-title" class="mb-6 text-2xl md:text-3xl"><%= t('home.how_title') %></h2>
-    <ol class="space-y-5">
-      <% [['fa-user-plus', t('home.step1')], ['fa-hand-pointer', t('home.step2')], ['fa-message', t('home.step3')]].forEach(function (step, i) { %>
-        <li class="flex gap-4">
-          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-lg text-white"><i class="fa-solid <%= step[0] %>" aria-hidden="true"></i></span>
-          <span class="min-w-0 pt-2 text-lg"><span class="mr-1 font-bold text-primary"><%= i + 1 %>.</span><%= step[1] %></span>
-        </li>
-      <% }) %>
-    </ol>
+<section class="mx-auto max-w-6xl px-4 py-10" aria-labelledby="how-title">
+  <div class="grid items-center gap-8 rounded-4xl bg-surface p-6 shadow-soft md:grid-cols-5 md:p-10">
+    <div class="min-w-0 md:col-span-3">
+      <p class="kicker"><%= t('home.how_kicker') %></p>
+      <h2 id="how-title" class="mb-6"><%= t('home.how_title') %></h2>
+      <ol class="space-y-4">
+        <% [['fa-user-plus', t('home.step1')], ['fa-hand-pointer', t('home.step2')], ['fa-message', t('home.step3')]].forEach(function (step, i) { %>
+          <li class="flex gap-4">
+            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-white" aria-hidden="true"><%= i + 1 %></span>
+            <span class="min-w-0 pt-2 text-lg"><i class="fa-solid <%= step[0] %> mr-2 text-primary" aria-hidden="true"></i><%= step[1] %></span>
+          </li>
+        <% }) %>
+      </ol>
+    </div>
+    <div class="hidden md:col-span-2 md:block" aria-hidden="true">
+      <div class="arch mx-auto w-60 bg-lavender pt-8"><img src="/images/illustrations/calendar.svg" alt="" class="mx-auto block w-52" width="208" height="208" loading="lazy"></div>
+    </div>
   </div>
 </section>
 
-<%# ================= VOLUNTEER + CALL ================= %>
+<%# ================= VOLUNTEER (Fortune peach warmth, ref 6) + FAMILY ================= %>
 <section class="mx-auto max-w-6xl px-4 pb-6">
-  <div class="grid gap-6 md:grid-cols-2">
-    <div class="rounded-2xl bg-success p-8 text-white">
-      <span class="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-success-dark text-2xl text-white"><i class="fa-solid fa-hands-holding-circle" aria-hidden="true"></i></span>
+  <div class="grid gap-4 md:grid-cols-2 md:gap-6">
+    <div class="hero-warm flex flex-col rounded-4xl p-6 md:p-8">
+      <img src="/images/illustrations/volunteer.svg" alt="" class="mb-4 h-20 w-20" width="80" height="80" loading="lazy">
       <h2 class="mb-3"><%= t('home.volunteer_title') %></h2>
       <p class="measure mb-6 text-lg"><%= t('home.volunteer_text') %></p>
-      <a href="/events" class="btn-plain focus-visible:outline-focus-on-dark"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i><%= t('nav.find_events') %></a>
+      <a href="/events" class="btn-volunteer mt-auto self-start"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i><%= t('nav.find_events') %></a>
     </div>
-    <div class="rounded-2xl bg-accent p-8 text-white">
-      <span class="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent-dark text-2xl text-white"><i class="fa-solid fa-phone-volume" aria-hidden="true"></i></span>
+    <div class="flex flex-col rounded-4xl bg-lavender p-6 md:p-8">
+      <img src="/images/illustrations/phone-call.svg" alt="" class="mb-4 h-20 w-20" width="80" height="80" loading="lazy">
       <h2 class="mb-3"><%= t('home.family_title') %></h2>
       <p class="measure mb-6 text-lg"><%= t('home.family_text') %></p>
-      <a href="/call" class="btn-plain focus-visible:outline-focus-on-dark"><i class="fa-solid fa-phone" aria-hidden="true"></i><%= t('call.title') %></a>
+      <a href="/call" class="btn-plain mt-auto self-start"><i class="fa-solid fa-phone" aria-hidden="true"></i><%= t('call.title') %></a>
     </div>
   </div>
 </section>

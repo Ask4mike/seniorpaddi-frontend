@@ -15,38 +15,39 @@
 <h1 class="mb-6"><%= t('account.title') %></h1>
 
 <div class="grid gap-6 lg:grid-cols-3">
-  <%# who you are %>
-  <section class="card self-start text-center lg:col-span-1">
+  <%# who you are: profile header card on a soft wash %>
+  <section class="hero-wash self-start rounded-4xl p-6 text-center shadow-soft lg:col-span-1">
     <% if (u.profilePictureUrl) { %>
-      <img src="<%= u.profilePictureUrl %>" alt="" class="mx-auto mb-4 h-28 w-28 rounded-full object-cover ring-4 ring-surface-muted" width="112" height="112">
+      <img src="<%= u.profilePictureUrl %>" alt="" class="mx-auto mb-4 h-32 w-32 rounded-full object-cover ring-8 ring-surface" width="128" height="128">
     <% } else { %>
-      <div class="mx-auto mb-4 flex h-28 w-28 items-center justify-center rounded-full bg-primary text-4xl font-bold text-white ring-4 ring-surface-muted" aria-hidden="true"><%= u.fullName.charAt(0) %></div>
+      <div class="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-primary text-5xl font-bold text-white ring-8 ring-surface" aria-hidden="true"><%= u.fullName.charAt(0) %></div>
     <% } %>
     <h2 class="mb-1"><%= u.fullName %></h2>
-    <p class="text-muted"><%= u.localPhone() %></p>
-    <% if (u.area) { %><p class="text-muted"><i class="fa-solid fa-location-dot mr-1" aria-hidden="true"></i><%= u.area %></p><% } %>
-    <div class="mt-4 flex flex-wrap justify-center gap-3">
-      <span class="<%= u.phoneVerifiedAt ? 'tag-leaf' : 'tag-amber' %>"><i class="fa-solid <%= u.phoneVerifiedAt ? 'fa-circle-check' : 'fa-triangle-exclamation' %>" aria-hidden="true"></i><%= u.phoneVerifiedAt ? t('verify.phone_ok') : t('verify.phone_not') %></span>
-      <% if (u.verificationStatus === 'approved') { %><span class="tag-leaf"><i class="fa-solid fa-id-card" aria-hidden="true"></i><%= t('find.verified') %></span><% } %>
+    <p class="text-lg text-muted"><i class="fa-solid fa-phone mr-2" aria-hidden="true"></i><%= u.localPhone() %></p>
+    <% if (u.area) { %><p class="text-muted"><i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i><%= u.area %></p><% } %>
+    <div class="mt-4 flex flex-wrap justify-center gap-2">
+      <span class="<%= u.phoneVerifiedAt ? 'chip-status chip-verified' : 'chip-status chip-pending' %>"><i class="fa-solid <%= u.phoneVerifiedAt ? 'fa-circle-check' : 'fa-triangle-exclamation' %>" aria-hidden="true"></i><%= u.phoneVerifiedAt ? t('verify.phone_ok') : t('verify.phone_not') %></span>
+      <% if (u.verificationStatus === 'approved') { %><span class="chip-status chip-verified"><i class="fa-solid fa-id-card" aria-hidden="true"></i><%= t('find.verified') %></span><% } %>
     </div>
     <a href="/settings" class="btn-plain btn-block mt-6"><i class="fa-solid fa-camera" aria-hidden="true"></i><%= t('account.edit_profile') %></a>
   </section>
 
-  <%# everything else %>
+  <%# everything else: grouped rows in one rounded card (Finvera cards, ref 2) %>
   <section class="lg:col-span-2">
-    <ul class="grid gap-3 sm:grid-cols-2">
+    <ul class="divide-y divide-hairline overflow-hidden rounded-4xl bg-surface shadow-soft">
       <% links.forEach(function (l) { %>
         <li>
-          <a href="<%= l[0] %>" class="card flex h-full items-start gap-4 text-body no-underline transition-colors hover:bg-surface-muted">
+          <a href="<%= l[0] %>" class="flex min-h-12 items-center gap-4 px-5 py-4 text-body no-underline transition-colors hover:bg-lavender active:bg-indigo-50">
             <span class="icon-tile"><i class="fa-solid <%= l[1] %>" aria-hidden="true"></i></span>
-            <span class="min-w-0"><span class="block text-lg font-bold"><%= l[2] %></span><span class="block text-base text-muted"><%= l[3] %></span></span>
+            <span class="min-w-0 flex-1"><span class="block text-lg font-semibold"><%= l[2] %></span><span class="block text-base text-muted"><%= l[3] %></span></span>
+            <i class="fa-solid fa-chevron-right shrink-0 text-muted" aria-hidden="true"></i>
           </a>
         </li>
       <% }) %>
     </ul>
     <form action="/logout" method="post" class="mt-5">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button class="btn-link-danger"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><%= t('nav.logout') %></button>
+      <button class="btn-danger btn-block"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><%= t('nav.logout') %></button>
     </form>
   </section>
 </div>

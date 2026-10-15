@@ -7,35 +7,38 @@
 
 <div class="dialog-backdrop" aria-hidden="true"></div>
 <div id="done" class="dialog" role="dialog" aria-modal="true" aria-labelledby="done-title" aria-describedby="done-desc" data-dialog>
-  <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-success text-white">
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>
+  <%# calm celebration (the "Successful" card, ref 11): a eucalyptus check, no confetti %>
+  <img src="/images/illustrations/success-check.svg" alt="" class="dialog-art" width="112" height="112">
+  <h1 id="done-title" tabindex="-1" class="mb-2 text-center text-3xl md:text-3xl"><%= t('registered.title') %></h1>
+  <div id="done-desc" class="mb-4 text-center">
+    <p class="text-lg font-bold"><%= event.tTitle || event.title %></p>
+    <p class="text-muted"><i class="fa-regular fa-calendar mr-2" aria-hidden="true"></i><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %></p>
   </div>
-  <h1 id="done-title" tabindex="-1" class="mb-2 text-2xl md:text-2xl"><%= t('registered.title') %></h1>
-  <div id="done-desc">
-    <p class="font-bold"><%= event.tTitle || event.title %></p>
-    <p class="mb-3"><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %></p>
-  </div>
-  <div class="mb-4 rounded-xl border-2 border-dashed border-primary bg-surface-muted px-4 py-3">
-    <p class="text-base text-muted"><%= t('ticket.label') %></p>
-    <p class="break-words text-3xl font-bold text-primary"><%= ticket %></p>
+  <div class="mb-4 rounded-3xl border-2 border-dashed border-primary bg-indigo-50 px-5 py-4 text-center">
+    <p class="text-base text-muted"><i class="fa-solid fa-ticket mr-2 text-primary" aria-hidden="true"></i><%= t('ticket.label') %></p>
+    <p class="text-3xl font-bold tracking-wide break-words text-primary-dark"><%= ticket %></p>
     <p class="text-base text-muted"><%= t('ticket.hint') %></p>
   </div>
-  <p class="mb-6"><%= currentUser.email ? t('registered.sent_both') : t('registered.sent_sms') %></p>
+  <p class="mb-6 text-center"><%= currentUser.email ? t('registered.sent_both') : t('registered.sent_sms') %></p>
 
   <% if (canVolunteer) { %>
-    <div class="border-t-2 border-border-strong pt-5">
-      <p class="mb-4 text-xl font-bold"><%= t('registered.volunteer_question') %></p>
+    <%# the volunteer offer: warm peach card (Fortune volunteering row, ref 6) %>
+    <div class="hero-warm rounded-3xl p-5">
+      <div class="mb-4 flex items-center gap-4">
+        <img src="/images/illustrations/volunteer.svg" alt="" class="h-16 w-16 shrink-0" width="64" height="64">
+        <p class="min-w-0 text-xl font-bold"><%= t('registered.volunteer_question') %></p>
+      </div>
       <form action="/events/<%= event.id %>/volunteer" method="post" class="mb-3">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="hidden" name="from" value="popup">
-        <button class="btn-volunteer btn-block"><%= t('registered.volunteer_yes') %></button>
+        <button class="btn-volunteer btn-block btn-lg"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i><%= t('registered.volunteer_yes') %></button>
       </form>
-      <a href="/events" class="btn-plain btn-block"><%= t('registered.volunteer_no') %></a>
+      <a href="/events" class="btn-plain btn-block btn-lg"><%= t('registered.volunteer_no') %></a>
     </div>
   <% } else { %>
-    <a href="/events" class="btn btn-block"><%= t('registered.continue') %></a>
+    <a href="/events" class="btn btn-block btn-lg"><%= t('registered.continue') %></a>
   <% } %>
-  <p class="mt-4"><a href="/account" class="inline-flex min-h-12 items-center"><%= t('registered.see_mine') %></a></p>
+  <p class="mt-4 text-center"><a href="/account" class="inline-flex min-h-12 items-center"><%= t('registered.see_mine') %></a></p>
 </div>
 
 <%- include('../partials/footer') %>

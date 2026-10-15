@@ -12,54 +12,59 @@
   <% if (next) { %>
     <%# one senior at a time: swipe right to message, left to skip %>
     <div class="swipe-stack">
-      <div class="swipe-peek card p-0 shadow-lg" aria-hidden="true"></div>
-      <article class="swipe-card card overflow-hidden p-0 shadow-lg"
+      <div class="swipe-peek card p-0" aria-hidden="true"></div>
+      <%# profile: round photo on a soft wash (Fortune circular photo, ref 6), bio under the photo %>
+      <article class="swipe-card card overflow-hidden p-0"
                data-swipe-card tabindex="0" aria-label="<%= next.firstName() %>" data-left="skip-senior" data-right="message-senior">
-        <div class="relative">
+        <div class="hero-wash relative px-6 pt-6 pb-5 text-center">
           <% if (next.profilePictureUrl) { %>
-            <img src="<%= next.profilePictureUrl %>" alt="<%= next.firstName() %>" draggable="false" class="aspect-4/3 w-full select-none object-cover" width="400" height="340">
+            <img src="<%= next.profilePictureUrl %>" alt="<%= next.firstName() %>" draggable="false" class="mx-auto h-36 w-36 rounded-full object-cover ring-8 ring-surface select-none sm:h-44 sm:w-44" width="176" height="176">
           <% } else { %>
-            <div class="flex aspect-4/3 w-full items-center justify-center bg-surface-muted" aria-hidden="true"><span class="flex h-32 w-32 items-center justify-center rounded-full bg-primary text-4xl font-bold text-white"><%= next.fullName.charAt(0) %></span></div>
+            <div class="mx-auto flex h-36 w-36 items-center justify-center rounded-full bg-primary text-6xl font-bold text-white ring-8 ring-surface sm:h-44 sm:w-44" aria-hidden="true"><%= next.fullName.charAt(0) %></div>
           <% } %>
-          <span class="absolute left-4 top-4 tag-leaf shadow"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><%= t('find.verified') %></span>
-          <span class="swipe-badge left-4 rounded-2xl border-4 border-primary bg-surface px-4 py-1 text-xl font-bold text-primary" data-badge="left" aria-hidden="true"><%= t('find.skip') %></span>
-          <span class="swipe-badge right-4 rounded-2xl border-4 border-success bg-success-bg px-4 py-1 text-xl font-bold text-success" data-badge="right" aria-hidden="true"><%= t('find.message_short') %></span>
+          <span class="swipe-badge left-4 rounded-full border-4 border-primary bg-surface px-5 py-1 text-xl font-bold text-primary" data-badge="left" aria-hidden="true"><%= t('find.skip') %></span>
+          <span class="swipe-badge right-4 rounded-full border-4 border-success bg-success-bg px-5 py-1 text-xl font-bold text-success" data-badge="right" aria-hidden="true"><%= t('find.message_short') %></span>
         </div>
-        <div class="p-6">
-          <h2 class="mb-1"><%= next.firstName() %></h2>
-          <% if (next.area) { %><p class="mb-3 text-muted"><i class="fa-solid fa-location-dot mr-1" aria-hidden="true"></i><%= next.area %></p><% } %>
-          <p class="mb-6 whitespace-pre-line text-base"><%= next.tBio || next.bio || t('find.no_bio') %></p>
+        <div class="px-6 pt-5 pb-6">
+          <div class="mb-1 flex flex-wrap items-center justify-center gap-3 text-center">
+            <h2 class="text-3xl"><%= next.firstName() %></h2>
+            <span class="chip-status chip-verified"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><%= t('find.verified') %></span>
+          </div>
+          <% if (next.area) { %><p class="mb-4 text-center text-muted"><i class="fa-solid fa-location-dot mr-1" aria-hidden="true"></i><%= next.area %></p><% } %>
+          <p class="mb-6 rounded-2xl bg-lavender p-4 text-lg whitespace-pre-line"><%= next.tBio || next.bio || t('find.no_bio') %></p>
 
           <div class="grid grid-cols-2 gap-3">
             <form id="skip-senior" action="/find-seniors/<%= next.id %>/skip" method="post">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-              <button class="btn-plain btn-block h-full"><i class="fa-solid fa-xmark" aria-hidden="true"></i><%= t('find.skip') %></button>
+              <button class="btn-plain btn-block btn-lg h-full"><i class="fa-solid fa-xmark" aria-hidden="true"></i><%= t('find.skip') %></button>
             </form>
-            <a id="message-senior" href="/messages/<%= next.id %>" class="btn btn-block h-full"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i><%= t('find.message_short') %></a>
+            <a id="message-senior" href="/messages/<%= next.id %>" class="btn btn-block btn-lg h-full"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i><%= t('find.message_short') %></a>
           </div>
         </div>
       </article>
     </div>
-    <p class="mt-5 text-center"><a href="/report/<%= next.id %>" class="btn-link"><i class="fa-solid fa-flag" aria-hidden="true"></i><%= t('find.report') %></a></p>
+    <p class="mt-5 text-center"><a href="/report/<%= next.id %>" class="btn-danger-soft w-auto py-2"><i class="fa-solid fa-flag" aria-hidden="true"></i><%= t('find.report') %></a></p>
   <% } else { %>
-    <div class="panel text-center">
-      <span class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface text-2xl text-primary"><i class="fa-solid fa-user-group" aria-hidden="true"></i></span>
-      <p class="mb-4"><%= t('find.seen_everyone') %></p>
+    <div class="empty-state">
+      <img src="/images/illustrations/elders-chat.svg" alt="" class="empty-art" width="144" height="144">
+      <p class="mb-5 text-lg"><%= t('find.seen_everyone') %></p>
       <a href="/messages" class="btn"><i class="fa-solid fa-comments" aria-hidden="true"></i><%= t('find.go_messages') %></a>
     </div>
   <% } %>
 
 <% } else { %>
   <%# locked until the ID is checked %>
+  <%# locked until the ID is checked: a reassuring shield, and a status chip with an icon and a word %>
   <div class="mb-6 text-center">
-    <span class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl text-3xl <%= status === 'pending' ? 'bg-warning-bg text-warning-ink' : 'bg-surface-muted text-primary' %>">
-      <i class="fa-solid <%= status === 'pending' ? 'fa-hourglass-half' : 'fa-lock' %>" aria-hidden="true"></i>
-    </span>
-    <h1 class="mb-2"><%= t('find.title') %></h1>
+    <img src="/images/illustrations/shield-id.svg" alt="" class="mx-auto mb-4 h-36 w-36" width="144" height="144">
+    <h1 class="mb-3"><%= t('find.title') %></h1>
+    <% if (status === 'pending') { %>
+      <span class="chip-status chip-pending"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i><%= t('find.pending') %></span>
+    <% } %>
   </div>
 
   <% if (status === 'guest') { %>
-    <p class="panel"><%= t('find.why_id') %></p>
+    <p class="panel text-lg"><%= t('find.why_id') %></p>
     <%- include('../partials/loginModal', {
           heading: t('modal.title_seniors'),
           mode: modalMode,
@@ -68,9 +73,8 @@
           closeHref: '/' }) %>
 
   <% } else if (status === 'pending') { %>
-    <div class="panel">
-      <p class="mb-2 text-xl font-bold"><%= t('find.pending') %></p>
-      <p class="mb-5"><%= t('find.pending_more') %></p>
+    <div class="empty-state text-left">
+      <p class="mb-5 text-lg"><%= t('find.pending_more') %></p>
       <a href="/events" class="btn"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i><%= t('nav.find_events') %></a>
     </div>
 
@@ -94,13 +98,13 @@
     <% } %>
 
     <form action="/find-seniors/id?_csrf=<%= encodeURIComponent(csrfToken) %>" method="post" enctype="multipart/form-data" data-upload>
-      <label for="idDocument" class="mb-4 block cursor-pointer rounded-2xl border-2 border-dashed border-primary bg-surface p-6 text-center transition-colors hover:bg-surface-muted">
+      <label for="idDocument" class="drop-zone">
         <i class="fa-solid fa-cloud-arrow-up mb-3 text-4xl text-primary" aria-hidden="true"></i>
         <span class="block text-lg font-bold text-primary"><%= t('find.id_label') %></span>
-        <span class="mt-1 block text-sm text-muted"><%= t('find.id_hint') %></span>
+        <span class="mt-1 block text-base text-muted"><%= t('find.id_hint') %></span>
         <input type="file" id="idDocument" name="idDocument" accept="image/jpeg,image/png,application/pdf" class="mx-auto mt-4 block max-w-full text-base file:mr-4 file:min-h-12 file:cursor-pointer file:rounded-xl file:border-0 file:bg-primary file:px-5 file:py-2 file:text-base file:font-bold file:text-white">
       </label>
-      <button class="btn btn-block" data-uploading-text="<%= t('upload.uploading') %>"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i><%= status === 'rejected' ? t('find.id_resend') : t('find.id_send') %></button>
+      <button class="btn-accent btn-block btn-lg" data-uploading-text="<%= t('upload.uploading') %>"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i><%= status === 'rejected' ? t('find.id_resend') : t('find.id_send') %></button>
     </form>
     <p class="mt-4 text-muted"><%= t('find.events_unaffected') %></p>
     <script src="/js/upload.js?v=ui1" defer></script>
