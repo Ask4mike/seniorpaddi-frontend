@@ -1,0 +1,16 @@
+<%#
+  TextInput: a field with a leading icon. Put it inside a .field, after its <label>.
+  needs: id, name. optional: type (text), value, autocomplete, icon (a Font Awesome name, e.g. 'fa-user'),
+         required, describedBy, invalid ('true' / 'false'), inputmode
+  describedBy and invalid are printed only when given, so a page keeps exactly the attributes it had before.
+%>
+<div class="input-wrap">
+  <% if (typeof icon !== 'undefined' && icon) { %><span class="input-icon" aria-hidden="true"><i class="fa-solid <%= icon %>"></i></span><% } %>
+  <input type="<%= typeof type !== 'undefined' && type ? type : 'text' %>" id="<%= id %>" name="<%= name %>"
+         <% if (typeof value !== 'undefined') { %>value="<%= value %>"<% } %>
+         <% if (typeof autocomplete !== 'undefined' && autocomplete) { %>autocomplete="<%= autocomplete %>"<% } %>
+         <% if (typeof inputmode !== 'undefined' && inputmode) { %>inputmode="<%= inputmode %>"<% } %>
+         <% if (typeof required !== 'undefined' && required) { %>required<% } %>
+         <% if (typeof describedBy !== 'undefined') { %>aria-describedby="<%= describedBy %>"<% } %>
+         <% if (typeof invalid !== 'undefined') { %>aria-invalid="<%= invalid %>"<% } %>>
+</div>

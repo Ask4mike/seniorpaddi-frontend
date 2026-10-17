@@ -17,10 +17,12 @@
   <%# Outfit: one self-hosted variable file (400 to 700) covers every weight, so it is the only font file to preload %>
   <link rel="preload" href="/fonts/outfit-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="stylesheet" href="/css/main.css?v=ui3">
+  <link rel="stylesheet" href="/css/main.css?v=ui4">
   <script src="/js/phone-input.js?v=ui1" defer></script>
   <%# page-change progress bar; the page works the same without it %>
   <script src="/js/top-loader.js?v=ui1" defer></script>
+  <%# shared pieces: password eye buttons, busy buttons, confirm password, pop-ups, log-out confirmation %>
+  <script src="/js/ui.js?v=ui1" defer></script>
 </head>
 
 <% if (isAdmin) { %>
@@ -46,8 +48,8 @@
     <div class="topbar">
       <a href="/" class="brand" aria-label="SeniorPadi">
         <span class="brand-mark"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i></span>
-        <%# the wordmark is the least important item: it hides on tablet widths where the menu needs the room %>
-        <span class="brand-word md:max-lg:sr-only">SeniorPadi</span>
+        <%# the wordmark is the least important item: it is visually hidden from 768 to 1279px, where the menu needs the room %>
+        <span class="brand-word md:max-xl:sr-only">SeniorPadi</span>
       </a>
 
       <%# on computers the same five-item menu sits in the middle of this one line %>
@@ -58,7 +60,8 @@
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="hidden" name="back" value="<%= currentPath %>">
         <button name="lang" value="<%= otherLang %>" lang="<%= otherLang %>" class="lang-pill">
-          <i class="fa-solid fa-language header-icon max-[359px]:hidden md:max-lg:hidden" aria-hidden="true"></i>
+          <%# (the hide goes on a wrapper: Font Awesome's own display rule would beat it on the icon itself) %>
+          <span class="max-[359px]:hidden md:max-lg:hidden" aria-hidden="true"><i class="fa-solid fa-language header-icon"></i></span>
           <%= otherLang === 'yo' ? 'Yorùbá' : 'English' %>
         </button>
       </form>

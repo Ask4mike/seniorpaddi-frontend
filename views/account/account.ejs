@@ -45,7 +45,7 @@
         </li>
       <% }) %>
     </ul>
-    <form action="/logout" method="post" class="mt-5">
+    <form action="/logout" method="post" class="mt-5" data-confirm-logout>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button class="btn-danger btn-block"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><%= t('nav.logout') %></button>
     </form>

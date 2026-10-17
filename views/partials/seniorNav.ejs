@@ -22,7 +22,8 @@
             <span class="tab-icon"><i class="fa-solid <%= item.icon %>" aria-hidden="true"></i></span>
             <span class="tab-label"><%= item.short ? item.short : item.label %></span>
           <% } else { %>
-            <i class="fa-solid <%= item.icon %> header-icon" aria-hidden="true"></i>
+            <%# icons step aside between 768 and 1023px so the five words (and an unread count) fit on one line %>
+            <span class="md:max-lg:hidden" aria-hidden="true"><i class="fa-solid <%= item.icon %> header-icon"></i></span>
             <%# in the one-line header: the short word on tablets and small laptops, the full words from 1280px %>
             <span class="whitespace-nowrap <%= item.short ? 'xl:hidden' : '' %>"><%= item.short ? item.short : item.label %></span>
             <% if (item.short) { %><span class="hidden whitespace-nowrap xl:inline"><%= item.label %></span><% } %>

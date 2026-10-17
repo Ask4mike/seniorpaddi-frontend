@@ -17,7 +17,7 @@
 
   <% if (isSignup) { %>
     <p id="login-desc" class="mb-6 text-center text-muted"><%= t('modal.signup_note') %></p>
-    <form action="/signup" method="post" novalidate>
+    <form action="/signup" method="post" novalidate class="form-soft" data-busy-text="<%= t('auth.creating') %>">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <input type="hidden" name="registerEventId" value="<%= regId %>">
       <input type="hidden" name="next" value="<%= goNext %>">
@@ -35,7 +35,7 @@
       </div>
       <div class="field">
         <label for="modal-password"><%= t('signup.password') %></label>
-        <input type="password" id="modal-password" name="password" autocomplete="new-password" required aria-describedby="modal-password-hint">
+        <%- include('ui/passwordInput', { id: 'modal-password', name: 'password', autocomplete: 'new-password', required: true, describedBy: 'modal-password-hint' }) %>
         <span class="hint" id="modal-password-hint"><%= t('signup.password_hint') %></span>
       </div>
       <label class="check mb-6">
@@ -48,7 +48,7 @@
 
   <% } else { %>
     <p id="login-desc" class="mb-6 text-center text-muted"><%= t('modal.session_note') %></p>
-    <form action="/login" method="post">
+    <form action="/login" method="post" class="form-soft" data-busy-text="<%= t('auth.logging_in') %>">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <input type="hidden" name="registerEventId" value="<%= regId %>">
       <input type="hidden" name="next" value="<%= goNext %>">
@@ -58,7 +58,7 @@
       </div>
       <div class="field">
         <label for="modal-password"><%= t('signup.password') %></label>
-        <input type="password" id="modal-password" name="password" autocomplete="current-password" required>
+        <%- include('ui/passwordInput', { id: 'modal-password', name: 'password', autocomplete: 'current-password', required: true }) %>
       </div>
       <button class="btn btn-block btn-lg"><%= regId ? t('modal.login_and_register') : t('login.submit') %></button>
     </form>

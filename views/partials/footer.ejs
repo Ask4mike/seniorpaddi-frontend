@@ -20,6 +20,7 @@
     </div>
   </footer>
 <% } %>
+<% if (currentUser) { %><%- include('confirmLogoutModal') %><% } %>
   <script src="/js/swipe.js?v=ui1" defer></script>
   <script src="/js/dialog.js?v=ui1" defer></script>
 </body>

@@ -203,12 +203,12 @@ Skills: the same two (`ecc:frontend-design-direction` for deciding where motion 
 
 **Shrink order, CSS only (no measuring script):**
 1. Gaps and padding step down: `gap-1 sm:gap-2 lg:gap-4`, bar padding `pl-2 sm:pl-3 lg:pl-4`, menu items `px-2.5 lg:px-3.5 xl:px-4`.
-2. The logo mark is 36px below sm, 40px from sm. The wordmark is visually hidden from md to lg (`md:max-lg:sr-only`), where the menu needs the room. The link keeps `aria-label="SeniorPadi"`.
+2. The logo mark is 36px below sm, 40px from sm. The wordmark is visually hidden from 768 to 1279px (`md:max-xl:sr-only`, corrected in section 13), where the menu needs the room. The link keeps `aria-label="SeniorPadi"`.
 3. Fluid text, defined once as utilities:
    - `header-text` = `clamp(0.778rem, 5vw - 0.11rem, 1rem)`: **14px at 320, 16px at 360, 18px from 400** (language pill).
    - `.brand-word` uses the same curve with a 1.25rem cap (22.5px).
    - `nav-text` = `clamp(0.889rem, 0.35rem + 1.15vw, 1rem)`: **16px at 768, 18px by 1024** (menu items).
-4. Fluid icons: `header-icon` = `clamp(0.889rem, 0.5rem + 1vw, 1.125rem)`. The language icon hides below 360px and from md to lg.
+4. Fluid icons: `header-icon` = `clamp(0.889rem, 0.5rem + 1vw, 1.125rem)`. The language icon and the menu icons hide below 360px and from 768 to 1023px (on a wrapper span: see section 13).
 
 Menu labels use the existing short words (Events, Seniors / Ètò, Àwọn àgbà) up to 1280px and the full words (Find events, Find seniors / Wá ètò, Wá àwọn àgbà) from 1280px. Both are existing i18n keys, and the hidden one is `display:none`, so the accessible name always matches what is shown.
 
@@ -300,3 +300,94 @@ Status chips, date and time blocks and plain cards do **not** lift on hover. The
 **Not checked by eye:** the browser pane stopped painting during this pass, so animations were verified by their computed timings and end states rather than watched. Please look at them once on a phone (Home tiles, Registered pop-up, the loader on a slow connection) before shipping.
 
 **Files changed in this pass:** `views/partials/header.ejs`, `views/partials/seniorNav.ejs`, `views/events/registered.ejs` (inline success mark, `enter-up` classes), `views/home.ejs` (`tile-list`, `lift` classes), `views/social/thread.ejs` (`msg-past` class on server-rendered bubbles), `views/social/find.ejs` (profile photo capped at screen width), `src/styles/input.css`, rebuilt `public/css/main.css` (`?v=ui3`), new `public/js/top-loader.js`, and this file. **No existing file in `public/js` was modified**, and no route, controller, service, model, migration, socket, locale or test file was touched.
+
+## 13. Log in, Create account, Verify and Log out (third pass, 17 to 18 Oct 2026)
+
+### 13.1 References and what each one gave
+
+The images folder now holds 10 screenshots: three of the current SeniorPadi screens (Home "Events near you", Log in, Create account in two parts) and six login/register designs from other products. Nothing was copied: no logo, wording, picture or claim.
+
+**Weak today:** heavy dark field outlines and no icons; no way to see the password and no confirm box; a big empty gap on the friendly panel between the checklist and the small picture; flat hierarchy (title, fields and "Forgot your password?" all weigh the same); on phones the friendly panel vanished, leaving a bare form.
+
+| Weakness | Taken from | What we did |
+|---|---|---|
+| Heavy outlines, no icons, no eye | AI inbox ("Welcome Back") | Soft tinted fields (`--color-input-fill` #F8F7FC, 1.5px `--color-input-border` #7C7796 at 4:1), a leading icon, an eye button inside the field |
+| Hints far from fields, unclear labels | Store app (Attiro) | Label above, lock icon on password fields, helper text right under its field |
+| Dead space on the friendly panel | Car trading (Adoma) and AI inbox | Bigger arch illustration filling the panel, with a trust card on it: initials avatars + "A safe, friendly community / Our staff check every member's ID" (no invented numbers) |
+| Flat hierarchy | Children's stories | One strong full-width purple button; "Forgot your password?" on the Password label line |
+| Weak focus | Workforce app | 4px soft indigo ring plus the 3px focus outline on the active field |
+| Bare phone layout | AI chat (Solara) | One centred card with the logo mark on top and the headline under the title |
+
+Rejected: small light-grey text, "Sign in with Google/Apple" buttons (not offered here), user-count claims, decorative 3D art.
+
+### 13.2 Components (all reusable)
+
+| Component | Where | Notes |
+|---|---|---|
+| TextInput | `views/partials/ui/textInput.ejs` | leading icon; prints `aria-describedby` / `aria-invalid` only when given, so pages keep exactly their old attributes (checked in the rendered HTML) |
+| PasswordInput | `views/partials/ui/passwordInput.ejs` | lock icon + 48px eye button (`aria-controls`, `aria-pressed`, label switches between "Show password" and "Hide password", icon eye / eye-slash); the button stays hidden until the script runs. `name` is optional, so Confirm password is never sent |
+| Button busy state | `public/js/ui.js` + `.btn-spinner` | forms with `data-busy-text` show a spinner and "Logging you in..." / "Creating your account..." / "Checking..." / "Sending..."; applied only after every other check passed (a form stopped by the phone check never looks busy); a second tap is blocked; reset on Back |
+| Modal | `public/js/ui.js` (`SP.openModal` / `SP.closeModal`) + `.dialog` | focus moves in (`data-modal-initial`), Tab is trapped, Escape and the backdrop close, body scroll locked (`body.modal-open`), focus returns to the trigger |
+| OTPInput | `public/js/otp.js` + `.otp-group` / `.otp-box` | see 13.4 |
+| ConfirmLogoutModal | `views/partials/confirmLogoutModal.ejs` | see 13.5 |
+| Shared panel | `views/partials/authAside.ejs` | the friendly panel for log in, create account, forgot, reset and change password |
+
+Tokens added in `@theme`: `--color-input-fill`, `--color-input-border`. Component classes: `.auth-shell`, `.auth-panel`, `.auth-title`, `.auth-lede`, `.auth-mobile-mark`, `.auth-switch`, `.auth-hero`, `.auth-hero-art`, `.trust-card`, `.avatar-stack`, `.form-soft`, `.label-row`, `.input-wrap`, `.input-icon`, `.input-toggle`, `.field .ok`, `.btn-spinner`, `.otp-group`, `.otp-box`, `.resend-row`, `.modal-actions`, `.modal-icon`, `.btn-link:disabled`.
+
+### 13.3 Log in and Create account
+
+- **Log in:** phone with a phone icon (the existing phone check is untouched), password with eye, forgot link on the label line, busy button, the existing error box (`role="alert"`). The log-in pop-up on Find events uses the same password field and busy button.
+- **Create account:** every field and hint kept. **Confirm password** added with its own eye. It has **no `name`, so the server never receives it**; it is checked in the browser only:
+  - while typing, a quiet "The passwords match" tick appears as soon as they match (inside an always-present `aria-live="polite"` region);
+  - on leaving the box, a mismatch shows "The two passwords are not the same. Please type them again." (`role="alert"`, `aria-invalid="true"`);
+  - on submit, an empty or different confirm box stops the form and puts focus on it.
+  - Without JavaScript the form submits as before and the confirm box is simply not checked (the server never asked for it).
+- Checked in the real app: a mismatch is stopped with the message and focus on the box; with matching passwords the account was created and the welcome page opened.
+
+### 13.4 Verify: code boxes and resend countdown
+
+- **No backend change.** The six boxes fill the existing single `code` field, and resend uses the existing `POST /verify/send` with its existing 60-second server limit.
+- **Boxes:** 6 big boxes (72px tall), numeric keyboard, auto-advance, paste or SMS auto-fill spreads the digits, Backspace on an empty box goes back, arrow keys move. Each box is labelled "Digit n of 6"; the visible label points at the first box. An incomplete code is stopped with "Please type all 6 numbers of the code."
+- **Countdown:** "Resend code in 00:60" (disabled) until it reaches zero, then a "Resend code" link (announced once to screen readers, not every second). It is worked out from the time the code was asked for (saved in the tab's sessionStorage), not from a ticking timer, so it is right after the phone sleeps; it refreshes when the page becomes visible and stops on page exit.
+- **After a resend:** a pop-up "A new code has been sent to your phone number 0809•••0001." (`role="dialog"`, `aria-modal`, OK focused, Tab trapped, Escape closes). Focus then goes to the first code box, because the resend link is disabled again while it counts down.
+- **Failure:** if the server refuses (too soon), the pop-up does not open; one friendly message appears next to the resend link ("We couldn't send a new code just now. Please wait a minute and try again.") and the duplicate message at the top of the page is hidden. Rapid clicks are blocked (the button is disabled while sending and while counting down).
+- **Without JavaScript:** one code box and a "Send a new code" button, exactly as before.
+- Checked in the real app with a new test account: all of the above, including a forced early resend.
+
+### 13.5 Log-out confirmation (seniors and staff)
+
+- One partial, `confirmLogoutModal.ejs`, included once in the footer for anyone logged in; every log-out form carries `data-confirm-logout` (senior Account page, staff sidebar, staff mobile bar). Those are all the log-out buttons in the app.
+- "Log out" opens "Are you sure you want to log out?" with "You will need your phone number and password to log in again." `role="alertdialog"`, focus on **Cancel**, Tab trapped, Escape and a tap on the backdrop act as Cancel, scrolling locked, focus returns to the button.
+- **Log out** sends the same form (so the page loader shows); **Cancel** keeps them on the page.
+- **One server change, non-breaking:** `POST /logout` now redirects to `/login` instead of `/` (`src/routes/public.js`), as asked. No API or data change, and no test depended on it.
+- Without JavaScript, the log-out button logs out straight away, as before.
+- Checked in the real app as a senior (Account) and as staff (sidebar): Cancel, Escape and backdrop keep them on the page; Log out ends the session and lands on Log in.
+
+### 13.6 Header fixes found while testing
+
+A finer sweep (every 4px from 760 to 1300px) found two overflow gaps the earlier 10-width test missed:
+- **1000 to 1023px:** the wordmark returned at 1024px while menu labels were already full size. The wordmark now stays visually hidden until 1280px (`md:max-xl:sr-only`; still in the link's name).
+- **768 to 800px, logged in:** the unread count pushed the menu 32px over. The menu icons now step aside from 768 to 1023px (labels and count stay), and menu padding is tighter at that size.
+- **Font Awesome overrides Tailwind's `hidden` on an icon** (its display rule is outside Tailwind's layers), so the language icon's hide from section 12 never actually worked. The responsive hide now sits on a wrapper `<span>` for both the language and menu icons.
+- Result: **572 of 572 header checks pass** (320, 360, 390, 412, 600, every 4px from 760 to 1300, 1536, 1920; English and Yorùbá; logged in with an unread count and logged out): one line, no clipping, no page scroll, every control 48px+.
+
+### 13.7 Strings
+
+27 new keys in each of `locales/en.json` and `locales/yo.json` (`auth.*`, `signup.confirm_*`, `signup.password_match` / `_mismatch`, `verify.*` for the code and resend, `common.ok`, `logout.*`). No existing key changed. **The Yorùbá was written by me and should be checked by a native speaker**, especially `auth.trust_text`, `verify.resend_in` and `logout.text`.
+
+### 13.8 Verification
+
+| Check | Result |
+|---|---|
+| Real app, local database: log in (wrong password), sign up (mismatch, then match), verify (boxes, paste, Backspace, incomplete, countdown, resend pop-up, too-soon), log out as senior and staff | all behave as described above |
+| Accessibility checker (axe 4.10 + text size, targets, overflow) on log in, sign up (and with errors), verify (both states), the log-in pop-ups, account and ID checks, English and Yorùbá, 360 and 1280px | clean, apart from the known frozen-animation artefact on the log-in pop-up pages (passes once animations finish, as in section 12) |
+| Rendered sign-up fields | ids, names, `aria-describedby`, `aria-invalid` identical to before; Confirm password has no `name` |
+| Browser console on the real pages | no errors |
+| Content freeze against the previous commit | only the changes above; 54 keys added, none changed. (The tool cannot see inside the new partials, so it lists their attributes as "removed"; the rendered HTML shows they are all there) |
+| Jest (`npm test`) | 58 of 59 in two full runs, each time a **different** test failing ("ID documents can only be opened by admins..." then "unverified seniors cannot open or send messages"); both pass when run on their own. The machine was also running the app, the database and browser checks, so this looks like timing under load, not this change (neither test touches these screens). A clean run on a quiet machine is worth doing |
+
+**Assumptions:** the confirm box is browser-only (the server never required it); the resend countdown trusts the server's existing 60-second limit; after the resend pop-up, focus goes to the first code box because the resend link is disabled again.
+
+**Test data:** testing created one account in your local database: **Test Elder (Claude QA), phone 08099990001**. Delete it from the staff Seniors page if you do not want it.
+
+**Files in this pass:** `views/auth/login.ejs`, `views/auth/signup.ejs`, `views/auth/verify.ejs`, `views/partials/authAside.ejs`, `views/partials/loginModal.ejs`, `views/partials/header.ejs`, `views/partials/seniorNav.ejs`, `views/partials/footer.ejs`, `views/partials/nav.ejs`, `views/account/account.ejs`, new `views/partials/ui/textInput.ejs`, `views/partials/ui/passwordInput.ejs`, `views/partials/confirmLogoutModal.ejs`, new `public/js/ui.js` and `public/js/otp.js`, `src/styles/input.css`, rebuilt `public/css/main.css`, `locales/en.json`, `locales/yo.json`, `src/routes/public.js` (log-out redirect only), and this file. No existing file in `public/js` was modified.

@@ -111,6 +111,8 @@
   --color-on-primary-muted: #e0dcf7;
   --color-border-strong: #6e6987; /* field borders: 5:1 on white */
   --color-hairline: #e9e5f5; /* quiet card edges, never the only boundary of a control */
+  --color-input-fill: #f8f7fc; /* soft field background: body text on it is 15.7:1 */
+  --color-input-border: #7c7796; /* soft field edge: 4.0:1 on the fill, 4.25:1 on white (3:1 needed) */
 
   --color-focus: #3b3290;
   --color-focus-on-dark: #f5b82e;
@@ -368,8 +370,8 @@
     scrollbar-width: none;
   }
   .nav-link {
-    @apply nav-text relative inline-flex min-h-12 shrink-0 items-center gap-1.5 rounded-full px-2.5 py-2 font-semibold whitespace-nowrap text-body
-      no-underline transition-colors duration-150 hover:bg-surface active:bg-indigo-100 lg:px-3.5 xl:gap-2 xl:px-4;
+    @apply nav-text relative inline-flex min-h-12 shrink-0 items-center gap-1 rounded-full px-2 py-2 font-semibold whitespace-nowrap text-body
+      no-underline transition-colors duration-150 hover:bg-surface active:bg-indigo-100 lg:gap-1.5 lg:px-3.5 xl:gap-2 xl:px-4;
   }
   .nav-link[aria-current="page"] {
     @apply bg-primary text-white hover:bg-primary-dark;
@@ -721,6 +723,145 @@
     @apply bg-primary text-white hover:bg-primary-dark;
   }
 
+  /*
+    ---------- account screens: log in, create account, confirm phone ----------
+    A split card on tablet and up (friendly panel + form), one centred card on phones.
+    Ideas: AI-inbox soft inputs with icons and eye toggle; store-app labels and hints under fields; car-trading
+    trust badge on the hero; children's-stories single strong button; workforce focus ring; Solara mobile card.
+  */
+  .auth-shell {
+    @apply mx-auto grid w-full max-w-5xl overflow-hidden rounded-4xl bg-surface shadow-lift md:grid-cols-2;
+  }
+  .auth-panel {
+    @apply min-w-0 px-5 py-8 sm:px-10 sm:py-10 md:px-12;
+  }
+  .auth-title {
+    @apply mb-2 text-3xl md:text-4xl;
+  }
+  .auth-lede {
+    @apply mb-7 text-lg text-muted;
+  }
+  /* the logo mark on top of the card on phones, where the friendly panel is hidden */
+  .auth-mobile-mark {
+    @apply mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-indigo-50 text-2xl text-primary md:hidden;
+  }
+  .auth-switch {
+    @apply mt-7 border-t border-hairline pt-6 text-center text-lg;
+  }
+  /* the friendly panel: headline, checklist, the elders illustration and a trust card that sits on it */
+  .auth-hero {
+    @apply relative hidden flex-col overflow-hidden p-10 md:flex lg:p-12;
+  }
+  .auth-hero-art {
+    @apply relative mx-auto mt-auto w-full max-w-xs;
+  }
+  .trust-card {
+    @apply relative -mt-10 flex items-center gap-4 rounded-3xl bg-surface p-4 shadow-lift;
+  }
+  .avatar-stack {
+    @apply flex shrink-0;
+  }
+  .avatar-stack > span {
+    @apply -ml-3 flex h-11 w-11 items-center justify-center rounded-full text-lg font-bold ring-4 ring-surface first:ml-0;
+  }
+
+  /* soft fields (AI-inbox style): tinted fill, 1.5px border that still has 4:1 contrast, a strong focus ring */
+  .form-soft .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+    @apply min-h-14 rounded-2xl bg-input-fill text-lg;
+    border-width: 1.5px;
+    border-color: var(--color-input-border);
+  }
+  .form-soft .field input:not([type="checkbox"]):not([type="radio"]):focus {
+    @apply border-primary bg-surface;
+    box-shadow: 0 0 0 4px var(--color-indigo-100);
+  }
+  .form-soft .field input[aria-invalid="true"] {
+    @apply border-error bg-error-bg;
+  }
+  /* a label with a link on the same line (Password ... Forgot your password?) */
+  .label-row {
+    @apply mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1;
+  }
+  .label-row label {
+    @apply mb-0;
+  }
+
+  /* input with a leading icon, and optionally a trailing show/hide button */
+  .input-wrap {
+    @apply relative;
+  }
+  .input-icon {
+    @apply pointer-events-none absolute top-0 left-0 flex h-14 w-12 items-center justify-center text-lg text-muted;
+  }
+  .input-wrap > input,
+  .form-soft .field .input-wrap > input:not([type="hidden"]) {
+    padding-left: 3rem;
+  }
+  .input-wrap > input.has-toggle,
+  .form-soft .field .input-wrap > input.has-toggle {
+    padding-right: 3.5rem;
+  }
+  /* the eye: a 48px target inside the field; it only appears when JavaScript can make it work */
+  .input-toggle {
+    @apply absolute top-1 right-1 flex h-12 w-12 items-center justify-center rounded-xl text-xl text-primary transition-colors duration-150
+      hover:bg-indigo-50 active:bg-indigo-100;
+  }
+  .input-toggle[aria-pressed="true"] {
+    @apply bg-indigo-50;
+  }
+
+  /* live hint under a field (the "passwords match" tick). Colour + icon + words */
+  .field .ok {
+    @apply mt-2 flex items-center gap-2 text-base font-semibold text-success;
+  }
+  .field .ok[hidden] {
+    display: none;
+  }
+
+  /* button busy state: the label changes to "Logging you in..." with a small spinner */
+  .btn-spinner {
+    @apply inline-block h-5 w-5 shrink-0 rounded-full border-3 border-current border-r-transparent;
+    animation: spin 0.8s linear infinite;
+  }
+  [aria-busy="true"] {
+    @apply cursor-progress;
+  }
+
+  /* one-time code: six big boxes (shown by public/js/otp.js; without JavaScript the single box is used) */
+  .otp-group {
+    @apply flex max-w-full justify-between gap-2 sm:justify-start sm:gap-3;
+  }
+  .otp-box {
+    @apply h-16 w-12 min-w-0 flex-1 rounded-2xl bg-input-fill text-center text-3xl font-bold text-body sm:w-14 sm:flex-none;
+    border: 1.5px solid var(--color-input-border);
+    caret-color: var(--color-primary);
+  }
+  .otp-box:focus {
+    @apply border-primary bg-surface;
+    box-shadow: 0 0 0 4px var(--color-indigo-100);
+  }
+  .otp-group[aria-invalid="true"] .otp-box {
+    @apply border-error bg-error-bg;
+  }
+  .resend-row {
+    @apply mt-4 flex min-h-12 flex-wrap items-center gap-x-3 gap-y-1 text-lg;
+  }
+  .countdown {
+    @apply font-semibold text-muted tabular-nums;
+  }
+  /* "Resend code in 00:42": plainly not tappable yet (still 8:1 readable), digits that do not jump about */
+  .btn-link:disabled {
+    @apply cursor-not-allowed text-muted no-underline tabular-nums hover:text-muted;
+  }
+
+  /* pop-ups opened by a script (log out, new code sent): the same sheet as the other pop-ups */
+  .modal-actions {
+    @apply mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end;
+  }
+  .modal-icon {
+    @apply mb-4 flex h-16 w-16 items-center justify-center rounded-full text-2xl;
+  }
+
   /* ---------- tables (staff area). Wrap wide tables in .table-wrap so the page itself never scrolls sideways ---------- */
   .table-wrap {
     @apply relative overflow-x-auto rounded-2xl;
@@ -1030,6 +1171,19 @@
 }
 .alert-success {
   animation: var(--animate-fade-in);
+}
+
+/* ---------- busy spinner on a button that is submitting (a fixed ring under reduced motion) ---------- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* while a script-opened pop-up is showing, the page behind does not scroll */
+body.modal-open {
+  overflow: hidden;
+}
+/* the "passwords match" tick and inline errors written by a script fade in like the server ones */
+.field .ok:not([hidden]) {
+  animation: var(--animate-nudge-in);
 }
 
 /* ---------- staff area: calmer still. Page fade, button press, pop-ups and the loader only ---------- */

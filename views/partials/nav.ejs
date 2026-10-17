@@ -20,7 +20,7 @@
     </a>
     <span class="flex items-center gap-3">
       <span class="chip-status chip-locked"><i class="fa-solid fa-user-shield" aria-hidden="true"></i>Staff</span>
-      <form action="/logout" method="post" class="md:hidden">
+      <form action="/logout" method="post" data-confirm-logout class="md:hidden">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button class="btn-plain w-auto py-2" aria-label="Log out"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Log out</button>
       </form>
@@ -42,7 +42,7 @@
   <div class="hidden border-t border-hairline px-5 py-4 md:block">
     <p class="text-sm text-muted">Logged in as</p>
     <p class="mb-3 font-semibold break-words text-body"><%= currentUser.fullName %></p>
-    <form action="/logout" method="post">
+    <form action="/logout" method="post" data-confirm-logout>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button class="btn-plain btn-block py-2"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Log out</button>
     </form>

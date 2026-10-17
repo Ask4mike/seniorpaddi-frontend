@@ -1,0 +1,15 @@
+<%#
+  ConfirmLogoutModal: one pop-up for every "Log out" button, seniors and staff alike.
+  Any form with action="/logout" and data-confirm-logout opens it (public/js/ui.js). "Log out" sends that same form,
+  "Cancel", Escape and a tap on the dark backdrop close it. Without JavaScript the log-out button works straight away.
+%>
+<div class="dialog-backdrop" data-modal-backdrop="logout-modal" hidden></div>
+<div id="logout-modal" class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="logout-title" aria-describedby="logout-text" data-modal hidden>
+  <span class="modal-icon bg-terracotta-100 text-terracotta-700" aria-hidden="true"><i class="fa-solid fa-right-from-bracket"></i></span>
+  <h2 id="logout-title" class="mb-2 text-2xl md:text-3xl"><%= t('logout.title') %></h2>
+  <p id="logout-text" class="text-lg text-muted"><%= t('logout.text') %></p>
+  <div class="modal-actions">
+    <button type="button" class="btn-plain btn-lg" data-modal-close data-modal-initial><%= t('logout.cancel') %></button>
+    <button type="button" class="btn-danger btn-lg" data-logout-confirm><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><%= t('logout.confirm') %></button>
+  </div>
+</div>

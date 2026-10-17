@@ -1,12 +1,28 @@
-<%# left side of the log-in and sign-up pages: reassurance on a soft mint-to-lavender wash (Lightyear, ref 5) %>
-<div class="hero-wash relative hidden overflow-hidden p-10 md:flex md:flex-col">
-  <p class="mb-5 text-3xl font-bold tracking-tight"><%= t('auth.aside_title') %></p>
-  <ul class="mb-8 space-y-3 text-lg">
+<%#
+  Friendly panel beside the account forms (tablet and up). Mint-to-lavender wash, headline and checklist, the elders
+  illustration filling the space below, and a trust card sitting on it (car-trading badge and AI-inbox avatars, refs).
+%>
+<div class="auth-hero hero-wash">
+  <div class="pattern-ankara pointer-events-none absolute -top-10 -right-10 h-48 w-48 rounded-full opacity-70" aria-hidden="true"></div>
+  <p class="relative mb-6 text-3xl leading-tight font-bold tracking-tight lg:text-4xl"><%= t('auth.aside_title') %></p>
+  <ul class="relative mb-8 space-y-3 text-lg">
     <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-1 shrink-0 text-success" aria-hidden="true"></i><span><%= t('home.trust_free') %></span></li>
     <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-1 shrink-0 text-success" aria-hidden="true"></i><span><%= t('home.trust_language') %></span></li>
     <li class="flex items-start gap-3"><i class="fa-solid fa-circle-check mt-1 shrink-0 text-success" aria-hidden="true"></i><span><%= t('home.trust_safe') %></span></li>
   </ul>
-  <div class="arch mx-auto mt-auto w-56 bg-surface/70 pt-6">
-    <img src="/images/illustrations/elders-chat.svg" alt="" class="mx-auto block w-48" width="192" height="192">
+  <div class="auth-hero-art">
+    <div class="arch mx-auto w-64 bg-surface/80 pt-8 lg:w-72">
+      <img src="/images/illustrations/elders-chat.svg" alt="" class="mx-auto block w-56 lg:w-64" width="256" height="256">
+    </div>
+    <%# trust card: initials stand in for members, never real people or invented numbers %>
+    <div class="trust-card">
+      <span class="avatar-stack" aria-hidden="true">
+        <span class="bg-yolk-400 text-charcoal">A</span><span class="bg-eucalyptus-700 text-white">B</span><span class="bg-primary text-white">F</span>
+      </span>
+      <span class="min-w-0">
+        <span class="flex items-center gap-2 text-lg font-bold"><i class="fa-solid fa-shield-halved text-success" aria-hidden="true"></i><%= t('auth.trust_title') %></span>
+        <span class="block text-base text-muted"><%= t('auth.trust_text') %></span>
+      </span>
+    </div>
   </div>
 </div>
