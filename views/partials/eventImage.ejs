@@ -1,4 +1,9 @@
-<%# event picture: the uploaded photo, or a cover picture for its category %>
+<%# event picture: the uploaded photo, or a cover picture for its category (WebP, with the JPG as a fallback).
+    optional: imgClass, eager (true for a picture that is on screen when the page opens) %>
 <% const pic = event.imageUrl || ('/images/events/' + event.category + '.jpg'); %>
-<img src="<%= pic %>" alt="" loading="lazy" draggable="false"
-     class="<%= typeof imgClass !== 'undefined' ? imgClass : 'aspect-video w-full rounded-2xl object-cover' %>" width="800" height="600">
+<%# display:contents, so the <img> still sits directly in the page layout exactly as before %>
+<picture class="contents">
+  <% if (!event.imageUrl) { %><source srcset="/images/events/<%= event.category %>.webp" type="image/webp"><% } %>
+  <img src="<%= pic %>" alt="" loading="<%= typeof eager !== 'undefined' && eager ? 'eager' : 'lazy' %>" decoding="async" draggable="false"
+       class="<%= typeof imgClass !== 'undefined' ? imgClass : 'aspect-video w-full rounded-2xl object-cover' %>" width="800" height="600">
+</picture>

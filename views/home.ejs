@@ -1,32 +1,72 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { pageLayout: 'hero', preloadImage: '/images/events/fitness.webp' }) %>
 
-<%# ================= HERO: greeting on a mint-to-lavender wash, arch-masked photo (Lightyear, ref 5; Eldora greeting, ref 8) ================= %>
-<section class="mx-auto max-w-6xl px-3 pt-2 md:px-4">
-  <div class="hero-wash relative overflow-hidden rounded-4xl px-5 py-6 md:px-12 md:py-14">
-    <%# faint Ankara diamonds in one corner only, never behind words %>
-    <div class="pattern-ankara pointer-events-none absolute -top-6 -right-6 h-40 w-40 rounded-full opacity-80 md:h-64 md:w-64" aria-hidden="true"></div>
-    <div class="relative grid items-center gap-8 md:grid-cols-5">
-      <div class="min-w-0 md:col-span-3">
-        <span class="mb-4 inline-flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-base font-semibold text-primary shadow-soft md:mb-5">
-          <i class="fa-solid fa-location-dot" aria-hidden="true"></i><%= t('home.eyebrow') %>
-        </span>
-        <h1 class="mb-3 text-3xl md:mb-4 md:text-5xl">
-          <%= currentUser ? t('home.welcome_back', { name: currentUser.firstName() }) : t('home.hero_title') %>
-          <span class="block text-primary"><%= t('home.hero_highlight') %></span>
-        </h1>
-        <p class="measure text-lg text-muted md:mb-6"><%= t('home.tagline') %></p>
-        <ul class="hidden flex-wrap gap-2 text-base md:flex">
-          <li class="inline-flex items-center gap-2 rounded-full bg-surface/80 px-3 py-1"><i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i><%= t('home.trust_free') %></li>
-          <li class="inline-flex items-center gap-2 rounded-full bg-surface/80 px-3 py-1"><i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i><%= t('home.trust_language') %></li>
-          <li class="inline-flex items-center gap-2 rounded-full bg-surface/80 px-3 py-1"><i class="fa-solid fa-circle-check text-success" aria-hidden="true"></i><%= t('home.trust_safe') %></li>
-        </ul>
-      </div>
-      <div class="hidden md:col-span-2 md:block">
-        <div class="arch mx-auto w-full max-w-xs border-8 border-surface shadow-lift">
-          <%# lazy: phones never show this photo, so they never download it; on computers it is on screen and loads at once %>
-          <img src="/images/events/fitness.jpg" alt="" class="aspect-4/5 w-full object-cover" width="720" height="540" loading="lazy" decoding="async">
+<%#
+  ================= HERO (Xefag product page, ref): one saturated yolk stage, the photo centred like the product,
+  big three-line headline on the left, a small info link on the right, and a bottom row:
+  trust words | one big number | the white "Find events" pill. It has its own top bar (the same five-item menu). =================
+%>
+<section class="hero-stage lg:min-h-[min(calc(100dvh-1.5rem),56rem)]" aria-labelledby="hero-title">
+  <%# large faint leaf shapes behind the subject (decorative) %>
+  <svg class="hero-leaf top-[12%] left-[18%] w-[46vw] max-w-[34rem] -rotate-12" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><path fill="currentColor" d="M100 10c48 30 70 78 50 130-12 32-38 50-50 50s-38-18-50-50C30 88 52 40 100 10z"/></svg>
+  <svg class="hero-leaf right-[10%] bottom-[8%] w-[34vw] max-w-[26rem] rotate-[28deg]" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><path fill="currentColor" d="M100 10c48 30 70 78 50 130-12 32-38 50-50 50s-38-18-50-50C30 88 52 40 100 10z"/></svg>
+
+  <%# top bar: logo | the same five-item menu (white pill = this page) | language + account %>
+  <div class="hero-bar on-yolk">
+    <a href="/" class="brand" aria-label="SeniorPadi">
+      <span class="brand-mark"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i></span>
+      <span class="brand-word md:max-xl:sr-only">SeniorPadi</span>
+    </a>
+    <div class="hidden min-w-0 justify-center md:flex md:flex-1"><%- include('partials/seniorNav', { placement: 'top' }) %></div>
+    <div class="flex shrink-0 items-center gap-2">
+      <%- include('partials/langToggle') %>
+      <a href="/account" class="icon-round hidden xl:flex" aria-label="<%= t('nav.account') %>"><i class="fa-solid fa-user" aria-hidden="true"></i></a>
+    </div>
+  </div>
+
+  <div class="relative z-10 grid flex-1 items-center gap-6 px-5 pt-6 pb-4 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:gap-8 lg:px-12">
+    <div class="min-w-0">
+      <span class="glass-chip mb-5"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><%= t('home.eyebrow') %></span>
+      <h1 id="hero-title" class="hero-title mb-4 max-w-[13ch]">
+        <%= currentUser ? t('home.welcome_back', { name: currentUser.firstName() }) : t('home.hero_title') %>
+        <span class="block"><%= t('home.hero_highlight') %></span>
+      </h1>
+      <p class="measure text-lg text-charcoal/85"><%= t('home.tagline') %></p>
+    </div>
+
+    <%# the subject, centred like the product in the reference: arch-cropped photo, soft shadow, a gentle float %>
+    <div class="hero-subject">
+      <div class="hero-float">
+        <div class="arch border-8 border-white/80 shadow-lift">
+          <picture>
+            <source srcset="/images/events/fitness.webp" type="image/webp">
+            <img src="/images/events/fitness.jpg" alt="<%= t('home.hero_photo_alt') %>" class="aspect-[4/5] w-full object-cover" width="720" height="540" fetchpriority="high" decoding="async">
+          </picture>
         </div>
       </div>
+      <span class="hero-subject-shadow" aria-hidden="true"></span>
+    </div>
+
+    <div class="flex lg:justify-end">
+      <a href="/about" class="glass-chip min-h-12 no-underline hover:bg-white/70"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><%= t('about.title') %></a>
+    </div>
+  </div>
+
+  <%# bottom row: trust | big number from the real list of events below | the white pill %>
+  <div class="relative z-10 grid items-center gap-5 px-5 pt-2 pb-6 sm:px-8 lg:grid-cols-3 lg:px-12 lg:pb-8">
+    <ul class="flex flex-wrap gap-x-4 gap-y-1 text-base font-semibold">
+      <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-eucalyptus-800" aria-hidden="true"></i><%= t('home.trust_free') %></li>
+      <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-eucalyptus-800" aria-hidden="true"></i><%= t('home.trust_language') %></li>
+      <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-eucalyptus-800" aria-hidden="true"></i><%= t('home.trust_safe') %></li>
+    </ul>
+    <p class="flex items-baseline gap-3 lg:justify-center">
+      <% if (upcoming.length > 0) { %>
+        <span class="text-5xl font-bold tracking-tight md:text-6xl"><%= upcoming.length %></span><span class="text-lg font-semibold"><%= t('home.events_count') %></span>
+      <% } else { %>
+        <span class="text-5xl font-bold tracking-tight md:text-6xl"><%= t('events.free') %></span>
+      <% } %>
+    </p>
+    <div class="flex lg:justify-end">
+      <a href="/events" class="btn-white"><%= t('nav.find_events') %><span class="btn-icon"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span></a>
     </div>
   </div>
 </section>
@@ -57,32 +97,31 @@
   </ul>
 </section>
 
-<%# ================= COMING UP (existing data only) ================= %>
-<% if (upcoming.length > 0) { %>
-<section class="mx-auto max-w-6xl px-4 py-8" aria-labelledby="upcoming-title">
-  <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+<%# ================= EVENTS NEAR YOU: tall photo cards (profile-card refs) in a product-style grid (Gozney ref) ================= %>
+<section class="mx-auto max-w-6xl px-4 py-10" aria-labelledby="upcoming-title">
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
     <div>
       <p class="kicker"><%= t('home.upcoming_kicker') %></p>
       <h2 id="upcoming-title"><%= t('home.upcoming_title') %></h2>
     </div>
-    <a href="/events" class="btn-ghost w-auto"><%= t('home.see_all') %><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+    <a href="/events" class="btn-white"><%= t('home.see_all') %><span class="btn-icon"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span></a>
   </div>
-  <div class="grid gap-4 lg:grid-cols-2">
-    <% upcoming.forEach(function (event, i) { %>
-      <a href="/events/<%= event.id %>"
-         class="lift flex gap-4 rounded-3xl bg-surface p-3 text-body no-underline shadow-soft hover:bg-lavender">
-        <%- include('partials/eventImage', { event, imgClass: 'h-28 w-24 shrink-0 rounded-2xl object-cover sm:h-32 sm:w-32' }) %>
-        <span class="flex min-w-0 flex-col justify-center gap-1 py-1 break-words">
-          <span class="tag-mine self-start"><i class="fa-solid fa-tag" aria-hidden="true"></i><%= t('category.' + event.category) %></span>
-          <span class="text-xl font-bold"><%= event.tTitle || event.title %></span>
-          <span class="text-base text-muted"><i class="fa-regular fa-calendar mr-2" aria-hidden="true"></i><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %></span>
-          <span class="text-base text-muted"><i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i><%= event.locationText %></span>
-        </span>
-      </a>
-    <% }) %>
-  </div>
+  <% if (upcoming.length > 0) { %>
+    <%# the cards alternate between the dark glass look and the light look %>
+    <ul class="ev-grid">
+      <% upcoming.forEach(function (event, i) { %>
+        <li><%- include('partials/eventTile', { event, variant: i % 2 === 0 ? 'dark' : 'light' }) %></li>
+      <% }) %>
+    </ul>
+  <% } else { %>
+    <%# nothing planned yet: a friendly note and one way forward %>
+    <div class="empty-state">
+      <img src="/images/illustrations/calendar.svg" alt="" class="empty-art" width="144" height="144" loading="lazy">
+      <p class="mb-5 text-lg"><%= t('stack.none') %></p>
+      <a href="/events" class="btn btn-lg"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><%= t('nav.find_events') %></a>
+    </div>
+  <% } %>
 </section>
-<% } %>
 
 <%# ================= HOW IT WORKS ================= %>
 <section class="mx-auto max-w-6xl px-4 py-10" aria-labelledby="how-title">

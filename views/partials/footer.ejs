@@ -1,7 +1,9 @@
 <% const isAdminFooter = currentUser && currentUser.role === 'admin'; %>
+<% const bareFooter = typeof pageLayout !== 'undefined' && pageLayout === 'auth'; %>
   </main>
 <% if (isAdminFooter) { %>
   </div>
+<% } else if (bareFooter) { %>
 <% } else { %>
   <footer class="mt-16 rounded-t-4xl bg-secondary text-white">
     <div class="mx-auto grid max-w-6xl gap-8 px-5 py-12 md:grid-cols-2">

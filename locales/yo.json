@@ -456,5 +456,15 @@
   "logout.title": "Ṣé ó dá yín lójú pé ẹ fẹ́ jáde?",
   "logout.text": "Ẹ máa nílò nọ́ńbà fóònù àti ọ̀rọ̀ aṣínà yín láti wọlé padà.",
   "logout.confirm": "Jáde",
-  "logout.cancel": "Fagilé"
+  "logout.cancel": "Fagilé",
+  "auth.big_word": "Papọ̀",
+  "auth.welcome_back": "Ẹ káàbọ̀ padà",
+  "auth.welcome_sub": "Ẹ wọlé láti rí ètò yín, àwọn ọ̀rẹ́ yín àti ọ̀rọ̀ yín.",
+  "auth.chat_from": "Ọ̀rọ̀ kan lórí SeniorPadi",
+  "auth.chat_text": "Ṣé a jọ lọ sí ìrìn ọjọ́ Sátidé?",
+  "home.events_count": "ètò tó ń bọ̀",
+  "events.free": "Ọ̀fẹ́",
+  "events.details": "Àlàyé ètò",
+  "events.close_details": "Pa àlàyé dé",
+  "home.hero_photo_alt": "Àwọn obìnrin àgbà méjì tí ń rẹ́rìn-ín bí wọ́n ṣe ń ṣe eré ìdárayá papọ̀ níta"
 }

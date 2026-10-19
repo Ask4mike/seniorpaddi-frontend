@@ -113,6 +113,9 @@
   --color-hairline: #e9e5f5; /* quiet card edges, never the only boundary of a control */
   --color-input-fill: #f8f7fc; /* soft field background: body text on it is 15.7:1 */
   --color-input-border: #7c7796; /* soft field edge: 4.0:1 on the fill, 4.25:1 on white (3:1 needed) */
+  --color-rose-500: #c42a85; /* log-in button (Welcome Back ref): white text 5.2:1 */
+  --color-rose-600: #a61e73; /* its hover: 6.9:1 */
+  --color-beige: #f3eee6; /* Create-account art panel: body text 14.5:1 */
 
   --color-focus: #3b3290;
   --color-focus-on-dark: #f5b82e;
@@ -319,7 +322,7 @@
       sm:gap-2 sm:pl-3 lg:gap-4 lg:py-2 lg:pr-2 lg:pl-4;
   }
   .brand {
-    @apply flex min-h-12 min-w-0 items-center gap-1.5 font-bold tracking-tight whitespace-nowrap text-body no-underline sm:gap-2;
+    @apply flex min-h-12 min-w-12 items-center gap-1.5 font-bold tracking-tight whitespace-nowrap text-body no-underline sm:gap-2;
   }
   /* the wordmark: 14px at 320px, 16px from 360px, up to 22.5px on wide screens. It is the least important item, so under
      very large text zoom it is the only thing that gets cut short (the link keeps the full name in its aria-label) */
@@ -862,6 +865,294 @@
     @apply mb-4 flex h-16 w-16 items-center justify-center rounded-full text-2xl;
   }
 
+  /*
+    ---------- account pages v2: one framed screen that never scrolls on computers ----------
+    Log in follows the "Welcome Back" reference (mesh-gradient art panel + frosted card + social-proof strip);
+    Create account follows the "Create your account" reference (white form side + warm beige art side).
+    From 1024px the whole frame fits the window (100dvh, no page scroll); below that it stacks and scrolls naturally.
+  */
+  .auth-page {
+    @apply min-h-dvh bg-background;
+    background-image: radial-gradient(60rem 40rem at 10% 0%, #ece7fb 0%, transparent 60%),
+      radial-gradient(50rem 36rem at 100% 100%, #fbe6f2 0%, transparent 60%);
+  }
+  .auth-main {
+    @apply flex min-h-dvh w-full items-center justify-center px-2 sm:px-4 lg:h-dvh lg:min-h-0;
+    padding-block: clamp(0.5rem, 2.2vh, 1.75rem);
+  }
+  .auth-frame {
+    @apply grid w-full max-w-6xl gap-2.5 overflow-hidden rounded-[2.25rem] border border-white/70 bg-white/60 p-2.5 shadow-lift backdrop-blur-md
+      lg:h-full lg:max-h-[56rem] lg:grid-cols-2;
+  }
+  /* the left art panel of Log in: a soft purple / pink / blue mesh with a glass orb and one big word */
+  .auth-art {
+    @apply relative hidden min-h-0 flex-col justify-end overflow-hidden rounded-[1.75rem] text-charcoal lg:flex;
+    padding: clamp(1.5rem, 4vh, 3rem);
+    background-color: #ddd6fb;
+    background-image: radial-gradient(38rem 30rem at 15% 10%, #b9a8f5 0%, transparent 60%),
+      radial-gradient(30rem 26rem at 90% 30%, #f6b4d8 0%, transparent 60%),
+      radial-gradient(34rem 28rem at 40% 95%, #b6d4f7 0%, transparent 62%);
+  }
+  .auth-bigword {
+    @apply pointer-events-none absolute left-[6%] font-bold tracking-tighter text-white/90 select-none;
+    top: 14%;
+    font-size: clamp(4rem, 8.5vw, 8rem);
+    line-height: 0.9;
+  }
+  /* a glossy glass orb, pure CSS: no image to download */
+  .auth-orb {
+    @apply pointer-events-none absolute rounded-full;
+    width: clamp(9rem, 16vw, 14rem);
+    aspect-ratio: 1;
+    left: 32%;
+    top: 24%;
+    background: radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.95) 0 6%, rgb(255 255 255 / 0) 22%),
+      radial-gradient(circle at 70% 78%, rgb(120 220 230 / 0.75) 0 18%, rgb(120 220 230 / 0) 46%),
+      radial-gradient(circle at 50% 50%, #f37cc4 0%, #c35fd8 55%, #7e6be8 100%);
+    box-shadow: inset -14px -20px 40px rgb(80 40 160 / 0.35), inset 10px 12px 30px rgb(255 255 255 / 0.5),
+      0 30px 60px -20px rgb(120 60 200 / 0.45);
+  }
+  .auth-side {
+    @apply flex min-h-0 flex-col gap-2.5;
+  }
+  /* frosted card holding the form. If a very short window ever needs more room, only this card scrolls */
+  .auth-card {
+    @apply flex min-h-0 flex-1 flex-col justify-center overflow-y-auto rounded-[1.75rem] border border-white bg-white/80 shadow-soft backdrop-blur-xl;
+    padding: clamp(1rem, 2.6vh, 2.75rem) clamp(1.25rem, 4vw, 3.5rem);
+  }
+  .auth-card-inner {
+    @apply mx-auto w-full max-w-md;
+  }
+  .logo-tile {
+    @apply flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl text-primary no-underline shadow-soft;
+  }
+  .auth-strip {
+    @apply flex items-center gap-4 rounded-[1.5rem] border border-white bg-white/75 px-5 py-2.5 shadow-soft backdrop-blur-xl;
+  }
+  /* the pink pill "Log in" with a soft glow (reference sign-in button); white text is 5.2:1 */
+  .btn-glow {
+    @apply inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-rose-500 px-8 py-3 text-lg font-semibold text-white
+      no-underline transition-colors duration-150 hover:bg-rose-600 active:bg-rose-600;
+    box-shadow: 0 14px 30px -12px rgb(196 42 133 / 0.65), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  }
+  /* the dark "Create my account" button with a little depth (reference) */
+  .btn-dark {
+    @apply inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-charcoal px-8 py-3 text-lg font-semibold text-white
+      no-underline transition-colors duration-150 hover:bg-indigo-900 active:bg-indigo-900;
+    box-shadow: 0 10px 22px -10px rgb(31 27 46 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.18);
+  }
+  /* Create account: white form side + warm beige art side */
+  .auth-frame-register {
+    @apply lg:max-w-7xl lg:grid-cols-[1.6fr_1fr];
+  }
+  .auth-form-panel {
+    @apply flex min-h-0 flex-col justify-center overflow-y-auto rounded-[1.75rem] bg-white;
+    padding: clamp(1rem, 2.2vh, 2.5rem) clamp(1.25rem, 3.5vw, 3rem);
+  }
+  .auth-beige {
+    @apply relative hidden min-h-0 flex-col items-center justify-center overflow-hidden rounded-[1.75rem] bg-beige lg:flex;
+    padding: clamp(1.25rem, 3vh, 2.5rem);
+  }
+  .chat-card {
+    @apply absolute inset-x-6 bottom-6 rounded-3xl bg-white p-4 shadow-lift;
+  }
+  /* compact form spacing on computers so every field fits the screen (inputs stay 48px+, text 16px+) */
+  .form-compact .field {
+    @apply mb-4 lg:mb-3;
+  }
+  /* screens under 800px tall (1280x720, 1366x768): a little less air so nothing has to scroll */
+  @media (min-width: 64rem) and (max-height: 50rem) {
+    .form-compact .field {
+      margin-bottom: 0.6rem;
+    }
+    .auth-page .alert {
+      margin-bottom: 0.75rem;
+      padding-block: 0.6rem;
+    }
+    .auth-page h1 {
+      font-size: var(--text-3xl);
+    }
+    .auth-strip {
+      padding-block: 0.4rem;
+    }
+  }
+  .form-compact .field .hint,
+  .form-compact .field .error {
+    @apply mt-1 leading-snug;
+  }
+  @media (min-width: 64rem) {
+    .form-compact .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+      min-height: 3rem;
+      padding-block: 0.55rem; /* about 48px tall: still a full-size target */
+    }
+    .form-compact .input-icon {
+      height: 3rem;
+    }
+    .form-compact .input-toggle {
+      top: 0;
+    }
+  }
+
+  /*
+    ---------- Home hero (Xefag product page, ref): a saturated yolk stage, one centred subject, big type ----------
+  */
+  .hero-stage {
+    @apply relative isolate mx-2 mt-2 flex flex-col overflow-hidden rounded-[2rem] text-charcoal sm:mx-3 sm:mt-3 md:rounded-[2.5rem];
+    background: radial-gradient(70% 80% at 50% 45%, #ffd25e 0%, #f5b82e 55%, #e5a417 100%);
+  }
+  .hero-leaf {
+    @apply pointer-events-none absolute -z-10 text-yolk-500;
+    opacity: 0.55;
+  }
+  .hero-bar {
+    @apply relative z-10 flex flex-nowrap items-center justify-between gap-2 px-3 pt-3 sm:px-5 lg:px-8 lg:pt-5;
+  }
+  /* the menu on yolk: tinted pills, the current page in a white pill (reference) */
+  .on-yolk .pillnav {
+    @apply bg-white/35;
+  }
+  .on-yolk .nav-link {
+    @apply text-charcoal hover:bg-white/60;
+  }
+  .on-yolk .nav-link[aria-current="page"] {
+    @apply bg-white text-charcoal shadow-soft hover:bg-white;
+  }
+  .on-yolk .lang-pill {
+    @apply border-charcoal bg-white/90 text-charcoal hover:bg-white;
+  }
+  .icon-round {
+    @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/45 text-xl text-charcoal no-underline transition-colors
+      duration-150 hover:bg-white;
+  }
+  .hero-subject {
+    @apply relative mx-auto w-[min(72vw,22rem)] lg:w-[min(26vw,24rem)];
+  }
+  .hero-subject-shadow {
+    @apply absolute -bottom-6 left-1/2 h-8 w-4/5 -translate-x-1/2 rounded-[50%];
+    background: radial-gradient(closest-side, rgb(120 70 0 / 0.45), transparent);
+    filter: blur(6px);
+  }
+  .hero-title {
+    @apply font-bold tracking-tight;
+    font-size: clamp(2.25rem, 4.6vw, 4.5rem);
+    line-height: 1.02;
+  }
+  .glass-chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/40 px-4 py-2 text-base font-semibold text-charcoal
+      backdrop-blur-md;
+  }
+  .btn-white {
+    @apply inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-white py-2 pr-2 pl-7 text-lg font-semibold text-charcoal
+      no-underline shadow-lift transition-colors duration-150 hover:bg-cream;
+  }
+  .btn-white .btn-icon {
+    @apply h-11 w-11 bg-charcoal text-white;
+  }
+
+  /*
+    ---------- Events near you: tall photo cards (profile-card refs) in a product-style grid (Gozney ref) ----------
+    Two looks that alternate: dark glass and light. A dark or light fade under the words keeps them readable on any photo.
+  */
+  .ev-grid {
+    @apply grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6;
+  }
+  .ev-shell {
+    @apply relative rounded-[2.25rem] p-2 shadow-lift;
+  }
+  .ev-shell.is-dark {
+    @apply bg-[#26213a];
+  }
+  .ev-shell.is-light {
+    @apply bg-white;
+  }
+  .ev-card {
+    /* tall (portrait) by default, but it grows when the words need room, so nothing overlaps the badge band */
+    @apply relative isolate flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-[1.75rem] sm:min-h-[28rem];
+    padding-top: 6.5rem;
+  }
+  .ev-card > picture img,
+  .ev-card > img {
+    @apply absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-300;
+  }
+  .ev-card::before {
+    content: "";
+    @apply absolute inset-0 -z-10;
+  }
+  /* a soft vignette on the whole photo; the strong fade sits right behind the words (.ev-body), so they are always readable */
+  .is-dark .ev-card::before {
+    background: linear-gradient(to top, rgb(22 18 36 / 0.55) 0%, transparent 55%);
+  }
+  .is-light .ev-card::before {
+    background: linear-gradient(to top, rgb(248 246 252 / 0.5) 0%, transparent 55%);
+  }
+  .ev-body {
+    @apply px-5 pt-12 pb-5;
+  }
+  .is-dark .ev-body {
+    background: linear-gradient(to top, rgb(22 18 36 / 0.97) 0%, rgb(22 18 36 / 0.92) 72%, rgb(22 18 36 / 0) 100%);
+  }
+  .is-light .ev-body {
+    background: linear-gradient(to top, rgb(248 246 252 / 0.99) 0%, rgb(248 246 252 / 0.95) 72%, rgb(248 246 252 / 0) 100%);
+  }
+  .is-dark .ev-body {
+    @apply text-white;
+  }
+  /* headings take the card colour, not the page heading colour */
+  .ev-body h3 {
+    color: inherit;
+  }
+  .is-dark .ev-body .ev-muted {
+    @apply text-on-primary-muted;
+  }
+  .is-light .ev-body {
+    @apply text-charcoal;
+  }
+  .is-light .ev-body .ev-muted {
+    @apply text-muted;
+  }
+  .ev-badges {
+    @apply absolute top-4 left-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2;
+  }
+  .ev-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-charcoal shadow-soft backdrop-blur-sm;
+  }
+  .ev-badge.is-free {
+    @apply bg-eucalyptus-100 text-eucalyptus-800;
+  }
+  .ev-join {
+    @apply inline-flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-white px-5 text-base font-semibold text-charcoal no-underline shadow-soft
+      transition-colors duration-150 hover:bg-cream;
+  }
+  .is-light .ev-join {
+    @apply bg-charcoal text-white hover:bg-indigo-900;
+  }
+  /* the info button opens a details panel over the photo; works with no JavaScript (details/summary) */
+  .ev-info > summary {
+    @apply absolute top-3 right-3 z-30 flex h-12 w-12 cursor-pointer list-none items-center justify-center rounded-full bg-white/90 text-xl text-charcoal
+      shadow-soft backdrop-blur-sm transition-colors hover:bg-white;
+  }
+  .ev-info > summary::-webkit-details-marker {
+    display: none;
+  }
+  .ev-info .when-open {
+    display: none;
+  }
+  .ev-info[open] .when-open {
+    display: inline;
+  }
+  .ev-info[open] .when-closed {
+    display: none;
+  }
+  .ev-info-panel {
+    @apply absolute inset-0 z-20 flex flex-col justify-center gap-4 overflow-y-auto bg-white/95 p-6 pt-16 text-charcoal backdrop-blur-md;
+  }
+  .ev-info-panel dt {
+    @apply flex items-center gap-2 text-sm font-semibold text-muted;
+  }
+  .ev-info-panel dd {
+    @apply text-lg font-semibold;
+  }
+
   /* ---------- tables (staff area). Wrap wide tables in .table-wrap so the page itself never scrolls sideways ---------- */
   .table-wrap {
     @apply relative overflow-x-auto rounded-2xl;
@@ -1041,6 +1332,10 @@
 #main:has([data-dialog]) {
   animation: none;
 }
+/* the account pages fill the screen exactly: they fade in without moving, so no scrollbar can flicker */
+.auth-page #main {
+  animation: var(--animate-fade-in);
+}
 
 /* ---------- pop-ups: backdrop fades, the sheet slides up on phones and scales in on computers ---------- */
 .dialog-backdrop {
@@ -1173,6 +1468,51 @@
   animation: var(--animate-fade-in);
 }
 
+/*
+  Account pages on computers: the whole frame must fit the window, so the root size follows the window height
+  between 16px (a 720px-tall screen) and the usual 18px. Text never goes under 16px.
+*/
+@media (min-width: 64rem) {
+  html:has(body.auth-page) {
+    font-size: clamp(100%, 2.25vh, 112.5%);
+  }
+  body.auth-page {
+    overflow: hidden;
+  }
+}
+
+/* Home hero: the subject floats gently (off under reduced motion); event cards zoom their photo a touch under a mouse */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.hero-float {
+  animation: float 7s ease-in-out infinite;
+}
+.ev-grid > li {
+  animation: var(--animate-fade-up);
+}
+.ev-grid > li:nth-child(2) { animation-delay: 70ms; }
+.ev-grid > li:nth-child(3) { animation-delay: 140ms; }
+.ev-grid > li:nth-child(4) { animation-delay: 210ms; }
+.ev-shell {
+  transition: transform var(--duration-micro) var(--ease-out);
+}
+.ev-shell:active {
+  transform: scale(0.99);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ev-shell:hover {
+    transform: translateY(-3px);
+  }
+  .ev-shell:hover .ev-card > picture img {
+    transform: scale(1.04);
+  }
+}
+.ev-info[open] .ev-info-panel {
+  animation: var(--animate-fade-in);
+}
+
 /* ---------- busy spinner on a button that is submitting (a fixed ring under reduced motion) ---------- */
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -1211,7 +1551,8 @@ body.modal-open {
     scroll-behavior: auto !important;
   }
   /* presses and hovers change colour only, never size or position */
-  :is(.btn, .btn-primary, .btn-accent, .btn-coral, .btn-volunteer, .btn-plain, .btn-secondary, .btn-ghost, .btn-danger, .btn-danger-soft, .lang-pill, .chip, .tile, .lift):is(:active, :hover),
+  :is(.btn, .btn-primary, .btn-accent, .btn-coral, .btn-volunteer, .btn-plain, .btn-secondary, .btn-ghost, .btn-danger, .btn-danger-soft, .lang-pill, .chip, .tile, .lift, .ev-shell):is(:active, :hover),
+  .ev-shell:hover .ev-card > picture img,
   .nav-link[aria-current="page"] .header-icon,
   .tab-link[aria-current="page"] .tab-icon i {
     transform: none !important;

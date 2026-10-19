@@ -1,76 +1,100 @@
-<%- include('../partials/header') %>
+<%- include('../partials/header', { pageLayout: 'auth' }) %>
 
-<div class="auth-shell">
-  <%- include('../partials/authAside') %>
-  <div class="auth-panel">
-    <span class="auth-mobile-mark" aria-hidden="true"><i class="fa-solid fa-hand-holding-heart"></i></span>
-    <h1 class="auth-title text-center md:text-left"><%= t('signup.title') %></h1>
-    <p class="auth-lede text-center md:text-left"><%= t('signup.intro') %></p>
-
-    <form action="/signup" method="post" novalidate class="form-soft" data-busy-text="<%= t('auth.creating') %>">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <input type="hidden" name="registerEventId" value="<%= typeof after !== 'undefined' ? after.registerEventId : '' %>">
-      <input type="hidden" name="next" value="<%= typeof after !== 'undefined' ? after.next : '' %>">
-
-      <div class="field">
-        <label for="fullName"><%= t('signup.name') %></label>
-        <%- include('../partials/ui/textInput', { id: 'fullName', name: 'fullName', value: values.fullName || '', autocomplete: 'name', icon: 'fa-user', required: true,
-              describedBy: errors.fullName ? 'fullName-error' : '', invalid: errors.fullName ? 'true' : 'false' }) %>
-        <% if (errors.fullName) { %><span class="error" id="fullName-error"><%= errors.fullName %></span><% } %>
+<%# "Create your account" layout (ref): white form side | warm beige art side with a chat card. Fits the screen from 1024px %>
+<div class="auth-frame auth-frame-register">
+  <div class="auth-form-panel">
+    <div class="mx-auto w-full max-w-2xl">
+      <%# logo, centred heading and language on one line, so all the fields fit the screen %>
+      <div class="mb-1 flex items-center justify-between gap-3">
+        <a href="/" class="logo-tile" aria-label="SeniorPadi"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i></a>
+        <h1 class="min-w-0 flex-1 text-center text-3xl"><%= t('signup.title') %></h1>
+        <%- include('../partials/langToggle') %>
       </div>
+      <p class="mb-4 text-center text-lg text-muted"><%= t('signup.intro') %></p>
 
-      <div class="field">
-        <label for="phone"><%= t('signup.phone') %></label>
-        <div class="input-wrap">
-          <span class="input-icon" aria-hidden="true"><i class="fa-solid fa-phone"></i></span>
-          <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone, describedBy: 'phone-hint' + (errors.phone ? ' phone-server-error' : ''), invalid: Boolean(errors.phone) }) %>
+      <%- include('../partials/flash') %>
+
+      <form action="/signup" method="post" novalidate class="form-soft form-compact" data-busy-text="<%= t('auth.creating') %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="registerEventId" value="<%= typeof after !== 'undefined' ? after.registerEventId : '' %>">
+        <input type="hidden" name="next" value="<%= typeof after !== 'undefined' ? after.next : '' %>">
+
+        <%# same fields, same order: two to a row on computers (left to right), one per row on phones %>
+        <div class="grid gap-x-5 lg:grid-cols-2">
+          <div class="field">
+            <label for="fullName"><%= t('signup.name') %></label>
+            <%- include('../partials/ui/textInput', { id: 'fullName', name: 'fullName', value: values.fullName || '', autocomplete: 'name', icon: 'fa-user', required: true,
+                  describedBy: errors.fullName ? 'fullName-error' : '', invalid: errors.fullName ? 'true' : 'false' }) %>
+            <% if (errors.fullName) { %><span class="error" id="fullName-error"><%= errors.fullName %></span><% } %>
+          </div>
+
+          <div class="field">
+            <label for="phone"><%= t('signup.phone') %></label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true"><i class="fa-solid fa-phone"></i></span>
+              <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone, describedBy: 'phone-hint' + (errors.phone ? ' phone-server-error' : ''), invalid: Boolean(errors.phone) }) %>
+            </div>
+            <span class="hint" id="phone-hint"><%= t('signup.phone_hint') %></span>
+            <% if (errors.phone) { %><span class="error" id="phone-server-error"><%= errors.phone %></span><% } %>
+          </div>
+
+          <div class="field">
+            <label for="email"><%= t('signup.email') %></label>
+            <%- include('../partials/ui/textInput', { id: 'email', name: 'email', type: 'email', value: values.email || '', autocomplete: 'email', icon: 'fa-envelope',
+                  describedBy: 'email-hint' + (errors.email ? ' email-error' : ''), invalid: errors.email ? 'true' : 'false' }) %>
+            <span class="hint" id="email-hint"><%= t('signup.email_hint') %></span>
+            <% if (errors.email) { %><span class="error" id="email-error"><%= errors.email %></span><% } %>
+          </div>
+
+          <div class="field">
+            <label for="password"><%= t('signup.password') %></label>
+            <%- include('../partials/ui/passwordInput', { id: 'password', name: 'password', autocomplete: 'new-password', required: true,
+                  describedBy: 'password-hint' + (errors.password ? ' password-error' : ''), invalid: errors.password ? 'true' : 'false' }) %>
+            <span class="hint" id="password-hint"><%= t('signup.password_hint') %></span>
+            <% if (errors.password) { %><span class="error" id="password-error"><%= errors.password %></span><% } %>
+          </div>
+
+          <%# checked in the browser only (public/js/ui.js). It has no name, so the server never receives it %>
+          <div class="field" data-confirm-for="password"
+               data-msg-mismatch="<%= t('signup.password_mismatch') %>" data-msg-empty="<%= t('signup.confirm_empty') %>">
+            <label for="confirmPassword"><%= t('signup.confirm_password') %></label>
+            <%- include('../partials/ui/passwordInput', { id: 'confirmPassword', autocomplete: 'new-password',
+                  describedBy: 'confirmPassword-hint confirmPassword-error confirmPassword-ok', invalid: 'false' }) %>
+            <span class="hint" id="confirmPassword-hint"><%= t('signup.confirm_hint') %></span>
+            <span class="error" id="confirmPassword-error" role="alert" hidden></span>
+            <div aria-live="polite"><span class="ok" id="confirmPassword-ok" hidden><i class="fa-solid fa-circle-check" aria-hidden="true"></i><%= t('signup.password_match') %></span></div>
+          </div>
+
+          <div class="field lg:self-end">
+            <label class="check mb-0 flex font-normal">
+              <input type="checkbox" name="ageDeclared" value="yes" class="shrink-0" <%= values.ageDeclared ? 'checked' : '' %>
+                     aria-describedby="<%= errors.ageDeclared ? 'ageDeclared-error' : '' %>"
+                     aria-invalid="<%= errors.ageDeclared ? 'true' : 'false' %>">
+              <span><strong><%= t('signup.age') %></strong></span>
+            </label>
+            <% if (errors.ageDeclared) { %><span class="error" id="ageDeclared-error"><%= errors.ageDeclared %></span><% } %>
+          </div>
         </div>
-        <span class="hint" id="phone-hint"><%= t('signup.phone_hint') %></span>
-        <% if (errors.phone) { %><span class="error" id="phone-server-error"><%= errors.phone %></span><% } %>
-      </div>
 
-      <div class="field">
-        <label for="email"><%= t('signup.email') %></label>
-        <%- include('../partials/ui/textInput', { id: 'email', name: 'email', type: 'email', value: values.email || '', autocomplete: 'email', icon: 'fa-envelope',
-              describedBy: 'email-hint' + (errors.email ? ' email-error' : ''), invalid: errors.email ? 'true' : 'false' }) %>
-        <span class="hint" id="email-hint"><%= t('signup.email_hint') %></span>
-        <% if (errors.email) { %><span class="error" id="email-error"><%= errors.email %></span><% } %>
-      </div>
+        <button class="btn-dark mt-1"><%= t('signup.submit') %></button>
+      </form>
 
-      <div class="field">
-        <label for="password"><%= t('signup.password') %></label>
-        <%- include('../partials/ui/passwordInput', { id: 'password', name: 'password', autocomplete: 'new-password', required: true,
-              describedBy: 'password-hint' + (errors.password ? ' password-error' : ''), invalid: errors.password ? 'true' : 'false' }) %>
-        <span class="hint" id="password-hint"><%= t('signup.password_hint') %></span>
-        <% if (errors.password) { %><span class="error" id="password-error"><%= errors.password %></span><% } %>
-      </div>
-
-      <%# checked in the browser only (public/js/ui.js). It has no name, so the server never receives it %>
-      <div class="field" data-confirm-for="password"
-           data-msg-mismatch="<%= t('signup.password_mismatch') %>" data-msg-empty="<%= t('signup.confirm_empty') %>">
-        <label for="confirmPassword"><%= t('signup.confirm_password') %></label>
-        <%- include('../partials/ui/passwordInput', { id: 'confirmPassword', autocomplete: 'new-password',
-              describedBy: 'confirmPassword-hint confirmPassword-error confirmPassword-ok', invalid: 'false' }) %>
-        <span class="hint" id="confirmPassword-hint"><%= t('signup.confirm_hint') %></span>
-        <span class="error" id="confirmPassword-error" role="alert" hidden></span>
-        <div aria-live="polite"><span class="ok" id="confirmPassword-ok" hidden><i class="fa-solid fa-circle-check" aria-hidden="true"></i><%= t('signup.password_match') %></span></div>
-      </div>
-
-      <div class="field">
-        <label class="check mb-0 flex font-normal">
-          <input type="checkbox" name="ageDeclared" value="yes" class="shrink-0" <%= values.ageDeclared ? 'checked' : '' %>
-                 aria-describedby="<%= errors.ageDeclared ? 'ageDeclared-error' : '' %>"
-                 aria-invalid="<%= errors.ageDeclared ? 'true' : 'false' %>">
-          <span><strong><%= t('signup.age') %></strong></span>
-        </label>
-        <% if (errors.ageDeclared) { %><span class="error" id="ageDeclared-error"><%= errors.ageDeclared %></span><% } %>
-      </div>
-
-      <button class="btn btn-block btn-lg"><%= t('signup.submit') %></button>
-    </form>
-
-    <p class="auth-switch"><%= t('home.have_account') %> <a href="/login" class="inline-flex min-h-12 items-center font-semibold"><%= t('home.login') %></a></p>
+      <p class="mt-4 text-center text-lg"><%= t('home.have_account') %> <a href="/login" class="inline-flex min-h-12 items-center font-semibold"><%= t('home.login') %></a></p>
+    </div>
   </div>
+
+  <%# warm beige side: the elders illustration and a chat card with a real kind of SeniorPadi message %>
+  <section class="auth-beige" aria-labelledby="signup-art-title">
+    <h2 id="signup-art-title" class="sr-only"><%= t('auth.aside_title') %></h2>
+    <img src="/images/illustrations/elders-chat.svg" alt="" class="-mt-16 w-[min(80%,24rem)]" width="384" height="384">
+    <div class="chat-card">
+      <p class="mb-2 flex items-center gap-2 text-base font-semibold text-muted"><i class="fa-solid fa-comments text-primary" aria-hidden="true"></i><%= t('auth.chat_from') %></p>
+      <div class="flex items-end gap-3">
+        <span class="avatar h-12 w-12 bg-yolk-400 text-lg text-charcoal" aria-hidden="true">B</span>
+        <p class="min-w-0 rounded-3xl rounded-bl-lg bg-indigo-50 px-4 py-3 text-lg"><%= t('auth.chat_text') %></p>
+      </div>
+    </div>
+  </section>
 </div>
 
-<%- include('../partials/footer') %>
+<%- include('../partials/footer', { pageLayout: 'auth' }) %>

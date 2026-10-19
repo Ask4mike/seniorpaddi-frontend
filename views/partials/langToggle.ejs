@@ -1,0 +1,14 @@
+<%#
+  LangToggle: one button that always shows the OTHER language. Used by the site top bar, the Home hero bar
+  and the log-in / create-account frame. optional: extraClass (added to the button)
+%>
+<% const toggleTo = lang === 'en' ? 'yo' : 'en'; %>
+<form action="/language" method="post" class="shrink-0">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <input type="hidden" name="back" value="<%= currentPath %>">
+  <button name="lang" value="<%= toggleTo %>" lang="<%= toggleTo %>" class="lang-pill <%= typeof extraClass !== 'undefined' ? extraClass : '' %>">
+    <%# (the hide goes on a wrapper: Font Awesome's own display rule would beat it on the icon itself) %>
+    <span class="max-[359px]:hidden md:max-lg:hidden" aria-hidden="true"><i class="fa-solid fa-language header-icon"></i></span>
+    <%= toggleTo === 'yo' ? 'Yorùbá' : 'English' %>
+  </button>
+</form>
