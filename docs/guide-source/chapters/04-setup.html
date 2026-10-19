@@ -1,0 +1,171 @@
+<h1 id="ch4"><span class="num">Chapter 4</span>Project setup, step by step</h1>
+
+<p class="lead">This chapter takes you from an empty computer to SeniorPadi running in your browser. Follow the steps in order. Where Windows, macOS and Linux differ, each is shown.</p>
+
+<div class="callout tip"><span class="label">Tip: what a terminal is</span>
+<p>A <strong>terminal</strong> is a window where you type commands instead of clicking. On Windows use <strong>PowerShell</strong> or the terminal inside VS Code (<kbd>Ctrl</kbd>+<kbd>`</kbd>). On macOS use <strong>Terminal</strong>. On Linux use your terminal app. Type a command, then press <kbd>Enter</kbd>.</p></div>
+
+<h2>1. Install the tools</h2>
+<table>
+  <thead><tr><th style="width:22%">Tool</th><th>Why</th><th style="width:38%">How</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Node.js 20+</strong> (LTS)</td><td>Runs the server. npm comes with it.</td><td>Download the LTS version from nodejs.org and install it. Check with <code>node -v</code> (should say v20 or higher).</td></tr>
+    <tr><td><strong>Git</strong></td><td>Downloads the code and keeps its history.</td><td>Windows: git-scm.com. macOS: run <code>git --version</code> and accept the offer to install. Linux: <code>sudo apt install git</code>.</td></tr>
+    <tr><td><strong>PostgreSQL</strong></td><td>The database.</td><td>Windows: the installer from postgresql.org (remember the password you choose for the <code>postgres</code> user). macOS: Postgres.app, or <code>brew install postgresql</code>. Linux: <code>sudo apt install postgresql</code>. Or skip it and use a free Neon database online.</td></tr>
+    <tr><td><strong>A code editor</strong></td><td>To read and edit files.</td><td>Visual Studio Code (code.visualstudio.com) is a good free choice.</td></tr>
+  </tbody>
+</table>
+
+<h2>2. Get the code</h2>
+<p>In a terminal, go to the folder where you keep projects and <strong>clone</strong> (download) the repository:</p>
+<pre class="code solo" data-lang="shell">git clone https://github.com/Ask4mike/seniorpaddi-frontend.git
+cd seniorpaddi-frontend</pre>
+<div class="callout know"><span class="label">Things to know</span><p>This is the repository the project's Git is connected to (its <code>origin</code>). <code>README.md</code> mentions a different address (<code>Otani-ibe/SeniorPadi_Capstone</code>), which looks like an earlier home of the project. Use whichever one you were given access to.</p></div>
+
+<h2>3. Install the packages</h2>
+<pre class="code solo" data-lang="shell">npm install</pre>
+<p>This reads <code>package.json</code> and downloads everything into a new <code>node_modules/</code> folder. It can take a few minutes the first time. You only need to run it again when <code>package.json</code> changes (for example after pulling someone else's work).</p>
+
+<h2>4. Create the database</h2>
+<p>Skip this if you will use Neon. Otherwise make an empty database called <code>seniorpadi</code>. The tables are created for you later.</p>
+<pre class="code solo" data-lang="shell"># macOS, Linux, or Windows when psql is on your PATH:
+psql -U postgres -c "CREATE DATABASE seniorpadi;"
+# Linux, if psql says "role postgres does not exist" or asks for a password you never set:
+sudo -u postgres psql -c "CREATE DATABASE seniorpadi;"</pre>
+<p>On Windows, if <code>psql</code> is "not recognized", use its full path, for example <code>&amp; "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -c "CREATE DATABASE seniorpadi;"</code> (change 17 to your version), or create the database by right-clicking <strong>Databases</strong> in pgAdmin, which is installed alongside PostgreSQL.</p>
+
+<h2>5. Create your settings file (.env)</h2>
+<p>Create a new file called exactly <code>.env</code> (with the dot, no other extension) in the main project folder, next to <code>package.json</code>. Paste this in and replace the placeholder values:</p>
+<pre class="code solo" data-lang="shell"># which database: local (PostgreSQL on this computer) or neon
+DB_TARGET=local
+LOCAL_DATABASE_URL=postgresql://postgres:YOUR_DB_PASSWORD_HERE@localhost:5432/seniorpadi
+# NEON_DATABASE_URL=postgres://YOUR_NEON_USER:YOUR_NEON_PASSWORD@YOUR_NEON_HOST/neondb
+
+SESSION_SECRET=YOUR_LONG_RANDOM_TEXT_HERE
+
+# the first staff (admin) account, created on first start
+ADMIN_NAME=Your Name
+ADMIN_PHONE=08000000000
+ADMIN_PASSWORD=YOUR_ADMIN_PASSWORD_HERE
+
+# print texts and emails in the terminal instead of sending them
+NOTIFY_DRY_RUN=true
+SUPPORT_PHONE=08000000000</pre>
+<div class="callout warn"><span class="label">Warning</span>
+<ul>
+  <li><strong>Never commit <code>.env</code></strong> or paste it anywhere public. It holds passwords. It is already listed in <code>.gitignore</code>, so Git ignores it.</li>
+  <li>If your database password contains <code>@</code>, <code>:</code> or <code>/</code>, it must be "URL-encoded" in the address (for example <code>@</code> becomes <code>%40</code>).</li>
+</ul></div>
+
+<h3>Every setting, explained</h3>
+<p>These are all the environment variables the code reads (found by searching <code>src/</code> for <code>process.env</code>). Only the database address is truly required.</p>
+<table>
+  <thead><tr><th style="width:32%">Setting</th><th>What it is for</th></tr></thead>
+  <tbody>
+    <tr><td><code>DB_TARGET</code></td><td><code>local</code> or <code>neon</code>. Leave it out on Render, where <code>DATABASE_URL</code> is used.</td></tr>
+    <tr><td><code>LOCAL_DATABASE_URL</code></td><td>Address of PostgreSQL on your computer.</td></tr>
+    <tr><td><code>NEON_DATABASE_URL</code></td><td>Address of a Neon database.</td></tr>
+    <tr><td><code>DATABASE_URL</code></td><td>Address used when no <code>DB_TARGET</code> is set (the live site on Render).</td></tr>
+    <tr><td><code>TEST_DATABASE_URL</code></td><td>A <em>separate</em> database for <code>npm test</code>. It gets wiped every run.</td></tr>
+    <tr><td><code>DB_SSL</code>, <code>DB_SSL_STRICT</code></td><td>Only for unusual database hosts that need encrypted connections. Neon is handled automatically.</td></tr>
+    <tr><td><code>SESSION_SECRET</code></td><td>Long random text used to sign the login cookie. If missing, one is made up at each start (everyone is logged out on restart).</td></tr>
+    <tr><td><code>ADMIN_NAME</code>, <code>ADMIN_PHONE</code>, <code>ADMIN_PASSWORD</code></td><td>The first staff account, made automatically if there is no admin yet. Password must be 8+ characters.</td></tr>
+    <tr><td><code>PORT</code></td><td>Which port to listen on. Default <code>3000</code>.</td></tr>
+    <tr><td><code>APP_URL</code></td><td>The public address, used in links inside texts and emails. Default <code>http://localhost:3000</code>. Render fills it in through <code>RENDER_EXTERNAL_URL</code>.</td></tr>
+    <tr><td><code>NODE_ENV</code></td><td><code>production</code> on the live site (secure cookies, caching). Leave it out on your computer.</td></tr>
+    <tr><td><code>NOTIFY_DRY_RUN</code></td><td><code>true</code> = print texts and emails in the terminal instead of sending them.</td></tr>
+    <tr><td><code>BREVO_API_KEY</code>, <code>BREVO_SENDER_EMAIL</code>, <code>BREVO_SENDER_NAME</code>, <code>BREVO_SMS_SENDER</code></td><td>Sending real SMS and email through Brevo.</td></tr>
+    <tr><td><code>CLOUDINARY_CLOUD_NAME</code>, <code>CLOUDINARY_API_KEY</code>, <code>CLOUDINARY_API_SECRET</code></td><td>Storing uploads in Cloudinary.</td></tr>
+    <tr><td><code>GOOGLE_TRANSLATE_API_KEY</code></td><td>Translating event text into Yorùbá.</td></tr>
+    <tr><td><code>SUPPORT_PHONE</code>, <code>SUPPORT_HOURS</code></td><td>The help number and opening hours shown on the Call page.</td></tr>
+  </tbody>
+</table>
+
+<h2>6. Check the database connection</h2>
+<pre class="code solo" data-lang="shell">npm run db:check</pre>
+<p>This runs <code>src/scripts/checkDb.js</code>, which prints which database the app will use and whether it can reach it. You want to see <code>Connected: yes</code>. If not, chapter 11 lists the usual causes.</p>
+
+<h2>7. Start the app</h2>
+<table>
+  <thead><tr><th style="width:30%">Command</th><th>When to use it</th></tr></thead>
+  <tbody>
+    <tr><td><code>npm start</code></td><td>Starts the site once. Uses whatever <code>DB_TARGET</code> says in <code>.env</code>.</td></tr>
+    <tr><td><code>npm run dev</code></td><td>Same, but restarts by itself when you save a <code>.js</code> or <code>.json</code> file. <strong>Best while working.</strong></td></tr>
+    <tr><td><code>npm run dev:local</code> / <code>dev:neon</code></td><td>Like <code>dev</code>, but forces the local or Neon database whatever <code>.env</code> says.</td></tr>
+    <tr><td>Double-click <code>start-windows.bat</code></td><td>Windows shortcut: checks Node, installs packages the first time, then runs <code>npm start</code>.</td></tr>
+  </tbody>
+</table>
+<p>The first start creates every table and your admin account. A good first start looks like this:</p>
+<pre class="code solo" data-lang="shell">Starting SeniorPadi...
+  Database connected (localhost)
+  Database updated: 10 change(s) applied
+  Added the default welcome guide text
+  Created the first admin account (08000000000)
+  ! Brevo is not set up. Texts and emails are printed in the log instead of sent.
+  ! Cloudinary is not set up. Picture, ID and video uploads are switched off.
+  ! Google Translate is not set up. Menus are still in Yorùbá, but event text stays in English.
+SeniorPadi is running at http://localhost:3000</pre>
+<p>The lines with <code>!</code> are warnings, not errors: the site works without those services.</p>
+
+<h2>8. Add demo data (optional)</h2>
+<pre class="code solo" data-lang="shell">npm run seed:local</pre>
+<p>This <strong>wipes your local database</strong> and fills it with sample organizations, events and users (<code>src/scripts/seed.js</code>). It refuses to wipe a Neon database unless you use <code>npm run seed:neon</code> on purpose. The README lists the demo accounts: every one uses the password <code>password123</code>, and the demo admin's phone number is <code>08000000001</code>.</p>
+
+<h2>9. Open it in the browser</h2>
+<ul>
+  <li>The site: <a href="http://localhost:3000">http://localhost:3000</a></li>
+  <li>Log in: <code>http://localhost:3000/login</code>. Staff are sent to the dashboard at <code>/admin</code> after logging in.</li>
+  <li>Health check: <code>http://localhost:3000/health</code></li>
+</ul>
+<p><code>localhost</code> means "this computer". Only you can see it; nothing is on the internet.</p>
+
+<h2>10. Stop and restart</h2>
+<ul>
+  <li><strong>Stop:</strong> click in the terminal that is running the site and press <kbd>Ctrl</kbd>+<kbd>C</kbd> (on macOS too). If asked "Terminate batch job (Y/N)?", type <kbd>Y</kbd>.</li>
+  <li><strong>Start again:</strong> run the same command (<code>npm run dev</code>). Pressing <kbd>↑</kbd> in the terminal brings back the last command.</li>
+  <li><strong>After changes</strong>, see the table below.</li>
+</ul>
+<table>
+  <thead><tr><th style="width:35%">You changed...</th><th>What to do</th></tr></thead>
+  <tbody>
+    <tr><td>A <code>.js</code> file in <code>src/</code>, or a <code>.json</code> file (like <code>locales/en.json</code>)</td><td>With <code>npm run dev</code>: nothing, it restarts itself. With <code>npm start</code>: stop and start.</td></tr>
+    <tr><td>An <code>.ejs</code> file in <code>views/</code></td><td>Just refresh the browser. (On your computer, Express reads templates fresh every time.)</td></tr>
+    <tr><td><code>src/styles/input.css</code>, or you added new class names in a template</td><td>Run <code>npm run build:css</code>, then refresh. Or keep <code>npm run dev:css</code> running in a second terminal: it rebuilds on every save.</td></tr>
+    <tr><td>A file in <code>public/</code> (a script or picture)</td><td>Refresh. If the old version still shows, do a hard refresh: <kbd>Ctrl</kbd>+<kbd>F5</kbd> (Windows/Linux) or <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> (macOS).</td></tr>
+    <tr><td><code>.env</code> or <code>package.json</code></td><td>Stop and start. After a <code>package.json</code> change, run <code>npm install</code> first.</td></tr>
+  </tbody>
+</table>
+
+<h2>Looking at pages without a database</h2>
+<p>The project has a <strong>preview server</strong> that shows every page using made-up sample data. It is handy for design work, or if your database is not ready yet. Nothing is saved and forms do not submit.</p>
+<pre class="code solo" data-lang="shell">node docs/ui-revamp/tools/preview-server.mjs
+# then open http://localhost:4100/__pages   (Windows: or double-click docs/ui-revamp/tools/start-preview.bat)</pre>
+
+<h2>Common setup errors</h2>
+<table>
+  <thead><tr><th style="width:38%">You see</th><th>What it means and the fix</th></tr></thead>
+  <tbody>
+    <tr><td><code>'node' is not recognized</code> / <code>command not found: node</code></td><td>Node.js is not installed, or the terminal was open before you installed it. Install it, then open a new terminal.</td></tr>
+    <tr><td><code>The database address is missing.</code></td><td>No <code>.env</code>, or it is in the wrong folder, or the <code>*_DATABASE_URL</code> for your <code>DB_TARGET</code> is empty.</td></tr>
+    <tr><td><code>Database not ready (ECONNREFUSED)</code>, then <code>Is Postgres started?</code></td><td>PostgreSQL is not running. Start it (Windows: Services app → "postgresql" → Start; macOS: open Postgres.app; Linux: <code>sudo service postgresql start</code>).</td></tr>
+    <tr><td><code>(28P01)</code> "password is wrong"</td><td>The password inside the database address is wrong.</td></tr>
+    <tr><td><code>database "seniorpadi" does not exist</code></td><td>Do step 4.</td></tr>
+    <tr><td><code>EADDRINUSE: address already in use :::3000</code></td><td>The site is already running in another terminal. Stop that one, or set <code>PORT=3001</code> in <code>.env</code>.</td></tr>
+    <tr><td>Pages show with no styling</td><td>Run <code>npm run build:css</code>.</td></tr>
+    <tr><td><code>npm install</code> fails on <code>bcrypt</code></td><td>Usually an old Node version. Install the current Node LTS, delete <code>node_modules</code>, run <code>npm install</code> again.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout know"><span class="label">Things to know</span>
+<ul>
+  <li><code>start-windows.bat</code> tries to copy a file called <code>.env.example</code> when <code>.env</code> is missing, but <strong>the project has no <code>.env.example</code></strong>. On a fresh copy the batch file will open an empty Notepad. Create <code>.env</code> by hand as in step 5.</li>
+  <li>The start-up message says uploads are "switched off" without Cloudinary, but <code>src/services/cloudinary.js</code> actually saves them on your computer instead (<code>public/uploads/</code>, <code>storage/ids/</code>). The warning is out of date, not the uploads.</li>
+</ul></div>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li>Install Node.js, Git and PostgreSQL; clone; <code>npm install</code>; create <code>.env</code>; <code>npm run dev</code>.</li>
+  <li>The app creates its own tables and first admin account.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>C</kbd> stops it. <code>npm run dev</code> restarts by itself; CSS changes need <code>npm run build:css</code>.</li>
+</ul></div>
+<div class="callout try"><span class="label">Try it yourself</span><p>Run <code>npm run seed:local</code>, start the site, and log in as the demo admin (phone <code>08000000001</code>, password <code>password123</code>). Then log out and sign up as a brand-new senior with your own made-up details.</p></div>

@@ -1,0 +1,161 @@
+<h1 id="ch3"><span class="num">Chapter 3</span>Technologies used, in plain English</h1>
+
+<p class="lead">SeniorPadi is built from a handful of well-known tools. For each one: what it is, why the project uses it, where you will find it, and a tiny real example from the code.</p>
+
+<p>The version numbers come from <code>package.json</code> and are the ones installed today. A version written as <code>^5.2.1</code> in <code>package.json</code> means "5.2.1 or any newer 5.x".</p>
+
+<table>
+  <thead><tr><th style="width:26%">Technology</th><th style="width:16%">Version</th><th>Job in one line</th></tr></thead>
+  <tbody>
+    <tr><td>JavaScript</td><td>(language)</td><td>The programming language for both the server and the small browser scripts.</td></tr>
+    <tr><td>Node.js</td><td>20 or newer</td><td>Runs JavaScript on a computer instead of in a browser.</td></tr>
+    <tr><td>npm</td><td>comes with Node</td><td>Downloads packages and runs the project's commands.</td></tr>
+    <tr><td>Express</td><td>5.2.1</td><td>The web framework: turns addresses into pages.</td></tr>
+    <tr><td>EJS</td><td>6.0.1</td><td>Templates: HTML with gaps for data.</td></tr>
+    <tr><td>PostgreSQL + pg</td><td>pg 8.23.0</td><td>The database, and the driver Node uses to talk to it.</td></tr>
+    <tr><td>Sequelize (+ CLI)</td><td>6.37.8 / 6.6.5</td><td>Lets you use database tables as JavaScript objects.</td></tr>
+    <tr><td>express-session + connect-pg-simple</td><td>1.19.0 / 10.0.0</td><td>Remembers who is logged in, stored in the database.</td></tr>
+    <tr><td>bcrypt</td><td>6.0.0</td><td>Scrambles passwords so they are never stored readable.</td></tr>
+    <tr><td>csrf-sync</td><td>4.2.1</td><td>Protects forms from being faked by other websites.</td></tr>
+    <tr><td>express-rate-limit</td><td>8.7.0</td><td>Slows down people guessing passwords.</td></tr>
+    <tr><td>dotenv</td><td>18.0.4</td><td>Reads private settings from the <code>.env</code> file.</td></tr>
+    <tr><td>multer</td><td>2.4.0</td><td>Receives uploaded files.</td></tr>
+    <tr><td>cloudinary</td><td>2.11.0</td><td>Stores pictures, ID documents and videos online.</td></tr>
+    <tr><td>node-cron</td><td>4.6.0</td><td>Runs jobs on a timetable (reminder texts at 8am).</td></tr>
+    <tr><td>qrcode</td><td>1.5.4</td><td>Draws the optional QR check-in code.</td></tr>
+    <tr><td>Socket.IO</td><td>4.8.4</td><td>Live chat: new messages appear without reloading.</td></tr>
+    <tr><td>Tailwind CSS (+ CLI)</td><td>4.3.3</td><td>The styling system that builds the stylesheet.</td></tr>
+    <tr><td>Font Awesome</td><td>6.5.2 (from a CDN)</td><td>The little icons.</td></tr>
+    <tr><td>Brevo, Google Translate</td><td>web services</td><td>SMS and email; Yorùbá translations of event text.</td></tr>
+    <tr><td>Jest + supertest</td><td>30.5.2 / 7.3.0</td><td>Automatic tests.</td></tr>
+    <tr><td>nodemon, cross-env</td><td>3.1.14 / 10.1.0</td><td>Development helpers.</td></tr>
+    <tr><td>Git, GitHub, Render, Neon</td><td>tools and services</td><td>Saving history, sharing code, hosting the site and the database.</td></tr>
+  </tbody>
+</table>
+
+<h2>JavaScript and Node.js</h2>
+<p><strong>JavaScript</strong> is a programming language. It started in web browsers, which is why the little scripts in <code>public/js/</code> are JavaScript. <strong>Node.js</strong> is a program that runs JavaScript on an ordinary computer or server, outside a browser. All of <code>src/</code> runs in Node.js. The project says it needs version 20 or newer:</p>
+<pre data-file="package.json" data-find="&quot;engines&quot;" data-lines="3"></pre>
+<p>Two JavaScript ideas you will see everywhere in this project:</p>
+<ul>
+  <li><code>require('...')</code> loads another file or package so you can use it, like borrowing a tool from a shelf. <code>module.exports = ...</code> is how a file puts its tools on the shelf.</li>
+  <li><code>async</code> and <code>await</code>: talking to the database takes time, so <code>await</code> means "wait here for the answer before carrying on".</li>
+</ul>
+
+<h2>npm and package.json</h2>
+<p><strong>npm</strong> (Node Package Manager) comes with Node.js. A <strong>package</strong> is code someone else wrote and shared, like Express. <code>package.json</code> lists the packages SeniorPadi needs and gives names to its commands ("scripts"). <code>npm install</code> downloads the packages into <code>node_modules/</code>; <code>npm run dev</code> runs the script called <code>dev</code>.</p>
+<pre data-file="package.json" data-find="&quot;dev:local&quot;" data-lines="1"></pre>
+<ul class="explain"><li>This script uses <strong>cross-env</strong> to set <code>DB_TARGET=local</code> (works on Windows, Mac and Linux alike) and <strong>nodemon</strong> to restart the site when a <code>.js</code> or <code>.json</code> file changes.</li></ul>
+
+<h2>Express</h2>
+<p><strong>Express</strong> is a <em>web framework</em>: a ready-made skeleton for a web server. You tell it "when someone asks for this address, run this function". Those instructions are called <strong>routes</strong>. Express also runs <strong>middleware</strong>, functions that every request passes through on its way to a route, like security guards in a corridor.</p>
+<p>Where: <code>src/app.js</code> builds the app; <code>src/routes/</code> holds the routes; <code>src/middleware/</code> holds the middleware.</p>
+<pre data-file="src/app.js" data-find="app.use('/', require('./routes/public'));" data-lines="7"></pre>
+<ul class="explain">
+  <li>Each line plugs a file of routes into the app. They are tried top to bottom until one matches the address.</li>
+  <li>The admin routes are plugged in at <code>/admin</code>, so <code>router.get('/events')</code> inside <code>admin.js</code> answers <code>/admin/events</code>.</li>
+</ul>
+
+<h2>EJS (Embedded JavaScript templates)</h2>
+<p><strong>EJS</strong> lets you write an ordinary HTML page with special tags where data should go. The server fills in the gaps and sends plain HTML. Chapter 6 is all about EJS.</p>
+<p>Where: every file in <code>views/</code>. It is switched on in <code>src/app.js</code>:</p>
+<pre data-file="src/app.js" data-find="app.set('view engine', 'ejs');" data-lines="2"></pre>
+<ul class="explain"><li>"Use EJS for pages" and "the pages are in the <code>views</code> folder". So <code>res.render('home')</code> means <code>views/home.ejs</code>.</li></ul>
+
+<h2>PostgreSQL and the pg driver</h2>
+<p>A <strong>database</strong> stores information permanently, in <strong>tables</strong> (like spreadsheets): a Users table, an Events table and so on. Each row is one thing (one user); each column is one detail (their phone number). <strong>PostgreSQL</strong> ("Postgres") is the database program SeniorPadi uses. It runs separately from the website: on your computer while you develop, or on <strong>Neon</strong> (a Postgres host in the cloud) for the live site. <strong>pg</strong> is the package Node uses to talk to it.</p>
+<pre data-file="src/config/session.js" data-find="const sessionPool = new Pool" data-lines="1"></pre>
+<ul class="explain"><li>A "pool" is a small set of open connections to the database that get reused, which is faster than connecting for every request.</li></ul>
+
+<h2>Sequelize, models and migrations</h2>
+<p><strong>Sequelize</strong> is an <em>ORM</em> (object-relational mapper): it lets you work with tables using JavaScript instead of writing database commands (SQL) by hand. A <strong>model</strong> is the JavaScript description of one table.</p>
+<pre data-file="src/models/event.js" data-find="const Event = sequelize.define('Event', {" data-lines="5"></pre>
+<p>Reading data then looks like this (the Home page asking for the next four published events):</p>
+<pre data-file="src/routes/public.js" data-find="const upcoming = await Event.findAll({" data-lines="6"></pre>
+<ul class="explain">
+  <li><code>where</code>: only published events that start after now (<code>Op.gt</code> means "greater than").</li>
+  <li><code>include: [Organization]</code>: also fetch the organization each event belongs to.</li>
+  <li><code>order</code> and <code>limit</code>: soonest first, at most four.</li>
+</ul>
+<p>A <strong>migration</strong> is a small file that changes the shape of the database, for example "create the Organizations table". They are kept in date order in <code>src/migrations/</code> and each one runs only once. SeniorPadi runs new migrations by itself every time it starts (<code>src/services/migrate.js</code>), so you rarely run them by hand. The <strong>Sequelize CLI</strong> (command-line interface) can also run them: <code>npm run db:migrate</code>. <code>.sequelizerc</code> tells it where things are.</p>
+<pre data-file="src/migrations/20260927000002-create-organizations.js" data-find="await queryInterface.createTable('Organizations', {" data-lines="5"></pre>
+
+<h2>Sessions: express-session and connect-pg-simple</h2>
+<p>The web forgets you between requests. A <strong>session</strong> is how the site remembers you: after you log in, the server stores <code>userId</code> in a session and gives your browser a <strong>cookie</strong> (a small label the browser sends back with every request). <strong>express-session</strong> handles this, and <strong>connect-pg-simple</strong> stores sessions in the database so they survive a restart.</p>
+<pre data-file="src/config/session.js" data-find="cookie: {" data-lines="6"></pre>
+<ul class="explain">
+  <li><code>httpOnly</code>: page scripts cannot read the cookie (safer).</li>
+  <li><code>maxAge</code>: 30 days, so seniors don't have to log in often.</li>
+</ul>
+
+<h2>bcrypt (password hashing)</h2>
+<p>Passwords are never stored as typed. <strong>bcrypt</strong> turns a password into a <em>hash</em>, a scrambled string that cannot be turned back. At log-in, bcrypt checks whether the typed password produces the same hash.</p>
+<pre data-file="src/routes/public.js" data-find="const passwordOk =" data-lines="1"></pre>
+
+<h2>csrf-sync (form protection)</h2>
+<p><strong>CSRF</strong> (cross-site request forgery) is a trick where another website secretly submits a form to SeniorPadi using your logged-in browser. To stop it, every form carries a secret <strong>token</strong> that only the real page knows, and the server rejects forms without the right one.</p>
+<pre data-file="views/auth/login.ejs" data-find="name=&quot;_csrf&quot;" data-lines="1"></pre>
+<div class="callout warn"><span class="label">Warning</span><p>Every <code>&lt;form method="post"&gt;</code> you add must include this hidden <code>_csrf</code> line, or submitting it shows "This form has expired".</p></div>
+
+<h2>express-rate-limit</h2>
+<p>Limits how many times someone can try something in a period of time, so nobody can guess passwords by trying thousands.</p>
+<pre data-file="src/middleware/rateLimit.js" data-find="loginLimiter: limiter(10, 15)," data-lines="5"></pre>
+<ul class="explain"><li>Log in: at most 10 tries every 15 minutes. Sign up: 5 an hour, and so on.</li></ul>
+
+<h2>dotenv and environment variables</h2>
+<p>An <strong>environment variable</strong> is a setting given to a program from outside its code, such as the database address or a password. Keeping them outside the code means secrets never end up on GitHub. <strong>dotenv</strong> reads them from a file called <code>.env</code> in the project folder; the code then reads them as <code>process.env.NAME</code>.</p>
+<pre data-file="src/app.js" data-find="require('dotenv')" data-lines="1"></pre>
+
+<h2>Uploads: multer and Cloudinary</h2>
+<p><strong>multer</strong> receives files sent from a form (profile pictures, ID documents, the welcome video) and keeps them in memory. <strong>Cloudinary</strong> is an online picture and video store; <code>src/services/cloudinary.js</code> sends the files there. If Cloudinary is not set up, that same file saves uploads on your computer instead (in <code>public/uploads/</code> and <code>storage/ids/</code>, both ignored by Git).</p>
+<pre data-file="src/middleware/upload.js" data-find="storage: multer.memoryStorage()," data-lines="2"></pre>
+
+<h2>Brevo (SMS and email) and Google Translate</h2>
+<p>These are outside web services the server calls over the internet with <code>fetch</code> (no extra package). <strong>Brevo</strong> sends the confirmation and reminder texts and emails; <strong>Google Cloud Translation</strong> translates event titles and descriptions into Yorùbá. Both are optional: without keys, messages are printed in the terminal instead, and event text stays in English.</p>
+<pre data-file="src/services/notify.js" data-find="const BREVO_EMAIL_URL" data-lines="2"></pre>
+
+<h2>node-cron (scheduled jobs)</h2>
+<p>Runs a function on a timetable, written in "cron" format. SeniorPadi sends reminders every morning at 8:00 and closes finished events every hour, in Lagos time.</p>
+<pre data-file="src/services/cron.js" data-find="cron.schedule('0 8 * * *'" data-lines="2"></pre>
+<ul class="explain"><li><code>'0 8 * * *'</code> reads as "minute 0, hour 8, every day". <code>'0 * * * *'</code> is "minute 0 of every hour".</li></ul>
+
+<h2>qrcode</h2>
+<p>Draws a QR code picture as SVG. Each registration has a QR code staff can scan to mark someone as arrived; it is always optional.</p>
+<pre data-file="src/services/qr.js" data-find="function qrSvg(qrToken)" data-lines="3"></pre>
+
+<h2>Socket.IO (live chat)</h2>
+<p>Normally the browser has to ask before the server can answer. <strong>Socket.IO</strong> keeps a line open between them, so the server can push a new chat message the moment it arrives. It shares the same login session as the website. The plain message form still works if it fails.</p>
+<pre data-file="src/sockets/index.js" data-find="io.engine.use(sessionMiddleware);" data-lines="1"></pre>
+
+<h2>Tailwind CSS</h2>
+<p><strong>CSS</strong> (Cascading Style Sheets) is the language for how a page looks: colours, sizes, spacing. <strong>Tailwind CSS</strong> is a CSS tool built around small ready-made class names such as <code>text-lg</code> (large text) or <code>rounded-full</code> (fully rounded corners), which you write straight into the HTML. You edit <code>src/styles/input.css</code>; the Tailwind <strong>CLI</strong> reads it plus every template, and writes the finished <code>public/css/main.css</code>.</p>
+<pre data-file="src/styles/input.css" data-find="@import &quot;tailwindcss&quot;;" data-lines="3"></pre>
+<ul class="explain">
+  <li><code>@source</code> tells Tailwind which files to scan for class names (the views and the browser scripts).</li>
+  <li>Brand colours and the font are set in an <code>@theme</code> block further down. Chapter 9 shows it.</li>
+</ul>
+
+<h2>Font Awesome and the Outfit font</h2>
+<p>The small icons (phone, calendar, lock) come from <strong>Font Awesome</strong>, loaded from a public <em>CDN</em> (a fast file server on the internet), so icons need an internet connection. The text font, <strong>Outfit</strong>, is stored in the project itself (<code>public/fonts/</code>).</p>
+<pre data-file="views/partials/header.ejs" data-find="font-awesome" data-lines="1"></pre>
+
+<h2>Jest and supertest (tests)</h2>
+<p>A <strong>test</strong> is a small program that uses the site and checks it behaves correctly. <strong>Jest</strong> runs the tests in <code>tests/</code>; <strong>supertest</strong> lets a test send requests to the app without a browser. Run them with <code>npm test</code>. They need their own empty database (<code>TEST_DATABASE_URL</code>) because they wipe it.</p>
+<pre data-file="tests/routes.test.js" data-find="test('a senior can sign up with a plain form (no JavaScript)'" data-lines="11"></pre>
+
+<h2>Git, GitHub, Render and Neon</h2>
+<ul>
+  <li><strong>Git</strong> keeps the history of every change, so you can always go back. A <em>commit</em> is a saved snapshot; a <em>branch</em> is a separate line of work.</li>
+  <li><strong>GitHub</strong> stores the Git history online and is where pull requests are reviewed and merged.</li>
+  <li><strong>Render</strong> runs the live website. <code>render.yaml</code> tells it how.</li>
+  <li><strong>Neon</strong> runs the live PostgreSQL database.</li>
+</ul>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li>The server is JavaScript running in Node.js, organised by Express, with pages written in EJS.</li>
+  <li>Data lives in PostgreSQL; Sequelize models describe tables, and migrations change them.</li>
+  <li>Sessions, bcrypt, CSRF tokens and rate limits keep accounts safe.</li>
+  <li>Tailwind builds <code>public/css/main.css</code> from <code>src/styles/input.css</code>.</li>
+  <li>Brevo, Cloudinary and Google Translate are optional add-ons; the site runs without them.</li>
+</ul></div>

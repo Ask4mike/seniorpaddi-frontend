@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SeniorPadi: Beginner's Project Guide</title>
+<style>
+  /* SeniorPadi brand colours, copied from the @theme block in src/styles/input.css */
+  :root {
+    --primary: #4a3fb0; --primary-dark: #3b3290; --secondary: #231d5c;
+    --yolk: #f5b82e; --yolk-100: #fef3d6; --charcoal: #1f1b2e; --muted: #4b4763;
+    --lavender: #f4f2fc; --indigo-50: #efedfb; --indigo-100: #e0dcf7; --mint-wash: #ddf5ee;
+    --success: #1f7a5f; --success-bg: #ddf3ea; --error: #a8380a; --error-bg: #fde8dd;
+    --warning-ink: #6b4200; --rose: #c42a85; --cream: #fff9f0; --hairline: #e9e5f5;
+    --code-bg: #f7f6fc;
+  }
+  @font-face {
+    font-family: "Outfit";
+    src: url("../../../public/fonts/outfit-variable.woff2") format("woff2");
+    font-weight: 100 900;
+  }
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+  @page cover { margin: 0; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Outfit", "Segoe UI", Arial, sans-serif; font-size: 11.5pt; line-height: 1.55; color: var(--charcoal); }
+
+  /* ---------- cover ---------- */
+  .cover { page: cover; height: 297mm; width: 210mm; position: relative; overflow: hidden; color: var(--charcoal);
+    background: linear-gradient(135deg, var(--mint-wash) 0%, var(--lavender) 55%, var(--indigo-100) 100%); break-after: page; }
+  .cover .leaf { position: absolute; color: #fff; opacity: .6; }
+  .cover-inner { position: absolute; left: 22mm; right: 22mm; top: 40mm; }
+  .cover-logo { display: inline-flex; align-items: center; gap: 10px; font-size: 18pt; font-weight: 700; margin-bottom: 30mm; }
+  .cover-logo .mark { width: 46px; height: 46px; border-radius: 50%; background: var(--primary); display: inline-flex; align-items: center; justify-content: center; }
+  .cover .kicker { font-size: 13pt; font-weight: 600; color: var(--primary); letter-spacing: .02em; margin: 0 0 6mm; }
+  .cover h1.cover-title { font-size: 44pt; line-height: 1.02; margin: 0 0 8mm; letter-spacing: -.02em; border: 0; padding: 0; color: var(--charcoal); break-before: auto; }
+  .cover .sub { font-size: 15pt; color: var(--muted); max-width: 140mm; margin: 0; }
+  .cover-meta { position: absolute; left: 22mm; bottom: 26mm; right: 22mm; display: flex; gap: 10mm; font-size: 11pt; }
+  .cover-meta div { background: rgba(255,255,255,.75); border-radius: 14px; padding: 10px 16px; }
+  .cover-meta b { display: block; font-size: 9pt; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+  .cover-card { position: absolute; right: 22mm; top: 196mm; width: 72mm; background: #fff; border-radius: 22px; padding: 16px 18px; box-shadow: 0 10px 30px rgba(35,29,92,.12); font-size: 10.5pt; }
+  .cover-card p { margin: 0 0 6px; }
+
+  /* ---------- headings ---------- */
+  h1, h2, h3, h4 { font-weight: 700; letter-spacing: -.01em; line-height: 1.2; break-after: avoid; }
+  h1 { font-size: 26pt; color: var(--secondary); margin: 0 0 4mm; padding-bottom: 3mm; border-bottom: 3px solid var(--yolk); break-before: page; }
+  h1 .num { display: block; font-size: 11pt; font-weight: 600; color: var(--primary); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2mm; }
+  h2 { font-size: 16.5pt; color: var(--primary-dark); margin: 9mm 0 3mm; }
+  h3 { font-size: 13pt; color: var(--charcoal); margin: 6mm 0 2mm; }
+  h4 { font-size: 11.5pt; margin: 5mm 0 2mm; color: var(--secondary); }
+  p { margin: 0 0 3mm; orphans: 3; widows: 3; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1.2mm; }
+  a { color: var(--primary); text-decoration: none; }
+  strong { font-weight: 700; }
+  .lead { font-size: 13pt; color: var(--muted); margin-bottom: 5mm; }
+  code { font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 9.6pt; background: var(--indigo-50); color: var(--secondary); padding: 0 3px; border-radius: 4px; overflow-wrap: anywhere; }
+  kbd { font-family: "Outfit", sans-serif; font-size: 10pt; border: 1px solid #c9c4de; border-bottom-width: 2px; border-radius: 5px; padding: 0 5px; background: #fff; }
+
+  /* ---------- contents ---------- */
+  .toc-page-wrap h1 { break-before: auto; }
+  ol.toc { list-style: none; padding: 0; margin: 0; }
+  ol.toc li { margin: 0; }
+  ol.toc a { display: flex; align-items: baseline; gap: 6px; color: var(--charcoal); padding: 0.9mm 0; }
+  .toc-l1 a { font-weight: 700; font-size: 12pt; margin-top: 2.4mm; color: var(--secondary); }
+  .toc-l2 a { padding-left: 7mm; font-size: 10.3pt; color: var(--muted); }
+  .toc-dots { flex: 1; border-bottom: 1px dotted #b9b4cf; transform: translateY(-3px); }
+  .toc-page { min-width: 8mm; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ---------- code ---------- */
+  .code-file { font-family: "Cascadia Mono", Consolas, monospace; font-size: 8.8pt; color: #fff; background: var(--secondary); padding: 1.6mm 3.5mm; border-radius: 8px 8px 0 0; margin-top: 3mm; break-after: avoid; }
+  .code-file .loc { color: #c9c4ef; font-size: 8.4pt; }
+  .loc { color: var(--muted); font-size: 8.4pt; }
+  pre.code { font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 8.9pt; line-height: 1.5; background: var(--code-bg);
+    border: 1px solid var(--hairline); border-radius: 0 0 8px 8px; padding: 3mm 3.5mm; margin: 0 0 4mm; white-space: pre-wrap; overflow-wrap: anywhere; }
+  pre.code.solo { border-radius: 8px; margin-top: 3mm; }
+  .tk-c { color: #5f6f64; font-style: italic; }
+  .tk-s { color: #a8380a; }
+  .tk-n { color: #1f7a5f; }
+  .tk-k { color: #3b3290; font-weight: 700; }
+  .tk-ejs { color: #b0217a; font-weight: 700; background: #fbe7f2; border-radius: 3px; }
+  .tk-tag { color: #175e49; font-weight: 600; }
+  .tk-attr { color: #6b4200; }
+  .explain { margin: -2mm 0 4mm; padding: 0; list-style: none; font-size: 10.5pt; }
+  .explain li { padding-left: 5mm; position: relative; margin-bottom: 1mm; }
+  .explain li::before { content: "→"; position: absolute; left: 0; color: var(--primary); font-weight: 700; }
+
+  /* ---------- callouts ---------- */
+  .callout { border-radius: 10px; padding: 3mm 4mm 2mm; margin: 4mm 0; border-left: 5px solid; break-inside: avoid; font-size: 10.8pt; }
+  .callout > .label { display: block; font-weight: 700; font-size: 9.5pt; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 1mm; }
+  .callout p:last-child, .callout ul:last-child, .callout ol:last-child { margin-bottom: 1mm; }
+  .tip { background: var(--success-bg); border-color: var(--success); } .tip > .label { color: var(--success); }
+  .warn { background: var(--error-bg); border-color: var(--error); } .warn > .label { color: var(--error); }
+  .important { background: var(--indigo-50); border-color: var(--primary); } .important > .label { color: var(--primary-dark); }
+  .try { background: var(--yolk-100); border-color: var(--yolk); } .try > .label { color: var(--warning-ink); }
+  .know { background: #fff; border: 1.5px dashed #8a83b5; border-left: 5px solid #8a83b5; } .know > .label { color: #514a86; }
+  .learned { background: var(--lavender); border-radius: 12px; padding: 4mm 5mm 2mm; margin: 7mm 0 3mm; break-inside: avoid; }
+  .learned > .label { display: block; font-weight: 700; color: var(--secondary); font-size: 12pt; margin-bottom: 1.5mm; }
+
+  /* "Used by / Uses" box for each file */
+  .conn { display: grid; grid-template-columns: 20mm 1fr; gap: 1mm 3mm; background: #fff; border: 1px solid var(--indigo-100); border-radius: 8px; padding: 2.5mm 3.5mm; margin: 2mm 0 4mm; font-size: 10pt; break-inside: avoid; }
+  .conn b { color: var(--primary-dark); }
+  .file-card > h3 { font-family: "Cascadia Mono", Consolas, monospace; font-size: 11pt; color: var(--secondary); background: var(--lavender); padding: 2mm 3mm; border-radius: 8px; }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 5mm; font-size: 10pt; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  th { text-align: left; background: var(--secondary); color: #fff; font-weight: 600; padding: 2mm 2.5mm; }
+  td { padding: 1.8mm 2.5mm; border-bottom: 1px solid var(--hairline); vertical-align: top; overflow-wrap: anywhere; }
+  tbody tr:nth-child(even) td { background: #faf9fe; }
+  td code { font-size: 8.8pt; }
+  table.filemap td.fm-path { font-family: "Cascadia Mono", Consolas, monospace; font-size: 8.3pt; width: 40%; color: var(--secondary); }
+  table.filemap { font-size: 9.5pt; margin-bottom: 3mm; }
+  h4.map-group { margin-top: 5mm; padding: 1.5mm 3mm; background: var(--indigo-50); border-radius: 6px; }
+
+  /* ---------- diagrams and small helpers ---------- */
+  figure { margin: 4mm 0 5mm; break-inside: avoid; text-align: center; }
+  figure svg { max-width: 100%; height: auto; }
+  figcaption { font-size: 9.5pt; color: var(--muted); margin-top: 1.5mm; }
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 10mm; margin-bottom: 2.4mm; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0.3mm; width: 6.5mm; height: 6.5mm; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; font-size: 9.5pt; display: flex; align-items: center; justify-content: center; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .pill { display: inline-block; background: var(--indigo-50); color: var(--primary-dark); border-radius: 999px; padding: 0 8px; font-size: 9.5pt; font-weight: 600; }
+  .keep { break-inside: avoid; }
+  .page-break { break-before: page; }
+  .cheat { font-size: 10pt; }
+  .cheat h2 { margin-top: 4mm; font-size: 13pt; }
+  .cheat table { font-size: 9.3pt; margin-bottom: 3mm; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <svg class="leaf" style="left:-30mm;top:120mm;width:170mm;transform:rotate(-14deg)" viewBox="0 0 200 200" aria-hidden="true"><path fill="currentColor" d="M100 10c48 30 70 78 50 130-12 32-38 50-50 50s-38-18-50-50C30 88 52 40 100 10z"/></svg>
+  <svg class="leaf" style="right:-40mm;top:-30mm;width:150mm;transform:rotate(30deg)" viewBox="0 0 200 200" aria-hidden="true"><path fill="currentColor" d="M100 10c48 30 70 78 50 130-12 32-38 50-50 50s-38-18-50-50C30 88 52 40 100 10z"/></svg>
+  <div class="cover-inner">
+    <div class="cover-logo"><span class="mark"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.1 0 3.6 1.1 4.2 2.5.6-1.4 2.1-2.5 4.2-2.5 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg></span>SeniorPadi</div>
+    <p class="kicker">Learn it, run it, change it</p>
+    <h1 class="cover-title" data-no-toc>Senior Paddi:<br>Beginner's Project Guide</h1>
+    <p class="sub">A friendly, step-by-step tour of the whole SeniorPadi website: what every folder and file does, how EJS pages are built, and how to run and change the project on your own.</p>
+  </div>
+  <div class="cover-card">
+    <p><strong>Who this is for</strong></p>
+    <p>Anyone who is new to Node.js, Express and EJS. No experience needed, only curiosity.</p>
+  </div>
+  <div class="cover-meta">
+    <div><b>Version</b>1.0</div>
+    <div><b>Date</b><!--TODAY--></div>
+    <div><b>Project</b>seniorpadi 0.1.0</div>
+  </div>
+</section>
+
+<section class="toc-page-wrap">
+  <h1 id="contents" data-no-toc>Contents</h1>
+  <!--TOC-->
+</section>
+
+<!--CHAPTERS-->
+
+</body>
+</html>

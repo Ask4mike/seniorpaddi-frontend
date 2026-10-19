@@ -1,0 +1,86 @@
+<h1 id="ch2"><span class="num">Chapter 2</span>The big picture</h1>
+
+<p class="lead">Before looking at any code, it helps to see the whole machine at once. This chapter follows one visit, from typing an address to seeing a page.</p>
+
+<h2>A website is a conversation</h2>
+<p>Every time you open a page, two programs talk to each other:</p>
+<ul>
+  <li>The <strong>browser</strong> (Chrome, Edge, the browser on a phone) is the program that shows pages. It <em>asks</em>.</li>
+  <li>The <strong>server</strong> is a program running on a computer somewhere (or on your own computer while you work). It <em>answers</em>.</li>
+</ul>
+<p>The question is called a <strong>request</strong> and the answer is called a <strong>response</strong>. A request is like a letter with an address on it, for example <code>GET /events</code> ("please give me the events page"). <code>GET</code> means "show me something"; <code>POST</code> means "here is a form I filled in".</p>
+
+<div class="callout tip"><span class="label">An everyday picture</span>
+<p>Think of SeniorPadi as a small office. The <strong>address</strong> on the letter (<code>/login</code>) is like a street address. The <strong>route</strong> is the person who answers the door at that address. The <strong>database</strong> is the filing cabinet in the back room. The <strong>view</strong> is a pre-printed form that the person fills in before handing it back to you.</p></div>
+
+<h2>The main parts of SeniorPadi</h2>
+<figure>
+  <img src="assets/architecture.svg" alt="Diagram: the browser sends a request to the server; inside the server, static files, middleware, routes, services, models and views run in order; models talk to the PostgreSQL database; services talk to Brevo, Cloudinary and Google Translate; the server sends an HTML page back." style="width:100%">
+  <figcaption>Figure 2.1 How the parts of SeniorPadi connect. The numbers are the order a request passes through.</figcaption>
+</figure>
+
+<table>
+  <thead><tr><th style="width:24%">Part</th><th style="width:28%">Where it lives</th><th>What it does, in one sentence</th></tr></thead>
+  <tbody>
+    <tr><td>Server start</td><td><code>src/server.js</code></td><td>Checks the settings, connects to the database, then starts listening for requests.</td></tr>
+    <tr><td>The app</td><td><code>src/app.js</code></td><td>Builds the Express app and decides the order every request is handled in.</td></tr>
+    <tr><td>Static files</td><td><code>public/</code></td><td>Files sent to the browser exactly as they are: the stylesheet, fonts, pictures and small scripts.</td></tr>
+    <tr><td>Middleware</td><td><code>src/middleware/</code></td><td>Small checks that run before every page: who is logged in, which language, is the form genuine.</td></tr>
+    <tr><td>Routes</td><td><code>src/routes/</code></td><td>One function per address, which decides what to do and which page to show.</td></tr>
+    <tr><td>Services</td><td><code>src/services/</code></td><td>The project's rules, kept out of the routes so several routes can share them (seats, SMS, dates).</td></tr>
+    <tr><td>Models</td><td><code>src/models/</code></td><td>A JavaScript description of each database table, used to read and save data.</td></tr>
+    <tr><td>Database</td><td>PostgreSQL (outside the project)</td><td>Where users, events and registrations are stored permanently.</td></tr>
+    <tr><td>Views</td><td><code>views/</code></td><td>EJS templates: HTML pages with gaps that are filled in with data.</td></tr>
+    <tr><td>Words</td><td><code>locales/</code></td><td>Every sentence on the site, in English and Yorùbá.</td></tr>
+  </tbody>
+</table>
+
+<h2>One visit, from start to finish</h2>
+<p>Here is what happens when someone types <code>localhost:3000/login</code>, fills in the form and presses <strong>Log in</strong>. Every page on the site follows this same path; only the route, the data and the view change.</p>
+<figure>
+  <img src="assets/request-lifecycle.svg" alt="Diagram: six steps of a log-in request, from the browser sending the form, through middleware, the route, tidying the phone number and checking the database, to either showing the login page again with an error or redirecting to Home." style="width:100%">
+  <figcaption>Figure 2.2 The life of one request. The file names show where each step happens.</figcaption>
+</figure>
+
+<h3>Opening the page (GET /login)</h3>
+<ol class="steps">
+  <li>The browser asks for <code>GET /login</code>.</li>
+  <li><code>src/app.js</code> first checks whether <code>public/</code> has a file called <code>login</code>. It doesn't, so the request moves on.</li>
+  <li>The middleware runs: the session is loaded (<code>src/config/session.js</code>), the user and language are found (<code>src/middleware/locals.js</code>) and a fresh security token is made for the form (<code>src/middleware/csrf.js</code>).</li>
+  <li>The routes are tried in order until one matches. <code>src/routes/public.js</code> has <code>router.get('/login', ...)</code>, so it answers.</li>
+  <li>That route calls <code>res.render('auth/login', {...})</code>. EJS takes <code>views/auth/login.ejs</code>, fills in the words and the token, and produces plain HTML.</li>
+  <li>The HTML goes back to the browser. The browser then asks for the files the page mentions (<code>/css/main.css</code>, the font, the scripts) and those come straight from <code>public/</code>.</li>
+</ol>
+
+<h3>Sending the form (POST /login)</h3>
+<p>Pressing <strong>Log in</strong> sends a second request, <code>POST /login</code>, with what was typed. Figure 2.2 shows its steps. The important idea is the ending: if the details are wrong, the server shows the same page again with an error message; if they are right, it remembers the person in the <strong>session</strong> and sends a <strong>redirect</strong>, which tells the browser to go and ask for another page (Home).</p>
+
+<div class="callout important"><span class="label">Important</span>
+<p>The server builds the whole page before sending it. This is called <strong>server-side rendering</strong>. It is why SeniorPadi works even on old phones and even with JavaScript switched off: the browser only has to show finished HTML. The small scripts in <code>public/js/</code> just make things nicer (pop-ups, the password eye button); every form still works without them.</p></div>
+
+<h2>What happens when the server starts</h2>
+<p>When you run <code>npm start</code>, <code>src/server.js</code> does its set-up work in this order. You can watch it happen in the terminal.</p>
+<pre data-file="src/server.js" data-find="async function start()" data-lines="12"></pre>
+<ul class="explain">
+  <li><code>prepareEnvironment()</code> reads your <code>.env</code> settings and fills in safe defaults (see <code>src/services/startup.js</code>).</li>
+  <li><code>require('./models')</code> loads every table description and connects Sequelize to the database.</li>
+  <li><code>waitForDatabase</code> tries to connect up to six times, waiting a little longer each time.</li>
+  <li><code>ensureDatabase</code> creates or updates the tables (it runs the "migrations", explained in chapter 3).</li>
+</ul>
+<p>After that it adds the welcome-guide text and the first staff account if they are missing, rebuilds the stylesheet if it is missing, plugs in live chat, starts the timed jobs and finally opens the door:</p>
+<pre data-file="src/server.js" data-find="const port = process.env.PORT" data-lines="5"></pre>
+<ul class="explain">
+  <li>The site listens on the port number in your settings, or <strong>3000</strong> if there is none. That is why the address is <code>localhost:3000</code>.</li>
+  <li>Any warnings (for example "Brevo is not set up") are printed first, so you see them.</li>
+</ul>
+
+<div class="callout try"><span class="label">Try it yourself</span>
+<p>Once you have the site running (chapter 4), open <code>http://localhost:3000/health</code>. This tiny route in <code>src/routes/public.js</code> asks the database "are you there?" and answers <code>{"ok":true}</code>. It is how Render and uptime checkers know the site is alive.</p></div>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li>The browser sends a <strong>request</strong>; the server sends back a <strong>response</strong> (usually a finished HTML page).</li>
+  <li>Inside the server a request passes through static files, middleware, routes, services, models and views, in that order.</li>
+  <li>A <strong>redirect</strong> tells the browser to ask for a different page; a <strong>session</strong> is how the site remembers who you are.</li>
+  <li><code>src/server.js</code> sets everything up on its own each time it starts.</li>
+</ul></div>

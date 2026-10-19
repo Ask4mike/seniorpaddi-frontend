@@ -1,0 +1,285 @@
+<h1 id="ch7"><span class="num">Chapter 7</span>File-by-file walkthrough</h1>
+
+<p class="lead">A reference for the important files: what each one does, what goes in and what comes out, which files it talks to, and the key lines in plain English. Small, similar files are grouped in tables.</p>
+
+<div class="callout tip"><span class="label">How to read the connection boxes</span>
+<p><strong>Used by</strong> lists the files that load or call this one (if you change it, check those). <strong>Uses</strong> lists the files this one depends on. Nearly every server file also uses <code>src/models/index.js</code> to reach the database; that is only mentioned where it matters.</p></div>
+
+<h2>Starting up</h2>
+
+<div class="file-card"><h3>src/server.js</h3>
+<p><strong>What and why:</strong> the very first file that runs (<code>npm start</code> runs <code>node src/server.js</code>). It does all the set-up so nobody has to type set-up commands, then starts the web server. Chapter 2 walks through it.</p>
+<p><strong>Receives:</strong> settings from <code>.env</code>. <strong>Sends:</strong> nothing; it starts the server and prints progress in the terminal.</p>
+<div class="conn"><b>Used by</b><span><code>package.json</code> scripts (<code>start</code>, <code>dev</code>), <code>start-windows.bat</code></span><b>Uses</b><span><code>src/services/startup.js</code>, <code>src/models/index.js</code>, <code>src/services/migrate.js</code>, <code>src/app.js</code>, <code>src/sockets/index.js</code>, <code>src/services/cron.js</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/app.js</h3>
+<p><strong>What and why:</strong> builds the Express app. The order of the lines here <em>is</em> the order every request is handled in, so this is the file to read to understand the request path.</p>
+<pre data-file="src/app.js" data-find="app.use(express.static" data-lines="12"></pre>
+<ul class="explain">
+  <li><code>express.static</code>: if the address matches a file in <code>public/</code>, send that file and stop.</li>
+  <li><code>express.urlencoded</code>: read submitted form fields into <code>req.body</code>.</li>
+  <li><code>sessionMiddleware</code>, <code>locals</code>, <code>addCsrfToken</code>, <code>csrfProtection</code>, <code>requirePasswordChanged</code>: the middleware, in order (next section).</li>
+</ul>
+<p>After the routes come two "catch-all" handlers: a 404 page for addresses nobody answered, and an error page for anything that crashed (with a special message when a form's security token has expired).</p>
+<div class="conn"><b>Used by</b><span><code>src/server.js</code>; every test file in <code>tests/</code> (they load the app without starting a server)</span><b>Uses</b><span><code>src/config/session.js</code>, <code>src/middleware/*</code>, every file in <code>src/routes/</code>, <code>views/error.ejs</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/config/database.js</h3>
+<p><strong>What and why:</strong> decides <em>which</em> database to use and whether it needs an encrypted (SSL) connection. Keeping it in one place means Sequelize, the migration tool and the session store always talk to the same database.</p>
+<pre data-file="src/config/database.js" data-find="//   DB_TARGET=local" data-lines="4"></pre>
+<div class="conn"><b>Used by</b><span><code>src/config/config.js</code>, <code>src/config/session.js</code>, <code>src/scripts/checkDb.js</code>, <code>src/scripts/seed.js</code></span><b>Uses</b><span>the <code>.env</code> settings</span></div>
+</div>
+
+<div class="file-card"><h3>src/config/config.js and .sequelizerc</h3>
+<p><code>config.js</code> turns the result of <code>database.js</code> into Sequelize settings (always store times in UTC, small connection pool). <code>.sequelizerc</code> tells the Sequelize CLI where <code>config.js</code>, the models and the migrations are.</p>
+<div class="conn"><b>Used by</b><span><code>src/models/index.js</code>, the <code>sequelize-cli</code> commands (<code>npm run db:migrate</code>)</span><b>Uses</b><span><code>src/config/database.js</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/config/session.js</h3>
+<p><strong>What and why:</strong> sets up login sessions, stored in a <code>session</code> table in the same database (created automatically). It lives in its own file because both Express and live chat need the very same session.</p>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code>, <code>src/sockets/index.js</code></span><b>Uses</b><span><code>src/config/database.js</code>, packages <code>express-session</code>, <code>connect-pg-simple</code>, <code>pg</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/services/startup.js and src/services/migrate.js</h3>
+<p><code>startup.js</code> holds the set-up steps <code>server.js</code> calls: check settings (and warn about missing optional ones), wait for the database, add the default welcome-guide text, create the first admin from <code>ADMIN_*</code> settings, and rebuild the stylesheet if it is missing. <code>migrate.js</code> runs any migration files that have not run yet (it records finished ones in a table called <code>SequelizeMeta</code>) and recreates any table that has gone missing. It never deletes data.</p>
+<pre data-file="src/services/startup.js" data-find="if (!phone || !password || password.length &lt; 8) return 'missing';" data-lines="1"></pre>
+<ul class="explain"><li>The first admin is only created if the phone number is valid and the password has at least 8 characters.</li></ul>
+<div class="conn"><b>Used by</b><span><code>src/server.js</code> (both); <code>migrate.js</code> also by <code>src/routes/admin.js</code> (System page), <code>src/scripts/seed.js</code>, <code>src/scripts/createAdmin.js</code></span><b>Uses</b><span><code>src/services/phone.js</code>, <code>locales/*.json</code>, <code>src/migrations/*</code></span></div>
+</div>
+
+<h2>Middleware</h2>
+
+<div class="file-card"><h3>src/middleware/locals.js</h3>
+<p><strong>What and why:</strong> runs on every request. It looks up the logged-in user from the session, picks the language, and puts shared things on <code>res.locals</code> so every template can use them (<code>currentUser</code>, <code>t</code>, <code>formatDate</code>, <code>flash</code>...). It also creates <code>req.flash()</code> for one-time messages.</p>
+<pre data-file="src/middleware/locals.js" data-find="const lang = user ? user.preferredLanguage" data-lines="5"></pre>
+<ul class="explain">
+  <li>A logged-in person's language comes from their account; a visitor's from their session; otherwise English.</li>
+  <li><code>req.t(key)</code> is the translation function routes use; templates get the same function as <code>t</code>.</li>
+</ul>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code> (so, every page)</span><b>Uses</b><span><code>src/models</code> (User, Notification), <code>src/services/i18n.js</code>, <code>src/services/dates.js</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/middleware/auth.js</h3>
+<p><strong>What and why:</strong> four "gatekeepers" that routes put in front of pages:</p>
+<table><thead><tr><th style="width:30%">Function</th><th>Lets you through only if...</th></tr></thead><tbody>
+  <tr><td><code>requireAuth</code></td><td>you are logged in (otherwise: remembers the page and sends you to <code>/login</code>).</td></tr>
+  <tr><td><code>requireAdmin</code></td><td>you are staff (otherwise: "not allowed" page).</td></tr>
+  <tr><td><code>requirePasswordChanged</code></td><td>you don't need to change a password a staff member reset.</td></tr>
+  <tr><td><code>requireVerified</code></td><td>you are a senior whose ID was approved (for Find seniors and messages).</td></tr>
+</tbody></table>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code> and every file in <code>src/routes/</code></span><b>Uses</b><span><code>views/error.ejs</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/middleware/csrf.js</h3>
+<p>Creates the secret form token (<code>csrfToken</code> in templates) and rejects POST requests without it. Upload forms send the token in the address instead, because the file has not been read yet when the check runs.</p>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code></span><b>Uses</b><span>package <code>csrf-sync</code></span></div>
+</div>
+
+<h3 data-no-toc>The other middleware</h3>
+<table><thead><tr><th style="width:32%">File</th><th>What it does</th><th style="width:28%">Used by</th></tr></thead><tbody>
+  <tr><td><code>src/middleware/rateLimit.js</code></td><td>Five limiters: log in, sign up, password reset, uploads, messages. Too many tries shows a friendly "please wait" page. Switched off during tests.</td><td><code>routes/public.js</code>, <code>account.js</code>, <code>social.js</code></td></tr>
+  <tr><td><code>src/middleware/numericId.js</code></td><td>If an address like <code>/events/:id</code> has letters instead of a number, shows "not found" before touching the database.</td><td><code>routes/events.js</code>, <code>account.js</code>, <code>social.js</code>, <code>admin.js</code></td></tr>
+  <tr><td><code>src/middleware/upload.js</code></td><td>Receives one uploaded file into memory and checks its type and size (pictures 2–3 MB, IDs 5 MB, videos 50 MB). Problems become friendly messages in <code>req.uploadError</code>.</td><td><code>routes/account.js</code>, <code>social.js</code>, <code>admin.js</code></td></tr>
+</tbody></table>
+
+<h2>Routes</h2>
+<p>Each route file creates a <code>router</code>, attaches functions to addresses with <code>router.get</code> or <code>router.post</code>, and is plugged into the app in <code>src/app.js</code>. Inside each function, <code>req</code> is the request (what came in) and <code>res</code> is the response (what goes back).</p>
+
+<div class="file-card"><h3>src/routes/public.js</h3>
+<p><strong>What:</strong> the pages anyone can open, plus everything about accounts and passwords.</p>
+<table><thead><tr><th style="width:34%">Address</th><th>What happens</th></tr></thead><tbody>
+  <tr><td><code>GET /health</code></td><td>Checks the database; answers <code>{"ok":true}</code>.</td></tr>
+  <tr><td><code>GET /</code></td><td>Home. Staff are sent to <code>/admin</code>. Loads the next 4 events; renders <code>home</code>.</td></tr>
+  <tr><td><code>GET /about</code>, <code>GET /call</code></td><td>About and Call pages.</td></tr>
+  <tr><td><code>POST /language</code></td><td>Switches English/Yorùbá and goes back to the same page.</td></tr>
+  <tr><td><code>GET/POST /signup</code></td><td>Create account (chapter 8).</td></tr>
+  <tr><td><code>GET/POST /login</code>, <code>POST /logout</code></td><td>Log in (chapter 8) and log out (ends the session, goes to <code>/login</code>).</td></tr>
+  <tr><td><code>/forgot-password</code>, <code>/reset-password/:token</code>, <code>/change-password</code></td><td>Password help. A reset link is only emailed if the account has an email; otherwise staff reset it.</td></tr>
+</tbody></table>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code></span><b>Uses</b><span>models User, PasswordReset, Event, Organization; services <code>translate</code>, <code>phone</code>, <code>registration</code>, <code>notify</code>; middleware <code>auth</code>, <code>rateLimit</code>; views <code>home</code>, <code>about</code>, <code>call</code>, <code>auth/*</code>, <code>error</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/routes/events.js</h3>
+<p><strong>What:</strong> finding and joining events.</p>
+<table><thead><tr><th style="width:38%">Address</th><th>What happens</th></tr></thead><tbody>
+  <tr><td><code>GET /events</code></td><td>Find events: shows <em>one</em> open event at a time (optionally one category), skipping full ones and ones you already joined.</td></tr>
+  <tr><td><code>POST /events/:id/skip</code>, <code>POST /events/start-again</code></td><td>Skip a card (remembered in the session), or clear the skips.</td></tr>
+  <tr><td><code>GET /events/:id</code></td><td>One event's page, with its tags and your status.</td></tr>
+  <tr><td><code>POST /events/:id/register</code>, <code>/volunteer</code></td><td>Take a place (log-in and a confirmed phone required).</td></tr>
+  <tr><td><code>GET /events/:id/registered</code>, <code>/confirmed</code></td><td>"You're registered" pop-up with the ticket number; confirmation with the QR code.</td></tr>
+  <tr><td><code>POST /events/:id/notify-me</code></td><td>"Tell me when a similar event is listed".</td></tr>
+</tbody></table>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code></span><b>Uses</b><span>services <code>capacity</code>, <code>registration</code>, <code>translate</code>, <code>qr</code>; <code>src/routes/verify.js</code> (<code>needsContactCheck</code>); views <code>events/*</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/routes/verify.js</h3>
+<p>Confirming a phone number (and email, if given) with a 6-digit code before joining an event or messaging. It remembers what you were trying to do in <code>req.session.afterVerify</code> and carries on once you are confirmed.</p>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code>, <code>src/routes/events.js</code></span><b>Uses</b><span><code>src/services/verification.js</code>, <code>src/services/registration.js</code>, <code>views/auth/verify.ejs</code>, <code>public/js/otp.js</code> (in the page)</span></div>
+</div>
+
+<div class="file-card"><h3>src/routes/account.js</h3>
+<p>My account (<code>/account</code>), my tickets (<code>/registrations</code>, with Cancel), past events (<code>/history</code>), settings and profile picture (<code>/settings</code>), and deleting the account (<code>/account/delete</code>). All need a log-in.</p>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code></span><b>Uses</b><span>services <code>notify</code>, <code>qr</code>, <code>cloudinary</code>, <code>removal</code>, <code>dates</code>; middleware <code>upload</code>, <code>rateLimit</code>; views <code>account/*</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/routes/social.js</h3>
+<p>Find seniors (one at a time; or the ID upload if not yet verified), skip, report, block, the message inbox and conversations, swapping phone numbers, and notifications. Almost everything here is behind <code>requireVerified</code>.</p>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code></span><b>Uses</b><span>services <code>social</code>, <code>messaging</code>, <code>phoneExchange</code>, <code>translate</code>, <code>cloudinary</code>; views <code>social/*</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/routes/onboarding.js</h3>
+<p>The welcome video shown once after signing up (<code>/onboarding</code>), always skippable, with a written transcript. <code>POST /onboarding/done</code> records that it was seen.</p>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code></span><b>Uses</b><span>model OnboardingVideo, <code>src/services/cloudinary.js</code>, <code>views/onboarding.ejs</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/routes/admin.js</h3>
+<p>The largest file (about 780 lines): every staff page under <code>/admin</code>. Its first lines put <code>requireAdmin</code> in front of <em>all</em> of them:</p>
+<pre data-file="src/routes/admin.js" data-find="router.use(requireAdmin);" data-lines="1"></pre>
+<p>Pages: dashboard (<code>/admin</code>, with live numbers from <code>/admin/stats.json</code>), events (add, edit, cancel, attendance, QR check-in), organizations, seniors (search, reset password, remove), ID checks, reports, the welcome video, staff accounts and the System status page.</p>
+<div class="conn"><b>Used by</b><span><code>src/app.js</code> (at <code>/admin</code>)</span><b>Uses</b><span>services <code>attendance</code>, <code>capacity</code>, <code>cloudinary</code>, <code>notify</code>, <code>audit</code>, <code>dates</code>, <code>removal</code>, <code>social</code>, <code>phone</code>, <code>migrate</code>, <code>cron</code>; views <code>admin/*</code></span></div>
+</div>
+
+<h2>Services (the rules)</h2>
+
+<div class="file-card"><h3>src/services/capacity.js</h3>
+<p><strong>What and why:</strong> everything about seats. Its <code>register()</code> function makes sure an event can never be overbooked, even if two people press Register for the last seat at the same moment. It does this with a database <em>transaction</em> (a group of steps that all happen or none do) and a <em>lock</em> on the event row (others wait their turn).</p>
+<pre data-file="src/services/capacity.js" data-find="return sequelize.transaction(async (transaction) =&gt; {" data-lines="2"></pre>
+<p>It also works out the tags shown on events ("Almost full" when 5 or fewer places are left, "Closes in X days" when 5 or fewer days are left) in <code>eventState()</code>.</p>
+<div class="conn"><b>Used by</b><span><code>src/services/registration.js</code>, <code>src/routes/events.js</code>, <code>src/routes/admin.js</code>; tested by <code>tests/capacity.test.js</code></span><b>Uses</b><span>models Event, Registration; <code>src/services/dates.js</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/services/registration.js</h3>
+<p>Calls <code>capacity.register()</code>, turns a failure reason into a message key (<code>full</code>, <code>closed</code>, <code>already</code>), and on success sends the confirmation SMS/email with the ticket number. Also has <code>safeNext()</code>, which only allows redirects to SeniorPadi's own pages.</p>
+<div class="conn"><b>Used by</b><span><code>src/routes/events.js</code>, <code>src/routes/public.js</code>, <code>src/routes/verify.js</code></span><b>Uses</b><span><code>capacity.js</code>, <code>notify.js</code>, <code>dates.js</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/services/notify.js</h3>
+<p>Sends email and SMS through Brevo. The words come from <code>locales/</code> (keys ending in <code>.sms</code>, <code>.email</code>, <code>.subject</code>) in the person's language; emails are wrapped in <code>views/emails/layout.ejs</code>. In "dry run" mode (no Brevo key, or <code>NOTIFY_DRY_RUN=true</code>) messages are printed in the terminal instead. A failed message is logged and never stops a registration.</p>
+<div class="conn"><b>Used by</b><span>routes <code>public</code>, <code>account</code>, <code>admin</code>; services <code>registration</code>, <code>cron</code>, <code>removal</code>, <code>verification</code></span><b>Uses</b><span><code>i18n.js</code>, <code>audit.js</code>, <code>views/emails/layout.ejs</code></span></div>
+</div>
+
+<h3 data-no-toc>The other services</h3>
+<table><thead><tr><th style="width:27%">File</th><th>What it does</th><th style="width:27%">Used by</th></tr></thead><tbody>
+  <tr><td><code>i18n.js</code></td><td><code>t(key, lang, vars)</code>: finds the sentence, falls back to English, fills in <code>{name}</code>-style gaps.</td><td><code>middleware/locals.js</code>, <code>notify.js</code></td></tr>
+  <tr><td><code>dates.js</code></td><td>Formats dates/times in Lagos time; converts form date boxes.</td><td>locals, routes, many services</td></tr>
+  <tr><td><code>phone.js</code></td><td><code>normalizePhone()</code> turns 0803... into +234803...; <code>phoneProblem()</code> says what is wrong.</td><td><code>routes/public.js</code>, <code>admin.js</code>, <code>startup.js</code>, <code>createAdmin.js</code></td></tr>
+  <tr><td><code>verification.js</code></td><td>Makes, sends and checks 6-digit codes.</td><td><code>routes/verify.js</code></td></tr>
+  <tr><td><code>translate.js</code></td><td>Yorùbá for event text via Google; results cached in the Translations table.</td><td>routes <code>public</code>, <code>events</code>, <code>social</code></td></tr>
+  <tr><td><code>cloudinary.js</code></td><td>Uploads and deletes files; signed (private) links for IDs; local saving when not set up.</td><td>routes <code>account</code>, <code>admin</code>, <code>onboarding</code>, <code>social</code></td></tr>
+  <tr><td><code>cron.js</code></td><td>8am reminders; hourly "mark finished events completed".</td><td><code>server.js</code>, <code>admin.js</code> (System page)</td></tr>
+  <tr><td><code>social.js</code></td><td>Who can see/message whom; in-app notifications.</td><td><code>routes/social.js</code>, <code>admin.js</code>, sockets, messaging</td></tr>
+  <tr><td><code>messaging.js</code></td><td>Saves and sends one chat message with the same rules for form and live chat.</td><td><code>routes/social.js</code>, <code>sockets/index.js</code></td></tr>
+  <tr><td><code>phoneExchange.js</code></td><td>Ask to swap numbers; the number shows only after Accept.</td><td><code>routes/social.js</code></td></tr>
+  <tr><td><code>removal.js</code></td><td>Remove from Find seniors only, or delete the account (keeps registrations honest).</td><td><code>routes/account.js</code>, <code>admin.js</code></td></tr>
+  <tr><td><code>attendance.js</code></td><td>Mark someone as came / didn't come; list, QR and ticket number all end here.</td><td><code>routes/admin.js</code></td></tr>
+  <tr><td><code>qr.js</code></td><td>Draws the QR code SVG for a registration.</td><td><code>routes/events.js</code>, <code>account.js</code></td></tr>
+  <tr><td><code>audit.js</code></td><td>Writes one line to the audit log; never crashes a request.</td><td><code>admin.js</code>, <code>notify.js</code>, <code>removal.js</code></td></tr>
+</tbody></table>
+
+<h2>Models (the database tables)</h2>
+
+<div class="file-card"><h3>src/models/index.js</h3>
+<p><strong>What and why:</strong> connects to the database, loads all 18 models, and declares how tables relate (an Event <em>belongs to</em> an Organization; a User <em>has many</em> Registrations). Everything else gets models from here: <code>const { User, Event } = require('../models')</code>.</p>
+<pre data-file="src/models/index.js" data-find="Organization.hasMany(Event" data-lines="5"></pre>
+<div class="conn"><b>Used by</b><span>almost every file in <code>src/</code>, plus the tests and scripts</span><b>Uses</b><span><code>src/config/config.js</code>, every other file in <code>src/models/</code></span></div>
+</div>
+
+<div class="file-card"><h3>src/models/user.js</h3>
+<p>The Users table. Seniors and staff are both users; <code>role</code> tells them apart. <code>paranoid: true</code> means deleting a user only marks them deleted (a "soft delete"), so history stays correct. It adds three helpers you will see in templates and routes:</p>
+<pre data-file="src/models/user.js" data-find="User.prototype.contactVerified = function () {" data-lines="13"></pre>
+<div class="conn"><b>Used by</b><span><code>src/models/index.js</code> (and through it, everything)</span><b>Uses</b><span>Sequelize; the table itself is created by <code>src/migrations/20260927000001-create-users.js</code> and later migrations</span></div>
+</div>
+
+<div class="file-card"><h3>src/models/event.js and src/models/registration.js</h3>
+<p><code>Event</code> holds what an event is (title, description, picture, start/end, place, <code>category</code>, <code>capacity</code>, volunteers, deadline, <code>status</code>). Its six categories are listed once and reused everywhere: <code>fitness</code>, <code>faith</code>, <code>learning</code>, <code>skills</code>, <code>social</code>, <code>health</code>.</p>
+<p><code>Registration</code> is one person's place at one event, as <code>attendee</code> or <code>volunteer</code>, with a status (<code>registered</code>, <code>cancelled</code>, <code>attended</code>, <code>no_show</code>), a QR token and a ticket number like <code>SP-7K3QX9</code> (no 0/O or 1/I/L, so it can be read out on the phone).</p>
+<div class="conn"><b>Used by</b><span><code>src/models/index.js</code>; heavily by <code>routes/events.js</code>, <code>services/capacity.js</code>, <code>routes/admin.js</code></span><b>Uses</b><span>Sequelize</span></div>
+</div>
+
+<h3 data-no-toc>The other models</h3>
+<table><thead><tr><th style="width:30%">Model (file)</th><th>One row is...</th></tr></thead><tbody>
+  <tr><td>Organization</td><td>a church, club or centre that hosts events.</td></tr>
+  <tr><td>EventInterest</td><td>"tell me about similar events" for one category.</td></tr>
+  <tr><td>PasswordReset</td><td>a one-hour reset link (only its hash is stored).</td></tr>
+  <tr><td>VerificationCode</td><td>a 6-digit code for a phone or email.</td></tr>
+  <tr><td>Message, Notification</td><td>a chat message; an in-app notification.</td></tr>
+  <tr><td>Skip, Block, Report, ReportHide</td><td>Find-seniors safety: skipped, blocked, reported, hidden after a report.</td></tr>
+  <tr><td>PhoneExchange</td><td>a request to swap phone numbers.</td></tr>
+  <tr><td>Attendance</td><td>a person who actually came to an event.</td></tr>
+  <tr><td>OnboardingVideo</td><td>the welcome video and transcript for one language.</td></tr>
+  <tr><td>Translation</td><td>a saved Google translation.</td></tr>
+  <tr><td>AuditLog</td><td>a record of a staff action or a failed message.</td></tr>
+</tbody></table>
+
+<h2>Views (the pages)</h2>
+
+<div class="file-card"><h3>views/partials/header.ejs and views/partials/footer.ejs</h3>
+<p><strong>What and why:</strong> the top and bottom of every page (chapter 6 explains the layout options). The header loads the font, the icons, <code>/css/main.css?v=ui5</code> and three scripts; draws the skip link, the thin loading bar, the one-line top bar and the menu; and opens <code>&lt;main&gt;</code>. The footer closes <code>&lt;main&gt;</code>, draws the dark footer with four links, adds the log-out pop-up for logged-in people and loads two more scripts.</p>
+<div class="conn"><b>Used by</b><span>every page in <code>views/</code></span><b>Uses</b><span>partials <code>seniorNav</code>, <code>nav</code> (staff), <code>langToggle</code>, <code>flash</code>, <code>confirmLogoutModal</code>; <code>public/css/main.css</code>; <code>public/js/phone-input.js</code>, <code>top-loader.js</code>, <code>ui.js</code>, <code>swipe.js</code>, <code>dialog.js</code></span></div>
+</div>
+
+<div class="file-card"><h3>views/auth/login.ejs</h3>
+<p>The "Welcome Back" log-in page: on large screens a colourful art panel on the left and a frosted card with the form on the right, with a small trust strip under it. It is a full-screen page (<code>pageLayout: 'auth'</code>).</p>
+<p><strong>Receives:</strong> <code>error</code>, <code>phone</code>, <code>after</code> from the route. <strong>Sends:</strong> <code>POST /login</code> with <code>_csrf</code>, <code>registerEventId</code>, <code>next</code>, <code>phone</code>, <code>password</code>.</p>
+<pre data-file="views/auth/login.ejs" data-find="&lt;form action=&quot;/login&quot;" data-lines="1"></pre>
+<ul class="explain"><li><code>data-busy-text</code> is read by <code>public/js/ui.js</code> to show "Logging you in..." with a spinner while the page loads.</li></ul>
+<div class="conn"><b>Used by</b><span><code>src/routes/public.js</code> (GET and POST <code>/login</code>)</span><b>Uses</b><span>partials <code>header</code>, <code>footer</code>, <code>langToggle</code>, <code>flash</code>, <code>phoneInput</code>, <code>ui/passwordInput</code>; CSS classes <code>auth-frame</code>, <code>auth-art</code>, <code>auth-card</code>, <code>btn-glow</code></span></div>
+</div>
+
+<div class="file-card"><h3>views/auth/signup.ejs</h3>
+<p>"Create your account": the form on a white panel with a warm beige picture panel beside it. Fields, in order: full name, phone, email (optional), password, confirm password, and the "I am 60 or over" checkbox. Each field shows its own error from the route's <code>errors</code> object.</p>
+<div class="callout know"><span class="label">Things to know</span><p>"Confirm password" has no <code>name</code>, so the server never receives it. It is checked only in the browser by <code>public/js/ui.js</code> (the "Passwords match" tick). Without JavaScript nothing compares the two boxes. This was deliberate, to avoid changing the server.</p></div>
+<div class="conn"><b>Used by</b><span><code>src/routes/public.js</code> (GET and POST <code>/signup</code>)</span><b>Uses</b><span>partials <code>header</code>, <code>footer</code>, <code>langToggle</code>, <code>flash</code>, <code>phoneInput</code>, <code>ui/textInput</code>, <code>ui/passwordInput</code>; <code>public/images/illustrations/elders-chat.svg</code></span></div>
+</div>
+
+<div class="file-card"><h3>views/home.ejs</h3>
+<p>Home, in four sections: the <strong>hero</strong> (its own top bar, a big headline, the arch-cropped photo, the trust words, the number of upcoming events and the white "Find events" button), the <strong>three choices</strong> (Find events, Find seniors, Call), <strong>Events near you</strong> (the cards) and <strong>How it works</strong>.</p>
+<p><strong>Receives:</strong> <code>upcoming</code> (up to 4 events), plus the shared variables. The greeting uses <code>currentUser.firstName()</code> when someone is logged in.</p>
+<div class="conn"><b>Used by</b><span><code>src/routes/public.js</code> (<code>GET /</code>)</span><b>Uses</b><span>partials <code>header</code> (with <code>pageLayout: 'hero'</code>), <code>footer</code>, <code>seniorNav</code>, <code>langToggle</code>, <code>eventTile</code>; <code>public/images/events/fitness.webp</code>; illustrations</span></div>
+</div>
+
+<div class="file-card"><h3>views/partials/eventTile.ejs</h3>
+<p>The tall photo card in "Events near you". <strong>Needs:</strong> <code>event</code>. <strong>Optional:</strong> <code>variant</code> (<code>'dark'</code> or <code>'light'</code>), <code>eager</code> (load the picture straight away). It shows the category and "Free" pills, an info button that opens the date, place, category and organizer over the photo (a <code>&lt;details&gt;</code> element, so it works without JavaScript), the title with a tick, two lines of description, the date and time, and a <strong>Register</strong> button.</p>
+<pre data-file="views/partials/eventTile.ejs" data-find="class=&quot;ev-join&quot;" data-lines="1"></pre>
+<ul class="explain"><li>Register opens the event's own page, where joining already handles every case (logged out, full, past, volunteering).</li></ul>
+<div class="conn"><b>Used by</b><span><code>views/home.ejs</code></span><b>Uses</b><span><code>views/partials/eventImage.ejs</code>; CSS classes <code>ev-shell</code>, <code>ev-card</code>, <code>ev-badge</code>, <code>ev-info</code>, <code>ev-body</code>, <code>ev-join</code></span></div>
+</div>
+
+<h3 data-no-toc>The other shared partials</h3>
+<table><thead><tr><th style="width:32%">Partial</th><th>What it draws</th><th style="width:26%">Used by</th></tr></thead><tbody>
+  <tr><td><code>seniorNav.ejs</code></td><td>The five-item menu; <code>placement: 'top'</code> or <code>'bottom'</code> (phones).</td><td><code>header.ejs</code>, <code>home.ejs</code></td></tr>
+  <tr><td><code>nav.ejs</code></td><td>The staff sidebar.</td><td><code>header.ejs</code></td></tr>
+  <tr><td><code>langToggle.ejs</code></td><td>A small form that posts to <code>/language</code> with the other language.</td><td>header, home, login, signup</td></tr>
+  <tr><td><code>flash.ejs</code></td><td>The one-time success/error/info box.</td><td>header and many pages</td></tr>
+  <tr><td><code>eventImage.ejs</code></td><td>Uploaded event photo, or the category cover (WebP with JPG fallback).</td><td><code>eventTile</code>, <code>eventCard</code> and event pages</td></tr>
+  <tr><td><code>eventCard.ejs</code>, <code>eventTags.ejs</code></td><td>The Find-events card; status tags ("Almost full").</td><td><code>events/*</code></td></tr>
+  <tr><td><code>loginModal.ejs</code></td><td>Log-in/sign-up pop-up when a visitor taps Register.</td><td><code>events/index</code>, <code>social/find</code></td></tr>
+  <tr><td><code>confirmLogoutModal.ejs</code></td><td>"Log out?" pop-up.</td><td><code>footer.ejs</code></td></tr>
+  <tr><td><code>authAside.ejs</code></td><td>Side panel for password pages.</td><td><code>auth/forgot</code>, <code>reset</code>, <code>change</code></td></tr>
+  <tr><td><code>phoneInput.ejs</code>, <code>ui/textInput.ejs</code>, <code>ui/passwordInput.ejs</code></td><td>Form boxes with icons; the password one has the eye button.</td><td>auth pages, <code>loginModal</code>, <code>admin/staff</code></td></tr>
+  <tr><td><code>qr.ejs</code></td><td>The optional QR code, tucked away.</td><td><code>events/confirmed</code>, <code>account/registrations</code></td></tr>
+</tbody></table>
+<p>The remaining pages in <code>views/events/</code>, <code>account/</code>, <code>social/</code> and <code>admin/</code> each belong to the route file of the same name; chapter 5 lists them all.</p>
+
+<h2>Browser scripts, styles, words and tests</h2>
+<table><thead><tr><th style="width:30%">File</th><th>What it does</th><th style="width:28%">Connected to</th></tr></thead><tbody>
+  <tr><td><code>public/js/ui.js</code></td><td>Pop-ups (focus, Escape, backdrop), password eye, busy buttons, confirm-password check, log-out question. Never changes what a form sends.</td><td>loaded by <code>header.ejs</code>; reads <code>data-*</code> attributes in the views</td></tr>
+  <tr><td><code>public/js/otp.js</code></td><td>Six code boxes (typing moves on, paste fills them all) and a 60-second resend countdown.</td><td><code>views/auth/verify.ejs</code></td></tr>
+  <tr><td><code>public/js/top-loader.js</code></td><td>The thin loading bar.</td><td><code>header.ejs</code> (<code>#top-loader</code>)</td></tr>
+  <tr><td><code>public/js/phone-input.js</code></td><td>Numbers only, 11 digits.</td><td><code>header.ejs</code>, <code>phoneInput.ejs</code></td></tr>
+  <tr><td><code>public/js/swipe.js</code>, <code>dialog.js</code></td><td>Swipe cards; pop-up accessibility.</td><td><code>footer.ejs</code></td></tr>
+  <tr><td><code>public/js/chat.js</code>, <code>dashboard.js</code>, <code>upload.js</code></td><td>Live chat; live dashboard numbers; upload button text.</td><td><code>social/thread</code>, <code>admin/dashboard</code>, upload forms</td></tr>
+  <tr><td><code>src/styles/input.css</code></td><td>The design system (chapter 9).</td><td>built into <code>public/css/main.css</code></td></tr>
+  <tr><td><code>locales/en.json</code>, <code>yo.json</code></td><td>About 470 keys each: every sentence on the site, SMS and email text.</td><td><code>src/services/i18n.js</code></td></tr>
+  <tr><td><code>src/sockets/index.js</code></td><td>Live chat: checks the session and form token, only verified seniors, re-checks blocks on every message.</td><td><code>server.js</code>; <code>public/js/chat.js</code></td></tr>
+  <tr><td><code>src/scripts/*.js</code></td><td>Command-line helpers: <code>seed</code>, <code>db:check</code>, <code>create-admin</code>, <code>translate:ui</code>.</td><td><code>package.json</code> scripts</td></tr>
+  <tr><td><code>tests/*.test.js</code></td><td>59 automated tests (chapter 5 says what each file covers).</td><td><code>src/app.js</code>, <code>tests/helpers.js</code></td></tr>
+</tbody></table>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li><code>server.js</code> sets up, <code>app.js</code> orders the request path, routes answer, services hold the rules, models talk to the database, views draw the page.</li>
+  <li>The connection boxes tell you what else to check when you change a file.</li>
+  <li><code>capacity.js</code> is the heart of "never overbooked"; <code>locals.js</code> is why <code>t</code> and <code>currentUser</code> work in every template.</li>
+</ul></div>

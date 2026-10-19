@@ -1,0 +1,61 @@
+<h1 id="ch8"><span class="num">Chapter 8</span>How the main features work, end to end</h1>
+
+<p class="lead">Each feature as a numbered journey, naming the exact file at every step.</p>
+
+<h2>Creating an account</h2>
+<ol class="steps">
+  <li><code>GET /signup</code> → <code>src/routes/public.js</code> renders <code>views/auth/signup.ejs</code> with empty <code>errors</code> and <code>values</code>. If the visitor came from an event's Register button, a hidden <code>registerEventId</code> field remembers it.</li>
+  <li>In the browser, <code>public/js/phone-input.js</code> keeps the phone box to digits and <code>public/js/ui.js</code> checks that "Confirm password" matches.</li>
+  <li><code>POST /signup</code> passes <code>signupLimiter</code> (5 an hour), then every field is checked:
+    <pre data-file="src/routes/public.js" data-find="if (values.fullName.length &lt; 2)" data-lines="5"></pre>
+    A phone number or email already in use is refused too.</li>
+  <li>With errors, the same page comes back (status 400) with one message under each wrong field and the typed values kept.</li>
+  <li><code>User.create(...)</code> saves the account with a bcrypt password hash; <code>req.session.userId</code> logs them in; a "Welcome" flash message is set.</li>
+  <li><code>finishAuth</code>: if they were registering for an event, confirm the phone first (<code>/verify</code>) or register straight away; otherwise go to the welcome video (<code>/onboarding</code>).</li>
+</ol>
+
+<h2>Logging in and out</h2>
+<ol class="steps">
+  <li><code>GET /login</code> → <code>views/auth/login.ejs</code>.</li>
+  <li><code>POST /login</code> passes <code>loginLimiter</code> (10 tries per 15 minutes); <code>normalizePhone()</code> tidies the number and explains exactly what is wrong if it is invalid.</li>
+  <li><code>User.findOne</code> and <code>bcrypt.compare</code>. On failure one general message is shown, never saying which part was wrong.</li>
+  <li>On success:
+    <pre data-file="src/routes/public.js" data-find="if (user.role === 'admin') {" data-lines="7"></pre>
+    Staff go to <code>/admin</code>; a senior finishes any event registration, sees the welcome video if never seen, or returns to the page they wanted.</li>
+  <li><code>src/middleware/locals.js</code> loads the user on every later request; the cookie lasts 30 days.</li>
+  <li>Log out: <code>public/js/ui.js</code> asks "Log out?" (<code>partials/confirmLogoutModal.ejs</code>), then <code>POST /logout</code> ends the session and goes to <code>/login</code>.</li>
+</ol>
+
+<h3>Confirming the phone number</h3>
+<ol class="steps">
+  <li>Joining an event or messaging needs a confirmed phone. <code>needsContactCheck()</code> in <code>src/routes/verify.js</code> remembers what they were doing and sends them to <code>/verify</code>.</li>
+  <li><code>POST /verify/send</code> → <code>src/services/verification.js</code> sends a 6-digit code by SMS (in dry-run mode it is printed in the terminal). <code>public/js/otp.js</code> shows six boxes and a 60-second resend countdown.</li>
+  <li><code>POST /verify/check</code>; once confirmed, <code>carryOn()</code> finishes the registration they started.</li>
+</ol>
+
+<h2>The home page, hero and Events near you</h2>
+<ol class="steps">
+  <li><code>GET /</code> → <code>src/routes/public.js</code> loads up to 4 upcoming published events with their organization, translates them if needed, and renders <code>home</code>.</li>
+  <li><code>views/home.ejs</code> includes the header with <code>pageLayout: 'hero'</code>, draws the hero (own top bar, headline, photo <code>public/images/events/fitness.webp</code>, event count, "Find events" button).</li>
+  <li>It loops over <code>upcoming</code> and includes <code>partials/eventTile.ejs</code> per event, alternating dark and light; with none, an empty-state message.</li>
+  <li>Each card uses <code>partials/eventImage.ejs</code> (uploaded photo or category cover), a <code>&lt;details&gt;</code> info panel, and a Register link to <code>/events/:id</code>.</li>
+</ol>
+
+<h2>Finding, filtering and joining events</h2>
+<ol class="steps">
+  <li><code>GET /events?category=...</code> → <code>src/routes/events.js</code> loads open events, removes full ones and ones already joined:
+    <pre data-file="src/routes/events.js" data-find="const open = events.filter((e) =&gt; {" data-lines="4"></pre>
+    then skips those in <code>req.session.skippedEvents</code> and shows one card (<code>views/events/index.ejs</code>).</li>
+  <li>A visitor pressing Register gets the log-in pop-up (<code>partials/loginModal.ejs</code>); after logging in they are registered automatically.</li>
+  <li>A senior posts to <code>/events/:id/register</code>; <code>registerAndNotify()</code> calls <code>capacity.register()</code>, which locks the event and checks it is open and not full:
+    <pre data-file="src/services/capacity.js" data-find="const taken = await countTaken(eventId, type, transaction);" data-lines="4"></pre></li>
+  <li>A Registration with a ticket number is saved, the SMS/email confirmation is sent, and the "You're registered" pop-up opens.</li>
+  <li>Cancel from <code>/registrations</code> (<code>src/routes/account.js</code>); reminders go out at 8:00 (<code>src/services/cron.js</code>); staff mark attendance through <code>src/services/attendance.js</code>.</li>
+</ol>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li>Sign up and log in live in <code>src/routes/public.js</code>; the session remembers <code>userId</code>.</li>
+  <li>Home's cards come from one query and <code>eventTile.ejs</code>; Register leads to the event page.</li>
+  <li>Every registration goes through <code>capacity.register()</code>, which cannot overbook.</li>
+</ul></div>

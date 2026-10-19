@@ -1,0 +1,55 @@
+<h1 id="ch1"><span class="num">Chapter 1</span>Welcome, and how to use this guide</h1>
+
+<p class="lead">This guide explains the SeniorPadi website from the ground up. By the end you will know how to run it on your own computer, find your way around its folders, and make changes with confidence.</p>
+
+<h2>What SeniorPadi is</h2>
+<p>SeniorPadi is a free website for people aged 60 and over in Ibadan, Nigeria. It helps them find community events near them (exercise groups, church programmes, skills classes, health talks and social gatherings), sign up to attend or volunteer, and, once staff have checked their ID, meet and chat with other seniors.</p>
+<p>The problem it solves is <strong>loneliness and not knowing what is on nearby</strong>. Many of the people using it have simple phones, slow internet and sometimes a relative helping them. So the site is built to be calm, readable and forgiving: big text, big buttons, plain words, and it works in English and Yorùbá.</p>
+<p>There are two kinds of people who use it:</p>
+<ul>
+  <li><strong>Seniors</strong> sign up with a phone number, browse events, register, get a confirmation text and a reminder, and can message other verified seniors.</li>
+  <li><strong>Staff</strong> (people at the NGO that runs the site) add organizations and events, mark who came, check IDs and handle reports. In the code, staff are called <code>admin</code>.</li>
+</ul>
+
+<div class="callout important"><span class="label">Important</span>
+<p>Everything in this guide was checked against the real project files on the <code>main</code> branch. Every code snippet you see is copied straight out of the project by the program that builds this PDF, with its file name and line numbers. If a snippet ever stops matching, the build refuses to finish, so the guide cannot quietly go out of date.</p></div>
+
+<h2>Who this guide is for</h2>
+<p>You, if you are smart and curious but new to some or all of these: JavaScript on a server, Node.js, Express, EJS templates, databases and Tailwind CSS. You do not need any of them before you start. Every technical word is explained the first time it appears, and there is a glossary at the back (chapter 12).</p>
+
+<h2>How to read it</h2>
+<table>
+  <thead><tr><th style="width:34%">If you want to...</th><th>Read</th></tr></thead>
+  <tbody>
+    <tr><td>Understand the whole thing</td><td>Chapters 1 to 9 in order. Each one builds on the last.</td></tr>
+    <tr><td>Just get it running today</td><td>Chapter 2 (the big picture) and chapter 4 (setup). Come back to the rest later.</td></tr>
+    <tr><td>Change some text, a colour or a picture</td><td>Chapter 10 (recipes). Each recipe names the exact files to open.</td></tr>
+    <tr><td>Fix an error message</td><td>Chapter 11 (troubleshooting).</td></tr>
+    <tr><td>Look something up quickly</td><td>Chapter 12 (glossary) and chapter 13 (cheat sheet).</td></tr>
+  </tbody>
+</table>
+<p>You can safely skip chapter 7 (file by file) on a first read. It is a reference: open it when you need to know what a particular file does.</p>
+
+<h2>How the boxes work</h2>
+<div class="callout tip"><span class="label">Tip</span><p>A shortcut or a good habit.</p></div>
+<div class="callout warn"><span class="label">Warning</span><p>Something that can break the site or lose data if you are not careful.</p></div>
+<div class="callout important"><span class="label">Important</span><p>A rule you need to remember.</p></div>
+<div class="callout try"><span class="label">Try it yourself</span><p>A small hands-on task. Doing them is the fastest way to learn.</p></div>
+<div class="callout know"><span class="label">Things to know</span><p>Something in the project that is unclear, unfinished or looks like a bug. These are collected again at the end of chapter 11.</p></div>
+
+<p>Code appears in boxes like this one, with the file it came from on the dark bar and plain-English notes underneath:</p>
+<pre data-file="package.json" data-find="&quot;start&quot;:" data-lines="2"></pre>
+<ul class="explain">
+  <li><code>"start"</code> is a name you can run with <code>npm start</code>. It starts the website with Node.js.</li>
+  <li><code>"dev"</code> runs it with <em>nodemon</em>, a helper that restarts the site every time you save a file.</li>
+</ul>
+
+<p>Words you type in a terminal look like this:</p>
+<pre class="code solo" data-lang="shell">npm start</pre>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li>SeniorPadi helps people aged 60+ in Ibadan find events, register, and meet other seniors. Staff run it.</li>
+  <li>The guide matches the real code on <code>main</code>; snippets are copied from the files automatically.</li>
+  <li>Chapters 2 and 4 get you running; chapter 10 is for making changes.</li>
+</ul></div>

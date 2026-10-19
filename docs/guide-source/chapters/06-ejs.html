@@ -1,0 +1,154 @@
+<h1 id="ch6"><span class="num">Chapter 6</span>EJS explained for beginners</h1>
+
+<p class="lead">Every page you see on SeniorPadi starts life as an EJS template in <code>views/</code>. Once you can read EJS, you can change almost any page.</p>
+
+<h2>What EJS is, and why it exists</h2>
+<p>A plain HTML file always shows the same thing. But SeniorPadi's pages change: your name appears in the greeting, the list of events comes from the database, an error message appears only when something went wrong, and every word can be English or Yorùbá.</p>
+<p><strong>EJS</strong> (Embedded JavaScript) solves this. An EJS file is ordinary HTML with a few special tags, the "holes". When a route asks for a page, the server runs the template, fills every hole with real data, and sends the finished HTML to the browser. The browser never sees the EJS tags.</p>
+<figure>
+  <img src="assets/ejs-render.svg" alt="Diagram: an EJS template with tags, plus a data object from res.render, go into EJS, which produces plain HTML with the values filled in." style="width:100%">
+  <figcaption>Figure 6.1 A template plus data makes HTML. This happens on the server for every page.</figcaption>
+</figure>
+<div class="callout tip"><span class="label">An everyday picture</span><p>An EJS template is like a printed form letter: "Dear ____, your appointment is on ____." The route is the clerk who fills in the blanks before posting it.</p></div>
+
+<h2>The four EJS tags used in this project</h2>
+<p>A count of every template in <code>views/</code> shows SeniorPadi uses exactly four kinds of tag. Each starts with <code>&lt;%</code> and ends with <code>%&gt;</code>.</p>
+<table>
+  <thead><tr><th style="width:18%">Tag</th><th style="width:20%">Name</th><th>What it does</th><th style="width:11%">Used</th></tr></thead>
+  <tbody>
+    <tr><td><code>&lt;%= x %&gt;</code></td><td>Output (escaped)</td><td>Prints the value of <code>x</code> into the page, made safe: characters like <code>&lt;</code> are turned into harmless text.</td><td>917 times</td></tr>
+    <tr><td><code>&lt;%- x %&gt;</code></td><td>Output (unescaped)</td><td>Prints <code>x</code> exactly as it is, HTML and all. Used for <code>include(...)</code> and for HTML the server built itself.</td><td>145 times</td></tr>
+    <tr><td><code>&lt;% code %&gt;</code></td><td>Scriptlet</td><td>Runs JavaScript but prints nothing: <code>if</code>, loops, setting a variable.</td><td>442 times</td></tr>
+    <tr><td><code>&lt;%# note %&gt;</code></td><td>Comment</td><td>A note for people reading the template. It is removed completely and never reaches the browser.</td><td>95 times</td></tr>
+  </tbody>
+</table>
+
+<h3>1. Output, escaped: <code>&lt;%= %&gt;</code></h3>
+<p>This is the tag you will use most. In the log-in page, the heading prints a sentence from the language files:</p>
+<pre data-file="views/auth/login.ejs" data-find="t('auth.welcome_back')" data-lines="2"></pre>
+<ul class="explain">
+  <li><code>t('auth.welcome_back')</code> looks up that key in <code>locales/en.json</code> (or <code>yo.json</code>) and returns the sentence. <code>&lt;%=</code> prints it.</li>
+  <li>The class names (<code>text-3xl</code>, <code>text-muted</code>) are ordinary HTML and are styled by Tailwind (chapter 9).</li>
+</ul>
+<div class="callout important"><span class="label">Important: why "escaped" matters</span><p>If a senior typed <code>&lt;script&gt;</code> as their name, <code>&lt;%= %&gt;</code> prints it as harmless text instead of running it. This stops a classic attack called <em>XSS</em> (cross-site scripting). <strong>Always use <code>&lt;%= %&gt;</code> for anything a person typed.</strong></p></div>
+
+<h3>2. Output, unescaped: <code>&lt;%- %&gt;</code></h3>
+<p>Use it only for HTML you trust, and above all for <strong>includes</strong> (next section). The QR code partial uses it to print an SVG picture that the server drew itself (<code>src/services/qr.js</code>):</p>
+<pre data-file="views/partials/qr.ejs" data-find="&lt;%- qr %&gt;" data-lines="1"></pre>
+
+<h3>3. Scriptlet: <code>&lt;% %&gt;</code></h3>
+<p>Runs JavaScript without printing. The opening and closing braces of an <code>if</code> or a loop each sit in their own scriptlet, with ordinary HTML between them. Here the log-in page shows an error box only when there is an error:</p>
+<pre data-file="views/auth/login.ejs" data-find="&lt;% if (error) { %&gt;" data-lines="3"></pre>
+<ul class="explain">
+  <li><code>&lt;% if (error) { %&gt;</code>: "if there is an error, include the next lines".</li>
+  <li><code>&lt;%= error %&gt;</code>: print the message.</li>
+  <li><code>&lt;% } %&gt;</code>: the end of the <code>if</code>. Forgetting it is the most common EJS mistake.</li>
+</ul>
+<p>Scriptlets can also set up variables at the top of a template. The event card works out which look to use:</p>
+<pre data-file="views/partials/eventTile.ejs" data-find="&lt;% const v = typeof variant" data-lines="3"></pre>
+<ul class="explain">
+  <li><code>typeof variant !== 'undefined'</code> asks "was I given a <code>variant</code>?". If not, it uses <code>'dark'</code>.</li>
+  <li><code>event.tTitle || event.title</code>: use the Yorùbá title if there is one, otherwise the original.</li>
+</ul>
+
+<h3>4. Comment: <code>&lt;%# %&gt;</code></h3>
+<pre data-file="views/auth/login.ejs" data-find="&lt;%# &quot;Welcome Back&quot; layout" data-lines="1"></pre>
+<p>Comments explain why a template is built the way it is. The project uses them a lot, so read them: they are often the best documentation.</p>
+
+<h2>How the server sends data to a view</h2>
+<p>A route calls <code>res.render(name, data)</code>. The <strong>name</strong> is a path inside <code>views/</code> without <code>.ejs</code>; the <strong>data</strong> is a JavaScript object whose keys become variables in the template.</p>
+<pre data-file="src/routes/public.js" data-find="res.render('home', {" data-lines="1"></pre>
+<ul class="explain">
+  <li>Opens <code>views/home.ejs</code>.</li>
+  <li>Inside it, <code>title</code> is <code>'SeniorPadi'</code>, <code>fullWidth</code> is <code>true</code>, and <code>upcoming</code> is the list of events the route just loaded. (<code>{ upcoming }</code> is shorthand for <code>{ upcoming: upcoming }</code>.)</li>
+</ul>
+<p>Some variables are available in <strong>every</strong> template without being passed. They are set by the middleware <code>src/middleware/locals.js</code> on <code>res.locals</code>, which Express merges into every render:</p>
+<pre data-file="src/middleware/locals.js" data-find="res.locals.currentUser = user;" data-lines="9"></pre>
+<table>
+  <thead><tr><th style="width:26%">Variable</th><th>What it holds</th></tr></thead>
+  <tbody>
+    <tr><td><code>currentUser</code></td><td>The logged-in person (a User from the database), or <code>null</code> for a visitor.</td></tr>
+    <tr><td><code>unreadCount</code></td><td>How many notifications they have not read (the badge on "My account").</td></tr>
+    <tr><td><code>lang</code></td><td><code>'en'</code> or <code>'yo'</code>.</td></tr>
+    <tr><td><code>t(key, vars)</code></td><td>Looks up a sentence in the current language. <code>t('home.welcome_back', { name: 'Ade' })</code> fills <code>{name}</code>.</td></tr>
+    <tr><td><code>formatDate(d)</code>, <code>formatTime(d)</code></td><td>Show a date or time in Lagos time, in the right language.</td></tr>
+    <tr><td><code>currentPath</code></td><td>The address of this page, e.g. <code>/events</code> (used to highlight the menu).</td></tr>
+    <tr><td><code>supportPhone</code></td><td>The help line number from <code>SUPPORT_PHONE</code>.</td></tr>
+    <tr><td><code>flash</code></td><td>A one-time message such as "Welcome, Ade!", or <code>null</code>.</td></tr>
+    <tr><td><code>csrfToken</code></td><td>The secret form token (set by <code>src/middleware/csrf.js</code>). Every POST form needs it.</td></tr>
+  </tbody>
+</table>
+
+<h2>Following one real page: Log in</h2>
+<ol class="steps">
+  <li><strong>The route</strong> in <code>src/routes/public.js</code> answers <code>GET /login</code>:
+    <pre data-file="src/routes/public.js" data-find="router.get('/login', (req, res) =&gt; {" data-lines="3"></pre></li>
+  <li><strong>The data</strong>: <code>title</code> (for the browser tab), <code>error: null</code> (nothing wrong yet), <code>phone: ''</code> (empty box) and <code>after</code> (where to go after logging in, e.g. straight into registering for an event).</li>
+  <li><strong>The template</strong> <code>views/auth/login.ejs</code> starts by including the shared header and passing it one extra value:
+    <pre data-file="views/auth/login.ejs" data-find="&lt;%- include('../partials/header'" data-lines="1"></pre></li>
+  <li><strong>The header</strong> (<code>views/partials/header.ejs</code>) writes the <code>&lt;head&gt;</code> with <code>&lt;%= title %&gt; | SeniorPadi</code> as the tab title, loads the stylesheet and scripts, and, because <code>pageLayout</code> is <code>'auth'</code>, leaves out the usual menu bar.</li>
+  <li><strong>The body</strong> of <code>login.ejs</code> prints the headings with <code>t(...)</code>, the error box only if <code>error</code> is set, the hidden <code>_csrf</code> field, and the phone and password boxes (each an include, see below).</li>
+  <li><strong>The footer</strong> include closes the page. EJS joins everything into one HTML document and Express sends it.</li>
+</ol>
+<p>When the form is sent with a wrong password, the POST route calls the same template again, but with <code>error</code> set to a message and <code>phone</code> set to what was typed. Same template, different data, different page.</p>
+
+<h2>Partials: reusing pieces</h2>
+<p>A <strong>partial</strong> is a small template meant to be placed inside other templates. SeniorPadi keeps them in <code>views/partials/</code>. You place one with <code>include</code>, always inside <code>&lt;%- %&gt;</code> (the dash, so its HTML is not escaped):</p>
+<pre data-file="views/auth/login.ejs" data-find="include('../partials/ui/passwordInput'" data-lines="1"></pre>
+<ul class="explain">
+  <li>The path is relative to the current file: <code>login.ejs</code> is in <code>views/auth/</code>, so <code>../partials/</code> goes up one folder.</li>
+  <li>The object <code>{ id: 'password', ... }</code> gives the partial its own variables. Inside <code>passwordInput.ejs</code>, <code>id</code> is <code>'password'</code>.</li>
+  <li>A partial also sees everything the page sees (<code>t</code>, <code>currentUser</code> and so on).</li>
+</ul>
+
+<h3>The "layout": header and footer</h3>
+<p>Many frameworks have one layout file that wraps every page. SeniorPadi does the same job with two partials: <strong>every</strong> page starts with <code>include('partials/header')</code> and ends with <code>include('partials/footer')</code>. The header opens <code>&lt;html&gt;</code>, <code>&lt;body&gt;</code> and <code>&lt;main&gt;</code>; the footer closes them. That is why one change in <code>header.ejs</code> changes every page.</p>
+<p>The header changes shape depending on what the page passes it:</p>
+<pre data-file="views/partials/header.ejs" data-find="const isAdmin = currentUser" data-lines="9"></pre>
+<table>
+  <thead><tr><th style="width:36%">Page passes</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>nothing</td><td>Normal page: one-line top bar, menu, narrow centred content.</td></tr>
+    <tr><td><code>wide: true</code></td><td>Wider content area (events, account pages).</td></tr>
+    <tr><td><code>fullWidth: true</code></td><td>Sections go edge to edge (Home).</td></tr>
+    <tr><td><code>pageLayout: 'auth'</code></td><td>Full-screen log-in / create-account: no top bar, no bottom menu, no footer.</td></tr>
+    <tr><td><code>pageLayout: 'hero'</code></td><td>Home draws its own top bar inside the hero.</td></tr>
+    <tr><td>(a staff member is logged in)</td><td>Staff sidebar instead of the senior menu.</td></tr>
+  </tbody>
+</table>
+
+<h2>Loops and if/else: the event cards</h2>
+<p>The "Events near you" section of Home shows one card per event, or a friendly message when there are none. It is a good example of <code>if/else</code> and a loop working together:</p>
+<pre data-file="views/home.ejs" data-find="&lt;% if (upcoming.length &gt; 0) { %&gt;" data-lines="15"></pre>
+<ul class="explain">
+  <li><code>upcoming.length &gt; 0</code>: are there any events?</li>
+  <li><code>upcoming.forEach(function (event, i) { ... })</code> repeats the <code>&lt;li&gt;</code> once per event. <code>event</code> is the current event; <code>i</code> counts 0, 1, 2, 3.</li>
+  <li><code>i % 2 === 0 ? 'dark' : 'light'</code>: even cards dark, odd cards light (<code>%</code> is "remainder after dividing").</li>
+  <li><code>&lt;% } else { %&gt;</code>: otherwise, show the empty-state picture and a button.</li>
+</ul>
+<p>The flash message partial is a small, complete example of the same ideas:</p>
+<pre data-file="views/partials/flash.ejs" data-find="&lt;% if (flash) {" data-lines="11"></pre>
+
+<h2>Common beginner mistakes</h2>
+<table>
+  <thead><tr><th style="width:38%">Mistake</th><th>What happens, and the fix</th></tr></thead>
+  <tbody>
+    <tr><td>Forgetting a closing <code>&lt;% } %&gt;</code></td><td>The page fails with an error like <code>Unexpected token</code> or <code>missing ) after argument list</code>. Count your opening and closing braces.</td></tr>
+    <tr><td>Using a variable the route didn't pass</td><td><code>ReferenceError: x is not defined</code>. Pass it in <code>res.render</code>, or check it with <code>typeof x !== 'undefined'</code> as the partials do.</td></tr>
+    <tr><td><code>&lt;%= include(...) %&gt;</code> (equals instead of dash)</td><td>The page shows raw HTML code as text. Use <code>&lt;%- include(...) %&gt;</code>.</td></tr>
+    <tr><td><code>&lt;%- %&gt;</code> on something a user typed</td><td>A security hole (XSS). Use <code>&lt;%= %&gt;</code>.</td></tr>
+    <tr><td>Wrong include path</td><td><code>Could not find the include file</code>. Paths are relative to the current template.</td></tr>
+    <tr><td>Wrong name in <code>res.render</code></td><td><code>Failed to lookup view "auth/logn"</code>. The name is the path inside <code>views/</code> without <code>.ejs</code>.</td></tr>
+    <tr><td>Typing English text straight into a template</td><td>It works, but Yorùbá users see English. Add a key to both <code>locales/</code> files and use <code>t('your.key')</code>.</td></tr>
+    <tr><td>Expecting EJS code to run in the browser</td><td>It runs once, on the server, before the page is sent. For things that react to clicks, use a script in <code>public/js/</code>.</td></tr>
+    <tr><td>A new POST form with no <code>_csrf</code> field</td><td>"The form has expired" error. Add <code>&lt;input type="hidden" name="_csrf" value="&lt;%= csrfToken %&gt;"&gt;</code>.</td></tr>
+  </tbody>
+</table>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li><code>&lt;%= %&gt;</code> prints safely, <code>&lt;%- %&gt;</code> prints raw HTML (for includes), <code>&lt;% %&gt;</code> runs code, <code>&lt;%# %&gt;</code> is a comment.</li>
+  <li><code>res.render('folder/name', { ... })</code> picks the template and gives it data; <code>res.locals</code> adds data to every page.</li>
+  <li>Every page is header partial + its own content + footer partial.</li>
+</ul></div>
+<div class="callout try"><span class="label">Try it yourself</span><p>In <code>views/partials/flash.ejs</code>, the icon for a success message is <code>fa-circle-check</code>. Change it to <code>fa-face-smile</code>, save, then create a new test account: the green "Welcome" message on the next page now has a smiley. Change it back afterwards. You just edited a partial that every page uses.</p></div>

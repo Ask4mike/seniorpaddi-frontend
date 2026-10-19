@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#3b3290"/></marker>
+  </defs>
+  <rect width="720" height="330" fill="#ffffff"/>
+  <text x="360" y="24" font-size="15" font-weight="700" text-anchor="middle" fill="#231d5c">EJS = a template with holes + data from the route → finished HTML</text>
+
+  <!-- template -->
+  <rect x="14" y="44" width="252" height="168" rx="14" fill="#fef3d6" stroke="#e5a417" stroke-width="1.6"/>
+  <text x="28" y="68" font-size="13" font-weight="700" fill="#1f1b2e">1. The template (views/....ejs)</text>
+  <g font-family="Consolas, Courier New, monospace" font-size="11">
+    <text x="28" y="96" fill="#175e49">&lt;h2&gt;<tspan fill="#b0217a" font-weight="700">&lt;%=</tspan><tspan fill="#1f1b2e"> title </tspan><tspan fill="#b0217a" font-weight="700">%&gt;</tspan>&lt;/h2&gt;</text>
+    <text x="28" y="120" fill="#b0217a" font-weight="700">&lt;% if (error) { %&gt;</text>
+    <text x="40" y="140" fill="#175e49">&lt;p&gt;<tspan fill="#b0217a" font-weight="700">&lt;%=</tspan><tspan fill="#1f1b2e"> error </tspan><tspan fill="#b0217a" font-weight="700">%&gt;</tspan>&lt;/p&gt;</text>
+    <text x="28" y="160" fill="#b0217a" font-weight="700">&lt;% } %&gt;</text>
+  </g>
+  <text x="28" y="192" font-size="11" fill="#4b4763">The pink tags are the "holes".</text>
+
+  <!-- data -->
+  <rect x="204" y="232" width="312" height="86" rx="14" fill="#efedfb" stroke="#4a3fb0" stroke-width="1.6"/>
+  <text x="218" y="256" font-size="13" font-weight="700" fill="#1f1b2e">2. The data (from the route)</text>
+  <g font-family="Consolas, Courier New, monospace" font-size="11" fill="#1f1b2e">
+    <text x="218" y="280">res.render('auth/login', {</text>
+    <text x="230" y="296">title: 'Log in', error: 'Wrong password'</text>
+    <text x="218" y="312">})</text>
+  </g>
+
+  <!-- engine -->
+  <circle cx="360" cy="128" r="54" fill="#4a3fb0"/>
+  <text x="360" y="124" font-size="15" font-weight="700" text-anchor="middle" fill="#fff">EJS</text>
+  <text x="360" y="142" font-size="11" text-anchor="middle" fill="#e0dcf7">fills the holes</text>
+  <line x1="268" y1="128" x2="302" y2="128" stroke="#3b3290" stroke-width="2.2" marker-end="url(#a)"/>
+  <line x1="360" y1="230" x2="360" y2="186" stroke="#3b3290" stroke-width="2.2" marker-end="url(#a)"/>
+  <line x1="416" y1="128" x2="452" y2="128" stroke="#3b3290" stroke-width="2.2" marker-end="url(#a)"/>
+
+  <!-- output -->
+  <rect x="454" y="44" width="252" height="168" rx="14" fill="#ddf5ee" stroke="#1f7a5f" stroke-width="1.6"/>
+  <text x="468" y="68" font-size="13" font-weight="700" fill="#1f1b2e">3. Plain HTML to the browser</text>
+  <g font-family="Consolas, Courier New, monospace" font-size="11" fill="#175e49">
+    <text x="468" y="96">&lt;h2&gt;<tspan fill="#1f1b2e" font-weight="700">Log in</tspan>&lt;/h2&gt;</text>
+    <text x="468" y="120">&lt;p&gt;<tspan fill="#1f1b2e" font-weight="700">Wrong password</tspan>&lt;/p&gt;</text>
+  </g>
+  <text x="468" y="160" font-size="11" fill="#4b4763">No EJS is left. The browser never</text>
+  <text x="468" y="175" font-size="11" fill="#4b4763">sees the template, only the result.</text>
+  <text x="468" y="192" font-size="11" fill="#4b4763">If error were null, the &lt;p&gt; is left out.</text>
+</svg>

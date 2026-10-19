@@ -1,0 +1,46 @@
+<h1 id="ch5"><span class="num">Chapter 5</span>The folder and file map</h1>
+
+<p class="lead">Every file in the project, grouped by what it is for, with one plain sentence each. Use this chapter like a map of a building: find the room first, then open the door.</p>
+
+<figure>
+  <img src="assets/folder-map.svg" alt="Diagram of the four main areas of the project: src (server code), views (EJS pages), public (files sent to the browser) and everything else (words, tests, docs, settings), with how they connect." style="width:100%">
+  <figcaption>Figure 5.1 The four main areas of the project and how they connect.</figcaption>
+</figure>
+
+<h2>The rule of thumb</h2>
+<table>
+  <thead><tr><th style="width:36%">If you want to change...</th><th>Look in</th></tr></thead>
+  <tbody>
+    <tr><td>The words on a page</td><td><code>locales/en.json</code> and <code>locales/yo.json</code></td></tr>
+    <tr><td>The layout or HTML of a page</td><td><code>views/</code> (the page) and <code>views/partials/</code> (shared pieces)</td></tr>
+    <tr><td>Colours, fonts, spacing, card styles</td><td><code>src/styles/input.css</code>, then <code>npm run build:css</code></td></tr>
+    <tr><td>What happens when a page opens or a form is sent</td><td><code>src/routes/</code></td></tr>
+    <tr><td>A rule used in several places (seats, SMS, dates)</td><td><code>src/services/</code></td></tr>
+    <tr><td>What is stored in the database</td><td><code>src/models/</code> and a new file in <code>src/migrations/</code></td></tr>
+    <tr><td>Pictures</td><td><code>public/images/</code> (and record them in <code>IMAGE_CREDITS.md</code>)</td></tr>
+    <tr><td>A small in-browser behaviour (pop-ups, password eye)</td><td><code>public/js/</code></td></tr>
+  </tbody>
+</table>
+
+<div class="callout important"><span class="label">Important</span>
+<p>There is no <code>controllers/</code> folder in this project. In many Express projects the code that answers a request lives in "controllers". Here it lives directly inside the route files in <code>src/routes/</code>, and shared logic lives in <code>src/services/</code>. When other tutorials say "controller", read "the function inside <code>router.get(...)</code> or <code>router.post(...)</code>".</p></div>
+
+<h2>Every file, grouped</h2>
+<p>This list is produced automatically from Git's own list of project files (<code>git ls-files</code>), so nothing is left out. The two entries in brackets are not stored in Git on purpose, but you will see them on your computer.</p>
+
+<div data-filemap="[[&quot;Project root: settings, starters and notes&quot;, &quot;^[^/]+$|^\\(&quot;],[&quot;Server start and settings: src/server.js, src/app.js, src/config/&quot;, &quot;^src/(server|app)\\.js$|^src/config/&quot;],[&quot;Middleware: src/middleware/ (runs before every route)&quot;, &quot;^src/middleware/&quot;],[&quot;Routes: src/routes/ (one function per address)&quot;, &quot;^src/routes/&quot;],[&quot;Services: src/services/ (shared rules)&quot;, &quot;^src/services/&quot;],[&quot;Models: src/models/ (database tables)&quot;, &quot;^src/models/&quot;],[&quot;Migrations: src/migrations/ (changes to the tables, in date order)&quot;, &quot;^src/migrations/&quot;],[&quot;Live chat and command-line scripts: src/sockets/, src/scripts/&quot;, &quot;^src/(sockets|scripts)/&quot;],[&quot;The stylesheet you edit: src/styles/&quot;, &quot;^src/styles/&quot;],[&quot;Views: top-level pages&quot;, &quot;^views/[^/]+\\.ejs$&quot;],[&quot;Views: shared pieces (partials)&quot;, &quot;^views/partials/&quot;],[&quot;Views: log in and account pages (auth/)&quot;, &quot;^views/auth/&quot;],[&quot;Views: events/&quot;, &quot;^views/events/&quot;],[&quot;Views: account/&quot;, &quot;^views/account/&quot;],[&quot;Views: social/ (Find seniors and messages)&quot;, &quot;^views/social/&quot;],[&quot;Views: admin/ (staff pages)&quot;, &quot;^views/admin/&quot;],[&quot;Views: emails/&quot;, &quot;^views/emails/&quot;],[&quot;Public files: public/ (sent to the browser as they are)&quot;, &quot;^public/&quot;],[&quot;Words: locales/&quot;, &quot;^locales/&quot;],[&quot;Tests: tests/&quot;, &quot;^tests/&quot;],[&quot;Documents and design tools: docs/&quot;, &quot;^docs/&quot;]]"></div>
+
+<div class="callout know"><span class="label">Things to know</span>
+<ul>
+  <li><code>.gitignore</code> contains the line <code>images/</code>, which tells Git to ignore <strong>every</strong> folder called <code>images</code>, including <code>public/images/</code>. The pictures already in Git stay tracked, but a <strong>new</strong> picture you add there will be silently left out of commits unless you use <code>git add -f</code> (chapter 10 shows how). If that line was only meant for <code>docs/images/</code>, change it to <code>/docs/images/</code>.</li>
+  <li><code>public/images/hero.png</code> is not used by any page.</li>
+  <li><code>public/images/README.md</code> is partly out of date (it says no WebP versions exist and that the hero photo has no description; both have since changed). <code>IMAGE_CREDITS.md</code> is the current record.</li>
+</ul></div>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li><code>src/</code> is the server, <code>views/</code> are the pages, <code>public/</code> goes to the browser untouched, <code>locales/</code> holds the words.</li>
+  <li>Route files do the "controller" job in this project.</li>
+  <li>Never edit <code>public/css/main.css</code> or anything in <code>node_modules/</code> by hand.</li>
+</ul></div>
+<div class="callout try"><span class="label">Try it yourself</span><p>Open <code>views/home.ejs</code> and find the line that includes <code>partials/eventTile</code>. Then open that partial. You have just followed a connection between two files, which is exactly what chapter 7 does for every important file.</p></div>
