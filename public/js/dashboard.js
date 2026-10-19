@@ -7,8 +7,8 @@
       var el = document.querySelector('[data-stat="' + key + '"]');
       if (el && el.textContent !== String(data.totals[key])) {
         el.textContent = data.totals[key];
-        el.classList.add('text-coral');
-        setTimeout(function () { el.classList.remove('text-coral'); }, 1200);
+        el.classList.add('bg-warning-bg');
+        setTimeout(function () { el.classList.remove('bg-warning-bg'); }, 1200);
       }
     });
 

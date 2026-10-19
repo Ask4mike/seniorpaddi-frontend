@@ -1,0 +1,54 @@
+<%#
+  EventTile: a tall photo card (profile-card refs) for the Home "Events near you" grid (Gozney grid ref).
+  needs: event. optional: variant ('dark' | 'light', default 'dark'), eager (true if on screen when the page opens)
+  Everything shown comes from the event itself; missing pieces are simply left out.
+  No attendee counts (SeniorPadi shows no numbers that pressure people): the small row shows the date and time instead.
+  "Register" opens the event's own page, where registering already works (log in, full, past, volunteer...).
+%>
+<% const v = typeof variant !== 'undefined' && variant === 'light' ? 'light' : 'dark'; %>
+<% const evTitle = event.tTitle || event.title; %>
+<% const evText = event.tDescription || event.description || ''; %>
+<article class="ev-shell is-<%= v %>" aria-labelledby="ev-<%= event.id %>-title">
+  <div class="ev-card">
+    <%- include('eventImage', { event, imgClass: 'select-none', eager: typeof eager !== 'undefined' && eager }) %>
+
+    <%# small pills, top left: the event type, Free (every SeniorPadi event is free), Hosted by a senior %>
+    <div class="ev-badges">
+      <span class="ev-badge"><i class="fa-solid fa-tag text-primary" aria-hidden="true"></i><%= t('category.' + event.category) %></span>
+      <span class="ev-badge is-free"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><%= t('events.free') %></span>
+    </div>
+
+    <%# the round info button (top right) opens the key details over the photo; it works without JavaScript %>
+    <details class="ev-info">
+      <summary>
+        <span class="when-closed"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span class="sr-only"><%= t('events.details') %>: <%= evTitle %></span></span>
+        <span class="when-open"><i class="fa-solid fa-xmark" aria-hidden="true"></i><span class="sr-only"><%= t('events.close_details') %></span></span>
+      </summary>
+      <div class="ev-info-panel">
+        <dl class="grid gap-4">
+          <div><dt><i class="fa-regular fa-calendar" aria-hidden="true"></i><%= t('event.when') %></dt><dd><%= formatDate(event.startsAt) %>, <%= formatTime(event.startsAt) %><% if (event.endsAt) { %> – <%= formatTime(event.endsAt) %><% } %></dd></div>
+          <% if (event.locationText) { %><div><dt><i class="fa-solid fa-location-dot" aria-hidden="true"></i><%= t('event.where') %></dt><dd class="break-words"><%= event.locationText %></dd></div><% } %>
+          <div><dt><i class="fa-solid fa-tag" aria-hidden="true"></i><%= t('events.filter') %></dt><dd><%= t('category.' + event.category) %> · <%= t('events.free') %></dd></div>
+          <% if (event.Organization && event.Organization.name) { %><div><dt><i class="fa-solid fa-building-columns" aria-hidden="true"></i><%= t('event.run_by') %></dt><dd><%= event.Organization.name %></dd></div><% } %>
+        </dl>
+      </div>
+    </details>
+
+    <div class="ev-body">
+      <% if (event.hostedBySenior) { %><span class="ev-badge mb-2"><i class="fa-solid fa-star text-yolk-500" aria-hidden="true"></i><%= t('tag.hosted_by_senior') %></span><% } %>
+      <h3 id="ev-<%= event.id %>-title" class="mb-1 flex items-center gap-2 text-2xl leading-tight font-bold tracking-tight">
+        <span class="min-w-0 break-words"><%= evTitle %></span>
+        <%# run by a partner organisation the staff work with %>
+        <i class="fa-solid fa-circle-check shrink-0 text-xl <%= v === 'dark' ? 'text-eucalyptus-500' : 'text-eucalyptus-700' %>" aria-hidden="true"></i>
+      </h3>
+      <% if (evText) { %><p class="ev-muted mb-4 line-clamp-2 text-base"><%= evText %></p><% } %>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <ul class="ev-muted flex min-w-0 flex-col gap-0.5 text-base">
+          <li class="flex items-center gap-2"><i class="fa-regular fa-calendar" aria-hidden="true"></i><span class="min-w-0"><%= formatDate(event.startsAt) %></span></li>
+          <li class="flex items-center gap-2"><i class="fa-regular fa-clock" aria-hidden="true"></i><%= formatTime(event.startsAt) %></li>
+        </ul>
+        <a href="/events/<%= event.id %>" class="ev-join" aria-describedby="ev-<%= event.id %>-title"><%= t('stack.register') %><i class="fa-solid fa-plus" aria-hidden="true"></i></a>
+      </div>
+    </div>
+  </div>
+</article>

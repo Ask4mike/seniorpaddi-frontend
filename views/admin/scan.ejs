@@ -13,17 +13,17 @@
   </div>
 
   <% if (r.status === 'attended') { %>
-    <p class="mb-6 rounded-lg border-l-8 border-leaf bg-green-50 p-4 text-xl font-bold">Checked in.</p>
+    <p class="alert alert-success text-xl"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span>Checked in.</span></p>
   <% } else if (r.status === 'cancelled') { %>
-    <p class="mb-6 rounded-lg border-l-8 border-full-tag bg-full-bg p-4 font-bold">This place was cancelled. If they're here, welcome them and note it on the paper list.</p>
+    <p class="alert alert-error"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><span>This place was cancelled. If they're here, welcome them and note it on the paper list.</span></p>
   <% } else { %>
     <form action="/admin/scan/<%= r.qrToken %>" method="post" class="mb-6">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button class="btn-volunteer w-full text-xl">Mark as came</button>
+      <button class="btn-volunteer btn-block"><i class="fa-solid fa-user-check" aria-hidden="true"></i>Mark as came</button>
     </form>
   <% } %>
 
-  <a href="/admin/events/<%= r.Event.id %>/attendance">Open the full list for this event</a>
+  <a href="/admin/events/<%= r.Event.id %>/attendance" class="btn-link -ml-2">Open the full list for this event</a>
 <% } %>
 
 <%- include('../partials/footer') %>

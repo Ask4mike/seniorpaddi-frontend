@@ -1,101 +1,629 @@
 @import "tailwindcss";
 @source "../../views";
 @source "../../public/js";
+/* the project docs mention class names and plain words like "inline"; keep them out of the CSS */
+@source not "../../docs";
 
 /*
-  SeniorPadi look: deep indigo with warm coral and sunny accents,
-  soft rounded cards, gentle motion, and readable (not heavy) type.
-*/
-@theme {
-  --font-sans: "Plus Jakarta Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  SeniorPadi look: "a warm front room". Cream page, a senior-tested indigo / eucalyptus / yolk / charcoal palette,
+  soft mint-to-lavender washes behind heroes only, arch-shaped pictures, flat illustrations, Outfit everywhere.
+  Design reasoning and the reference images each choice comes from: DESIGN-NOTES.md (project root).
 
-  --color-ink: #16213e;
-  --color-indigo: #22407a;
-  --color-indigo-dark: #172d57;
-  --color-mist: #eef2fa;
-  --color-coral: #f2795b;
-  --color-coral-dark: #d9583a;
-  --color-sun: #f6b93b;
-  --color-mint: #3bb89f;
-  --color-lilac: #8e7cc3;
-  --color-leaf: #1f7a5c;
-  --color-leaf-dark: #155c45;
-  --color-amber-tag: #7a4b00;
-  --color-amber-bg: #fdf0d2;
-  --color-full-tag: #9f1d1d;
-  --color-full-bg: #fde8e8;
+  THE PALETTE LIVES HERE. Every text/background pair below is measured (DESIGN-NOTES.md section 5). Rules:
+    - white text goes only on indigo-500 and darker, eucalyptus-700, terracotta-600 (and the semantic names mapped to them)
+    - yolk is a fill with CHARCOAL text, never white text, never yolk text on white
+    - eucalyptus-500 and the pale tints are decorative (icons, illustration fills, backgrounds), never text
+    - text on a status tint uses the darkest shade of that colour (eucalyptus-800, terracotta-700, warning-ink)
+    - status is never colour alone: always an icon and a word as well
+*/
+
+/*
+  Outfit, self-hosted: ONE variable file (400 to 700) holding every character the site needs, so the Yoruba tone marks
+  and the letters they sit on come from the same font. Details and test result: public/fonts/README.txt.
+*/
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/outfit-variable.woff2") format("woff2");
+}
+
+@theme {
+  /* one typeface: sans and display both resolve to Outfit, then the system sans fonts */
+  --font-sans: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /*
+    Type scale. The page root is 18px (html below), so 1rem is 18px.
+    Nothing renders under 16px: text-sm and text-xs are 0.9rem (16.2px). Never use arbitrary sizes like text-[0.8rem].
+  */
+  --text-xs: 0.9rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.9rem;
+  --text-sm--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.55;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.45;
+  --text-2xl: 1.375rem;
+  --text-2xl--line-height: 1.35;
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 1.25;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 1.15;
+  --text-5xl: 2.75rem;
+  --text-5xl--line-height: 1.1;
+
+  /* ---------- the palette ---------- */
+  --color-indigo-*: initial;
+  --color-indigo-50: #efedfb;
+  --color-indigo-100: #e0dcf7;
+  --color-indigo-500: #5b51c9;
+  --color-indigo-600: #4a3fb0;
+  --color-indigo-700: #3b3290;
+  --color-indigo-900: #231d5c;
+
+  --color-yolk-100: #fef3d6;
+  --color-yolk-400: #f5b82e;
+  --color-yolk-500: #e5a417;
+
+  --color-eucalyptus-100: #ddf3ea;
+  --color-eucalyptus-500: #2f9e7e;
+  --color-eucalyptus-700: #1f7a5f;
+  --color-eucalyptus-800: #175e49;
+
+  --color-terracotta-100: #fde8dd;
+  --color-terracotta-600: #c2410c;
+  --color-terracotta-700: #a8380a;
+
+  --color-cream: #fff9f0;
+  --color-peach: #fde9dc;
+  --color-mint-wash: #ddf5ee;
+  --color-lavender: #f4f2fc;
+  --color-charcoal: #1f1b2e;
+  --color-slate-muted: #4b4763;
+
+  /* ---------- semantic names (used by every template and by public/js) ---------- */
+  --color-primary: #4a3fb0; /* indigo-600 */
+  --color-primary-dark: #3b3290; /* indigo-700 */
+  --color-secondary: #231d5c; /* indigo-900 */
+  --color-accent: #f5b82e; /* yolk-400, charcoal text */
+  --color-accent-dark: #e5a417; /* yolk-500 */
+
+  --color-success: #1f7a5f; /* eucalyptus-700 */
+  --color-success-dark: #175e49;
+  --color-success-bg: #ddf3ea;
+  --color-warning-ink: #6b4200;
+  --color-warning-bg: #fef3d6;
+  --color-error: #a8380a; /* terracotta-700: text and borders on white or on its tint */
+  --color-error-bg: #fde8dd;
+
+  --color-background: #fff9f0; /* cream */
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f2fc; /* lavender */
+  --color-surface-subtle: #f7f5fb;
+
+  --color-body: #1f1b2e; /* charcoal */
+  --color-muted: #4b4763; /* slate-muted */
+  --color-on-primary-muted: #e0dcf7;
+  --color-border-strong: #6e6987; /* field borders: 5:1 on white */
+  --color-hairline: #e9e5f5; /* quiet card edges, never the only boundary of a control */
+  --color-input-fill: #f8f7fc; /* soft field background: body text on it is 15.7:1 */
+  --color-input-border: #7c7796; /* soft field edge: 4.0:1 on the fill, 4.25:1 on white (3:1 needed) */
+  --color-rose-500: #c42a85; /* log-in button (Welcome Back ref): white text 5.2:1 */
+  --color-rose-600: #a61e73; /* its hover: 6.9:1 */
+  --color-beige: #f3eee6; /* Create-account art panel: body text 14.5:1 */
+
+  --color-focus: #3b3290;
+  --color-focus-on-dark: #f5b82e;
+
+  /* decorative only */
+  --color-sun: #f5b82e;
+  --color-mint: #2f9e7e;
+
+  /* ---------- shape ---------- */
+  --radius-4xl: 2rem;
+  --shadow-soft: 0 1px 2px rgb(31 27 46 / 0.06), 0 6px 20px -6px rgb(59 50 144 / 0.14);
+  --shadow-lift: 0 2px 4px rgb(31 27 46 / 0.06), 0 16px 36px -12px rgb(59 50 144 / 0.28);
+
+  /*
+    ---------- motion ----------
+    Motion explains what is happening (loading, opening, success); it is never decoration.
+    Only transform and opacity animate (plus short colour changes on buttons). Ease-out to enter, ease-in to leave.
+    No bounce, no spin, nothing loops. Everything is switched off under prefers-reduced-motion (end of this file).
+  */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  --animate-page-in: page-in 250ms var(--ease-out) backwards; /* main content: fade + 8px rise */
+  --animate-fade-in: fade-in 200ms var(--ease-out) backwards; /* backdrops, success states */
+  --animate-fade-up: fade-up 260ms var(--ease-out) backwards; /* Home tiles, pop-up buttons */
+  --animate-sheet-up: sheet-up 250ms var(--ease-out) backwards; /* pop-up on phones: slides up 24px */
+  --animate-dialog-in: dialog-in 250ms var(--ease-out) backwards; /* pop-up on md+: scale 0.96 to 1 */
+  --animate-slide-in-x: slide-in-x 220ms var(--ease-out) backwards; /* the next event / senior card */
+  --animate-pop-in: pop-in 180ms var(--ease-out) backwards; /* a new chat bubble */
+  --animate-drop-in: drop-in 200ms var(--ease-out) backwards; /* flash messages */
+  --animate-nudge-in: nudge-in 150ms var(--ease-out) backwards; /* inline form errors */
+  --animate-scale-in: scale-in 300ms var(--ease-out) backwards; /* the success circle */
+  --animate-draw: draw 400ms var(--ease-out) backwards; /* the success check mark */
+
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(8px); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+  }
+  @keyframes sheet-up {
+    from { opacity: 0; transform: translateY(24px); }
+  }
+  @keyframes dialog-in {
+    from { opacity: 0; transform: scale(0.96); }
+  }
+  @keyframes slide-in-x {
+    from { opacity: 0; transform: translateX(12px); }
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  }
+  @keyframes drop-in {
+    from { opacity: 0; transform: translateY(-8px); }
+  }
+  @keyframes nudge-in {
+    from { opacity: 0; transform: translateY(-4px); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.85); }
+  }
+  @keyframes draw {
+    from { stroke-dashoffset: 48; }
+  }
+}
+
+/* durations, shared by transitions and the top loader */
+:root {
+  --duration-micro: 150ms; /* buttons, pills, presses */
+  --duration-enter: 250ms; /* pop-ups and page entrance */
+  --duration-leave: 150ms;
+}
+
+/*
+  Fluid header sizes: defined once, used only inside the one-line top bar.
+  header-text is the ONE place text may go under 16px: 14px at 320px wide, 16px from 360px, 18px from 400px.
+  nav-text is the menu inside the bar (md and up): 16px at 768px, growing to 18px by 1024px.
+*/
+@utility header-text {
+  font-size: clamp(0.778rem, 5vw - 0.11rem, 1rem);
+  line-height: 1.2;
+}
+@utility nav-text {
+  font-size: clamp(0.889rem, 0.35rem + 1.15vw, 1rem);
+  line-height: 1.2;
+}
+@utility header-icon {
+  font-size: clamp(0.889rem, 0.5rem + 1vw, 1.125rem);
+}
+/* small stagger steps for lists that enter one after another */
+@utility enter-delay-1 {
+  animation-delay: 60ms;
+}
+@utility enter-delay-2 {
+  animation-delay: 120ms;
+}
+@utility enter-delay-3 {
+  animation-delay: 180ms;
 }
 
 @layer base {
   html {
-    font-size: 106.25%; /* 17px body text */
+    font-size: 112.5%; /* 18px: body text a senior can read without zooming */
     -webkit-text-size-adjust: 100%;
+    /* keep the sticky top bar and bottom bar from covering a focused item */
+    scroll-padding-top: 6rem;
+    scroll-padding-bottom: 7rem;
+  }
+  html,
+  body {
+    @apply font-sans;
   }
   body {
-    @apply bg-[#fafbff] text-ink leading-relaxed antialiased;
+    @apply bg-background text-base text-body antialiased;
+    line-height: 1.6;
+    /* a very long word (a name, an email address) wraps instead of pushing the page wider than the screen */
+    overflow-wrap: break-word;
+  }
+  /* form controls do not inherit the page font on their own */
+  button,
+  input,
+  select,
+  textarea,
+  optgroup {
+    font-family: inherit;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-body;
   }
   h1 {
-    @apply text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem];
+    @apply text-3xl font-bold tracking-tight md:text-4xl;
   }
   h2 {
-    @apply text-[1.3rem] font-semibold leading-snug;
+    @apply text-2xl font-bold tracking-tight md:text-3xl;
   }
   h3 {
-    @apply font-semibold;
+    @apply text-xl font-semibold;
+  }
+  h4 {
+    @apply text-lg font-semibold;
   }
   a {
-    @apply text-indigo underline decoration-1 underline-offset-4;
+    @apply text-primary underline decoration-2 underline-offset-4;
+  }
+  ::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 1.75rem;
+    height: 1.75rem;
+    accent-color: var(--color-primary);
+  }
+  /* a short word (for example the Yoruba "Wole") must still be a 48px-wide target */
+  .min-h-12 {
+    min-width: 3rem;
   }
   :focus-visible {
-    @apply outline-3 outline-offset-2 outline-coral;
+    @apply outline-3 outline-offset-2 outline-focus;
+  }
+  /* on dark fills the indigo ring would vanish, so use yolk there */
+  .bg-primary :focus-visible,
+  .bg-primary-dark :focus-visible,
+  .bg-secondary :focus-visible,
+  .bg-success :focus-visible,
+  .bg-success-dark :focus-visible,
+  .bg-indigo-900 :focus-visible {
+    outline-color: var(--color-focus-on-dark);
   }
 }
 
 @layer components {
+  /* ---------- page shells ---------- */
   .page {
-    @apply mx-auto w-full max-w-4xl px-4 py-8;
+    @apply mx-auto w-full max-w-4xl px-4 py-6 md:px-6 md:py-10;
   }
   .page-wide {
-    @apply mx-auto w-full max-w-6xl px-4 py-8 md:py-12;
+    @apply mx-auto w-full max-w-6xl px-4 py-6 md:px-6 md:py-10;
+  }
+  .measure {
+    max-width: 65ch;
   }
 
-  /* ---------- buttons ---------- */
+  /*
+    Pill top bar (Home Care pill nav, ref 7): ONE line at every width, from 320px phones to wide monitors.
+    It never wraps; it shrinks, in this order: gaps and padding, then the logo, then fluid text (header-text, nav-text)
+    and icons (header-icon). Sticky everywhere, with safe-area padding for notched phones.
+  */
+  .site-header {
+    @apply sticky top-0 z-30 bg-background/95 pb-2 backdrop-blur-sm;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+  }
+  .topbar {
+    @apply mx-auto flex max-w-6xl flex-nowrap items-center justify-between gap-1 rounded-full bg-surface py-1.5 pr-1.5 pl-2 shadow-soft
+      sm:gap-2 sm:pl-3 lg:gap-4 lg:py-2 lg:pr-2 lg:pl-4;
+  }
+  .brand {
+    @apply flex min-h-12 min-w-12 items-center gap-1.5 font-bold tracking-tight whitespace-nowrap text-body no-underline sm:gap-2;
+  }
+  /* the wordmark: 14px at 320px, 16px from 360px, up to 22.5px on wide screens. It is the least important item, so under
+     very large text zoom it is the only thing that gets cut short (the link keeps the full name in its aria-label) */
+  .brand-word {
+    @apply min-w-0 truncate;
+    font-size: clamp(0.778rem, 5vw - 0.11rem, 1.25rem);
+  }
+  .brand-mark {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm text-white sm:h-10 sm:w-10 sm:text-base;
+  }
+  /* the language toggle: a pill that always shows the OTHER language. 48px tall at every width */
+  .lang-pill {
+    @apply header-text inline-flex min-h-12 shrink-0 items-center gap-1.5 rounded-full border-2 border-primary bg-surface px-3 font-semibold
+      whitespace-nowrap text-primary transition-colors duration-150 hover:bg-indigo-50 active:bg-indigo-100 sm:gap-2 sm:px-4;
+  }
+
+  /* bottom navigation on phones (ref 9 doctor app): icon over a word, the active item sits in an indigo pill */
+  .tabbar {
+    @apply fixed inset-x-0 bottom-0 z-30 border-t border-hairline bg-surface;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -6px 20px -10px rgb(59 50 144 / 0.25);
+  }
+  .tab-link {
+    @apply relative flex min-h-16 min-w-12 flex-col items-center justify-center gap-1 rounded-2xl px-0 py-1.5 text-sm leading-tight
+      font-semibold text-muted no-underline transition-colors hover:bg-lavender active:bg-indigo-50;
+  }
+  /* words never break in the middle; a long Yoruba word may take two lines between its own syllables only */
+  .tab-label {
+    @apply max-w-full tracking-tight;
+    overflow-wrap: normal;
+    hyphens: manual;
+  }
+  .tab-link .tab-icon {
+    @apply flex h-8 w-14 items-center justify-center rounded-full text-xl transition-colors;
+  }
+  .tab-link[aria-current="page"] {
+    @apply text-primary;
+  }
+  .tab-link[aria-current="page"] .tab-icon {
+    @apply bg-primary text-white;
+  }
+  /*
+    The same five items as a compact pill inside the one-line top bar (md and up). Never wraps. If huge text zoom ever
+    makes it wider than its space, it scrolls sideways inside itself instead of pushing the page wider.
+  */
+  .pillnav {
+    @apply flex max-w-full min-w-0 flex-nowrap items-center gap-0.5 overflow-x-auto rounded-full bg-lavender p-1 lg:gap-1;
+    scrollbar-width: none;
+  }
+  .nav-link {
+    @apply nav-text relative inline-flex min-h-12 shrink-0 items-center gap-1 rounded-full px-2 py-2 font-semibold whitespace-nowrap text-body
+      no-underline transition-colors duration-150 hover:bg-surface active:bg-indigo-100 lg:gap-1.5 lg:px-3.5 xl:gap-2 xl:px-4;
+  }
+  .nav-link[aria-current="page"] {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+  /* the active icon grows a little; it is transform-only, so nothing around it moves */
+  .nav-link .header-icon,
+  .tab-link .tab-icon i {
+    transition: transform var(--duration-micro) var(--ease-out);
+  }
+  .nav-link[aria-current="page"] .header-icon,
+  .tab-link[aria-current="page"] .tab-icon i {
+    transform: scale(1.08);
+  }
+  .count-badge {
+    @apply inline-flex min-w-7 items-center justify-center rounded-full bg-yolk-400 px-1.5 text-sm leading-6 font-bold text-charcoal;
+  }
+
+  /* ---------- buttons: icon + text label, 48px or taller, hover and pressed states, no movement ---------- */
   .btn,
+  .btn-primary,
+  .btn-accent,
+  .btn-coral,
   .btn-volunteer,
-  .btn-coral {
-    @apply inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-indigo px-6 py-3 text-center
-      font-semibold text-white no-underline shadow-md shadow-indigo/20 transition hover:-translate-y-0.5 hover:bg-indigo-dark sm:w-auto;
+  .btn-plain,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger,
+  .btn-danger-soft {
+    @apply inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-transparent px-6 py-3 text-center
+      text-lg leading-snug font-semibold no-underline transition-colors duration-150 sm:w-auto;
   }
+  /* indigo: the normal main action */
+  .btn,
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark active:bg-indigo-900;
+  }
+  /* yolk with charcoal text: the ONE most important action on a screen (Lightyear CTA, ref 5) */
+  .btn-accent,
+  .btn-coral {
+    @apply bg-yolk-400 text-charcoal shadow-soft hover:bg-yolk-500 active:bg-yolk-500 active:shadow-none;
+  }
+  /* eucalyptus: yes to volunteering, approve */
   .btn-volunteer {
-    @apply bg-leaf shadow-leaf/20 hover:bg-leaf-dark;
+    @apply bg-success text-white hover:bg-success-dark active:bg-success-dark;
   }
-  .btn-coral {
-    @apply bg-coral shadow-coral/30 hover:bg-coral-dark;
+  /* outlined indigo: the second choice beside a main action */
+  .btn-plain,
+  .btn-secondary {
+    @apply border-primary bg-surface text-primary hover:bg-indigo-50 active:bg-indigo-100;
   }
-  .btn-plain {
-    @apply inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-indigo/20 bg-white px-6 py-3
-      text-center font-semibold text-indigo no-underline transition hover:border-indigo hover:bg-mist sm:w-auto;
+  /* quiet: a low-key action that is still a full-size target */
+  .btn-ghost {
+    @apply bg-transparent text-primary hover:bg-indigo-50 active:bg-indigo-100;
   }
+  /* soft terracotta: Report a problem and other gentle warnings */
+  .btn-danger-soft {
+    @apply bg-terracotta-100 text-terracotta-700 hover:border-terracotta-700 active:border-terracotta-700;
+  }
+  /* a serious or one-way action (delete, block): outlined terracotta, never filled */
+  .btn-danger {
+    @apply border-error bg-surface text-error hover:bg-error-bg active:bg-error-bg;
+  }
+  /* bigger main action: 56px+ */
+  .btn-lg {
+    @apply min-h-14 px-8 text-xl;
+  }
+  .btn-block {
+    @apply w-full sm:w-full;
+  }
+  /* the icon inside a button sits in a soft circle (Home Care, ref 7) */
+  .btn-icon {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-base;
+  }
+  .btn-accent .btn-icon,
+  .btn-coral .btn-icon {
+    @apply bg-charcoal text-yolk-400;
+  }
+  .btn-link {
+    @apply inline-flex min-h-12 cursor-pointer items-center gap-2 border-0 bg-transparent px-2 py-2 text-base font-semibold text-primary
+      underline decoration-2 underline-offset-4 hover:text-primary-dark;
+  }
+  .btn-link-danger {
+    @apply inline-flex min-h-12 cursor-pointer items-center gap-2 border-0 bg-transparent px-2 py-2 text-base font-semibold text-error
+      underline decoration-2 underline-offset-4 hover:text-terracotta-700;
+  }
+  /* disabled: readable text, dashed border, not a colour-only change */
   .btn[disabled],
-  .btn-volunteer[disabled] {
-    @apply cursor-not-allowed bg-gray-400 shadow-none hover:translate-y-0 hover:bg-gray-400;
+  .btn-primary[disabled],
+  .btn-accent[disabled],
+  .btn-volunteer[disabled],
+  .btn-coral[disabled],
+  .btn-plain[disabled],
+  .btn[aria-disabled="true"],
+  .btn-volunteer[aria-disabled="true"],
+  .btn-plain[aria-disabled="true"] {
+    @apply cursor-not-allowed border-2 border-dashed border-border-strong bg-surface-muted text-muted shadow-none hover:bg-surface-muted;
+  }
+  .back-link {
+    @apply inline-flex min-h-12 items-center gap-2 rounded-full pr-4 text-base font-semibold no-underline hover:underline;
+  }
+  .btn-link,
+  .btn-link-danger,
+  .back-link,
+  .chip,
+  .nav-link,
+  .dialog-close {
+    @apply min-w-12;
+  }
+
+  /* filter chips: 48px tall pills. The selected one gets aria-current="true", an indigo fill and a check mark */
+  .chip {
+    @apply inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-primary bg-surface px-5 py-2 text-base font-semibold text-primary
+      no-underline transition-colors hover:bg-indigo-50 active:bg-indigo-100;
+  }
+  .chip[aria-current="true"],
+  .chip[aria-current="page"] {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+  .chip[aria-current="true"]::before,
+  .chip[aria-current="page"]::before {
+    content: "";
+    flex: none;
+    width: 1.1em;
+    height: 1.1em;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E") center / contain no-repeat;
   }
 
   /* ---------- surfaces ---------- */
-  .panel {
-    @apply rounded-3xl bg-mist p-6;
-  }
   .card {
-    @apply rounded-3xl border border-gray-200 bg-white p-5 shadow-sm;
+    @apply rounded-3xl border border-hairline bg-surface p-5 shadow-soft md:p-6;
+  }
+  .panel {
+    @apply rounded-3xl bg-surface-muted p-6;
+  }
+  /* a big tappable choice (Eldora tiles, ref 8): illustration, bold label, one line of description */
+  .tile {
+    @apply flex min-h-12 items-center gap-4 rounded-3xl border-2 border-transparent bg-surface p-5 text-body no-underline shadow-soft
+      transition-colors duration-150 hover:border-primary active:bg-indigo-50 md:flex-col md:items-start md:p-6;
+  }
+  .tile-accent {
+    @apply bg-yolk-400 hover:border-charcoal active:bg-yolk-500;
+  }
+  .tile-art {
+    @apply flex h-20 w-20 shrink-0 items-end justify-center overflow-hidden rounded-t-full rounded-b-2xl bg-lavender md:h-28 md:w-28;
+  }
+  .tile-accent .tile-art {
+    @apply bg-yolk-100;
+  }
+  .icon-tile {
+    @apply inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-lavender text-xl text-primary;
+  }
+  .kicker {
+    @apply mb-2 text-base font-semibold text-primary;
+  }
+  /* empty states and locked states: illustration, one sentence, one action */
+  .empty-state {
+    @apply relative overflow-hidden rounded-3xl bg-surface p-6 text-center shadow-soft md:p-10;
+  }
+  .empty-art {
+    @apply mx-auto mb-5 block h-36 w-36;
   }
 
-  /* ---------- forms ---------- */
+  /* hero washes (Lightyear mint-to-lavender, ref 5; Fortune peach, ref 6). Behind hero sections only */
+  .hero-wash {
+    background-image: linear-gradient(135deg, var(--color-mint-wash) 0%, var(--color-lavender) 55%, var(--color-indigo-100) 100%);
+  }
+  .hero-warm {
+    background-image: linear-gradient(160deg, var(--color-cream) 0%, var(--color-peach) 100%);
+  }
+  /* faint Ankara-style diamonds, for decorative corners only: never put text on top of this */
+  .pattern-ankara {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%234a3fb0' stroke-opacity='.14' stroke-width='2'%3E%3Cpath d='M24 4 44 24 24 44 4 24Z'/%3E%3Cpath d='M24 15 33 24 24 33 15 24Z'/%3E%3C/g%3E%3Ccircle cx='24' cy='24' r='3' fill='%23e5a417' fill-opacity='.35'/%3E%3C/svg%3E");
+    background-size: 48px 48px;
+  }
+
+  /* ---------- date and time block (Aether date chips, ref 1): big bold numerals ---------- */
+  .date-block {
+    @apply flex w-20 shrink-0 flex-col items-center justify-center rounded-2xl bg-primary px-2 py-2 text-center text-white;
+  }
+  .date-block-day {
+    @apply text-sm leading-tight font-semibold text-on-primary-muted;
+  }
+  .date-block-num {
+    @apply text-4xl leading-none font-bold tracking-tight;
+  }
+  .time-chip {
+    @apply inline-flex min-h-12 items-center gap-2 rounded-2xl bg-lavender px-4 py-2 text-lg font-semibold text-body;
+  }
+
+  /* ---------- status chips and tags: icon + word + border, never colour alone ---------- */
+  .tag-amber,
+  .tag-full,
+  .tag-mine,
+  .tag-leaf,
+  .chip-status {
+    @apply inline-flex items-center gap-2 rounded-full border-2 px-3 py-1 text-sm leading-snug font-semibold;
+  }
+  .tag-leaf,
+  .chip-verified {
+    @apply border-eucalyptus-700 bg-eucalyptus-100 text-eucalyptus-800;
+  }
+  .tag-amber,
+  .chip-pending {
+    @apply border-warning-ink bg-warning-bg text-warning-ink;
+  }
+  .tag-mine,
+  .chip-locked {
+    @apply border-primary bg-indigo-50 text-primary-dark;
+  }
+  .tag-full,
+  .chip-danger {
+    @apply border-terracotta-700 bg-terracotta-100 text-terracotta-700;
+  }
+  /* a tag laid over a photo needs a solid white base so the photo cannot lower its contrast */
+  .tag-float {
+    @apply border-transparent bg-surface text-body shadow-soft;
+  }
+
+  /* ---------- alerts and flash messages: colour + icon (in the markup) + words ---------- */
+  .alert {
+    @apply mb-6 flex items-start gap-3 rounded-2xl border-2 p-4 text-base font-semibold;
+  }
+  .alert-success {
+    @apply border-eucalyptus-700 bg-success-bg text-eucalyptus-800;
+  }
+  .alert-error {
+    @apply border-error bg-error-bg text-error;
+  }
+  .alert-warning {
+    @apply border-warning-ink bg-warning-bg text-warning-ink;
+  }
+  .alert-info {
+    @apply border-primary bg-indigo-50 text-primary-dark;
+  }
+  .alert > i {
+    @apply mt-1 shrink-0;
+  }
+  .alert > span,
+  .alert > div {
+    @apply min-w-0;
+  }
+
+  /* ---------- forms: tall fields, label above, visible border, big helper text ---------- */
   .field {
-    @apply mb-5 block;
+    @apply mb-6 block;
   }
   .field label,
   .field .label {
-    @apply mb-1.5 block font-medium;
+    @apply mb-2 block text-base font-semibold;
   }
   .field input[type="text"],
   .field input[type="tel"],
@@ -103,81 +631,605 @@
   .field input[type="password"],
   .field input[type="number"],
   .field input[type="url"],
+  .field input[type="search"],
+  .field input[type="date"],
+  .field input[type="time"],
   .field input[type="datetime-local"],
   .field select,
   .field textarea {
-    @apply block min-h-12 w-full rounded-2xl border border-gray-300 bg-white px-4 py-2.5 text-ink shadow-sm
-      transition focus:border-indigo focus:ring-4 focus:ring-indigo/10 focus:outline-none;
+    @apply block min-h-14 w-full rounded-2xl border-2 border-border-strong bg-surface px-4 py-3 text-lg text-body transition-colors
+      hover:border-primary focus:border-primary;
   }
-  .field .hint {
-    @apply mt-1.5 block text-[0.9rem] text-gray-600;
+  .field textarea {
+    @apply min-h-32;
   }
+  .field input[type="file"] {
+    @apply block w-full rounded-2xl border-2 border-border-strong bg-surface p-3 text-base text-body file:mr-4 file:min-h-12 file:cursor-pointer
+      file:rounded-full file:border-0 file:bg-primary file:px-5 file:py-2 file:text-base file:font-semibold file:text-white;
+  }
+  .hint {
+    @apply mt-2 block text-base text-muted;
+  }
+  /* inline error: terracotta, bold, with a warning icon drawn in CSS so it needs no icon font */
   .field .error {
-    @apply mt-1.5 block font-medium text-full-tag;
+    @apply mt-2 flex items-start gap-2 text-base font-semibold text-error;
+  }
+  .field .error::before {
+    content: "";
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.2rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23a8380a'/%3E%3Cpath d='M12 6v7M12 16.5v1.5' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
   }
   .field .error[hidden] {
     display: none;
   }
-  .field input[aria-invalid="true"] {
-    @apply border-full-tag bg-full-bg;
+  .field input[aria-invalid="true"],
+  .field select[aria-invalid="true"],
+  .field textarea[aria-invalid="true"] {
+    @apply border-error bg-error-bg;
+  }
+  .check,
+  .field .check {
+    @apply mb-0 flex min-h-12 cursor-pointer items-center gap-4 py-2 text-base font-normal;
+  }
+  /* the file box for the ID upload: a big dashed target */
+  .drop-zone {
+    @apply mb-4 block cursor-pointer rounded-3xl border-2 border-dashed border-primary bg-surface p-6 text-center transition-colors
+      hover:bg-indigo-50;
   }
 
-  /* ---------- tags ---------- */
-  .tag-amber,
-  .tag-full,
-  .tag-mine,
-  .tag-leaf {
-    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.85rem] font-medium;
+  /* ---------- dialogs: a rounded sheet, capped height so buttons stay reachable at 400% zoom ---------- */
+  .dialog-backdrop {
+    @apply fixed inset-0 z-40 bg-charcoal/70;
   }
-  .tag-amber { @apply bg-amber-bg text-amber-tag; }
-  .tag-full { @apply bg-full-bg text-full-tag; }
-  .tag-mine { @apply bg-mist text-indigo; }
-  .tag-leaf { @apply bg-emerald-50 text-leaf; }
+  .dialog {
+    @apply fixed inset-x-0 bottom-0 z-50 max-h-[90dvh] overflow-y-auto rounded-t-4xl bg-surface p-6 shadow-lift
+      md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:w-full md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-4xl md:p-8;
+  }
+  /* the picture at the top of a pop-up */
+  .dialog-art {
+    @apply mx-auto mb-4 block h-28 w-28;
+  }
+  .dialog-close {
+    @apply inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-lavender text-3xl leading-none text-body no-underline
+      hover:bg-indigo-100;
+  }
 
-  /* ---------- admin tables ---------- */
+  /* ---------- messages ---------- */
+  .convo {
+    @apply flex min-h-12 items-center gap-4 rounded-3xl bg-surface p-4 text-body no-underline shadow-soft transition-colors hover:bg-lavender;
+  }
+  .avatar {
+    @apply flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-100 font-bold text-primary-dark;
+  }
+  .unread-dot {
+    @apply inline-block h-3 w-3 shrink-0 rounded-full bg-terracotta-600;
+  }
+  .send-bar {
+    @apply relative z-20 rounded-3xl bg-surface p-4 shadow-lift md:sticky md:bottom-4;
+  }
+
+  /* ---------- staff area: calmer and denser, same palette, light only (Halden queue, ref 3; Finvera cards, ref 2) ---------- */
+  .stat-card {
+    @apply rounded-3xl bg-surface p-5 shadow-soft;
+  }
+  .queue-row {
+    @apply flex flex-wrap items-center gap-4 rounded-2xl bg-surface p-4 shadow-soft;
+  }
+  .admin-link {
+    @apply flex min-h-12 items-center gap-3 rounded-full px-4 py-2 text-base font-semibold whitespace-nowrap text-body no-underline transition-colors
+      hover:bg-lavender;
+  }
+  .admin-link[aria-current="page"] {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+
+  /*
+    ---------- account screens: log in, create account, confirm phone ----------
+    A split card on tablet and up (friendly panel + form), one centred card on phones.
+    Ideas: AI-inbox soft inputs with icons and eye toggle; store-app labels and hints under fields; car-trading
+    trust badge on the hero; children's-stories single strong button; workforce focus ring; Solara mobile card.
+  */
+  .auth-shell {
+    @apply mx-auto grid w-full max-w-5xl overflow-hidden rounded-4xl bg-surface shadow-lift md:grid-cols-2;
+  }
+  .auth-panel {
+    @apply min-w-0 px-5 py-8 sm:px-10 sm:py-10 md:px-12;
+  }
+  .auth-title {
+    @apply mb-2 text-3xl md:text-4xl;
+  }
+  .auth-lede {
+    @apply mb-7 text-lg text-muted;
+  }
+  /* the logo mark on top of the card on phones, where the friendly panel is hidden */
+  .auth-mobile-mark {
+    @apply mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-indigo-50 text-2xl text-primary md:hidden;
+  }
+  .auth-switch {
+    @apply mt-7 border-t border-hairline pt-6 text-center text-lg;
+  }
+  /* the friendly panel: headline, checklist, the elders illustration and a trust card that sits on it */
+  .auth-hero {
+    @apply relative hidden flex-col overflow-hidden p-10 md:flex lg:p-12;
+  }
+  .auth-hero-art {
+    @apply relative mx-auto mt-auto w-full max-w-xs;
+  }
+  .trust-card {
+    @apply relative -mt-10 flex items-center gap-4 rounded-3xl bg-surface p-4 shadow-lift;
+  }
+  .avatar-stack {
+    @apply flex shrink-0;
+  }
+  .avatar-stack > span {
+    @apply -ml-3 flex h-11 w-11 items-center justify-center rounded-full text-lg font-bold ring-4 ring-surface first:ml-0;
+  }
+
+  /* soft fields (AI-inbox style): tinted fill, 1.5px border that still has 4:1 contrast, a strong focus ring */
+  .form-soft .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+    @apply min-h-14 rounded-2xl bg-input-fill text-lg;
+    border-width: 1.5px;
+    border-color: var(--color-input-border);
+  }
+  .form-soft .field input:not([type="checkbox"]):not([type="radio"]):focus {
+    @apply border-primary bg-surface;
+    box-shadow: 0 0 0 4px var(--color-indigo-100);
+  }
+  .form-soft .field input[aria-invalid="true"] {
+    @apply border-error bg-error-bg;
+  }
+  /* a label with a link on the same line (Password ... Forgot your password?) */
+  .label-row {
+    @apply mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1;
+  }
+  .label-row label {
+    @apply mb-0;
+  }
+
+  /* input with a leading icon, and optionally a trailing show/hide button */
+  .input-wrap {
+    @apply relative;
+  }
+  .input-icon {
+    @apply pointer-events-none absolute top-0 left-0 flex h-14 w-12 items-center justify-center text-lg text-muted;
+  }
+  .input-wrap > input,
+  .form-soft .field .input-wrap > input:not([type="hidden"]) {
+    padding-left: 3rem;
+  }
+  .input-wrap > input.has-toggle,
+  .form-soft .field .input-wrap > input.has-toggle {
+    padding-right: 3.5rem;
+  }
+  /* the eye: a 48px target inside the field; it only appears when JavaScript can make it work */
+  .input-toggle {
+    @apply absolute top-1 right-1 flex h-12 w-12 items-center justify-center rounded-xl text-xl text-primary transition-colors duration-150
+      hover:bg-indigo-50 active:bg-indigo-100;
+  }
+  .input-toggle[aria-pressed="true"] {
+    @apply bg-indigo-50;
+  }
+
+  /* live hint under a field (the "passwords match" tick). Colour + icon + words */
+  .field .ok {
+    @apply mt-2 flex items-center gap-2 text-base font-semibold text-success;
+  }
+  .field .ok[hidden] {
+    display: none;
+  }
+
+  /* button busy state: the label changes to "Logging you in..." with a small spinner */
+  .btn-spinner {
+    @apply inline-block h-5 w-5 shrink-0 rounded-full border-3 border-current border-r-transparent;
+    animation: spin 0.8s linear infinite;
+  }
+  [aria-busy="true"] {
+    @apply cursor-progress;
+  }
+
+  /* one-time code: six big boxes (shown by public/js/otp.js; without JavaScript the single box is used) */
+  .otp-group {
+    @apply flex max-w-full justify-between gap-2 sm:justify-start sm:gap-3;
+  }
+  .otp-box {
+    @apply h-16 w-12 min-w-0 flex-1 rounded-2xl bg-input-fill text-center text-3xl font-bold text-body sm:w-14 sm:flex-none;
+    border: 1.5px solid var(--color-input-border);
+    caret-color: var(--color-primary);
+  }
+  .otp-box:focus {
+    @apply border-primary bg-surface;
+    box-shadow: 0 0 0 4px var(--color-indigo-100);
+  }
+  .otp-group[aria-invalid="true"] .otp-box {
+    @apply border-error bg-error-bg;
+  }
+  .resend-row {
+    @apply mt-4 flex min-h-12 flex-wrap items-center gap-x-3 gap-y-1 text-lg;
+  }
+  .countdown {
+    @apply font-semibold text-muted tabular-nums;
+  }
+  /* "Resend code in 00:42": plainly not tappable yet (still 8:1 readable), digits that do not jump about */
+  .btn-link:disabled {
+    @apply cursor-not-allowed text-muted no-underline tabular-nums hover:text-muted;
+  }
+
+  /* pop-ups opened by a script (log out, new code sent): the same sheet as the other pop-ups */
+  .modal-actions {
+    @apply mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end;
+  }
+  .modal-icon {
+    @apply mb-4 flex h-16 w-16 items-center justify-center rounded-full text-2xl;
+  }
+
+  /*
+    ---------- account pages v2: one framed screen that never scrolls on computers ----------
+    Log in follows the "Welcome Back" reference (mesh-gradient art panel + frosted card + social-proof strip);
+    Create account follows the "Create your account" reference (white form side + warm beige art side).
+    From 1024px the whole frame fits the window (100dvh, no page scroll); below that it stacks and scrolls naturally.
+  */
+  .auth-page {
+    @apply min-h-dvh bg-background;
+    background-image: radial-gradient(60rem 40rem at 10% 0%, #ece7fb 0%, transparent 60%),
+      radial-gradient(50rem 36rem at 100% 100%, #fbe6f2 0%, transparent 60%);
+  }
+  .auth-main {
+    @apply flex min-h-dvh w-full items-center justify-center px-2 sm:px-4 lg:h-dvh lg:min-h-0;
+    padding-block: clamp(0.5rem, 2.2vh, 1.75rem);
+  }
+  .auth-frame {
+    @apply grid w-full max-w-6xl gap-2.5 overflow-hidden rounded-[2.25rem] border border-white/70 bg-white/60 p-2.5 shadow-lift backdrop-blur-md
+      lg:h-full lg:max-h-[56rem] lg:grid-cols-2;
+  }
+  /* the left art panel of Log in: a soft purple / pink / blue mesh with a glass orb and one big word */
+  .auth-art {
+    @apply relative hidden min-h-0 flex-col justify-end overflow-hidden rounded-[1.75rem] text-charcoal lg:flex;
+    padding: clamp(1.5rem, 4vh, 3rem);
+    background-color: #ddd6fb;
+    background-image: radial-gradient(38rem 30rem at 15% 10%, #b9a8f5 0%, transparent 60%),
+      radial-gradient(30rem 26rem at 90% 30%, #f6b4d8 0%, transparent 60%),
+      radial-gradient(34rem 28rem at 40% 95%, #b6d4f7 0%, transparent 62%);
+  }
+  .auth-bigword {
+    @apply pointer-events-none absolute left-[6%] font-bold tracking-tighter text-white/90 select-none;
+    top: 14%;
+    font-size: clamp(4rem, 8.5vw, 8rem);
+    line-height: 0.9;
+  }
+  /* a glossy glass orb, pure CSS: no image to download */
+  .auth-orb {
+    @apply pointer-events-none absolute rounded-full;
+    width: clamp(9rem, 16vw, 14rem);
+    aspect-ratio: 1;
+    left: 32%;
+    top: 24%;
+    background: radial-gradient(circle at 32% 28%, rgb(255 255 255 / 0.95) 0 6%, rgb(255 255 255 / 0) 22%),
+      radial-gradient(circle at 70% 78%, rgb(120 220 230 / 0.75) 0 18%, rgb(120 220 230 / 0) 46%),
+      radial-gradient(circle at 50% 50%, #f37cc4 0%, #c35fd8 55%, #7e6be8 100%);
+    box-shadow: inset -14px -20px 40px rgb(80 40 160 / 0.35), inset 10px 12px 30px rgb(255 255 255 / 0.5),
+      0 30px 60px -20px rgb(120 60 200 / 0.45);
+  }
+  .auth-side {
+    @apply flex min-h-0 flex-col gap-2.5;
+  }
+  /* frosted card holding the form. If a very short window ever needs more room, only this card scrolls */
+  .auth-card {
+    @apply flex min-h-0 flex-1 flex-col justify-center overflow-y-auto rounded-[1.75rem] border border-white bg-white/80 shadow-soft backdrop-blur-xl;
+    padding: clamp(1rem, 2.6vh, 2.75rem) clamp(1.25rem, 4vw, 3.5rem);
+  }
+  .auth-card-inner {
+    @apply mx-auto w-full max-w-md;
+  }
+  .logo-tile {
+    @apply flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl text-primary no-underline shadow-soft;
+  }
+  .auth-strip {
+    @apply flex items-center gap-4 rounded-[1.5rem] border border-white bg-white/75 px-5 py-2.5 shadow-soft backdrop-blur-xl;
+  }
+  /* the pink pill "Log in" with a soft glow (reference sign-in button); white text is 5.2:1 */
+  .btn-glow {
+    @apply inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-rose-500 px-8 py-3 text-lg font-semibold text-white
+      no-underline transition-colors duration-150 hover:bg-rose-600 active:bg-rose-600;
+    box-shadow: 0 14px 30px -12px rgb(196 42 133 / 0.65), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  }
+  /* the dark "Create my account" button with a little depth (reference) */
+  .btn-dark {
+    @apply inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-charcoal px-8 py-3 text-lg font-semibold text-white
+      no-underline transition-colors duration-150 hover:bg-indigo-900 active:bg-indigo-900;
+    box-shadow: 0 10px 22px -10px rgb(31 27 46 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.18);
+  }
+  /* Create account: white form side + warm beige art side */
+  .auth-frame-register {
+    @apply lg:max-w-7xl lg:grid-cols-[1.6fr_1fr];
+  }
+  .auth-form-panel {
+    @apply flex min-h-0 flex-col justify-center overflow-y-auto rounded-[1.75rem] bg-white;
+    padding: clamp(1rem, 2.2vh, 2.5rem) clamp(1.25rem, 3.5vw, 3rem);
+  }
+  .auth-beige {
+    @apply relative hidden min-h-0 flex-col items-center justify-center overflow-hidden rounded-[1.75rem] bg-beige lg:flex;
+    padding: clamp(1.25rem, 3vh, 2.5rem);
+  }
+  .chat-card {
+    @apply absolute inset-x-6 bottom-6 rounded-3xl bg-white p-4 shadow-lift;
+  }
+  /* compact form spacing on computers so every field fits the screen (inputs stay 48px+, text 16px+) */
+  .form-compact .field {
+    @apply mb-4 lg:mb-3;
+  }
+  /* screens under 800px tall (1280x720, 1366x768): a little less air so nothing has to scroll */
+  @media (min-width: 64rem) and (max-height: 50rem) {
+    .form-compact .field {
+      margin-bottom: 0.6rem;
+    }
+    .auth-page .alert {
+      margin-bottom: 0.75rem;
+      padding-block: 0.6rem;
+    }
+    .auth-page h1 {
+      font-size: var(--text-3xl);
+    }
+    .auth-strip {
+      padding-block: 0.4rem;
+    }
+  }
+  .form-compact .field .hint,
+  .form-compact .field .error {
+    @apply mt-1 leading-snug;
+  }
+  @media (min-width: 64rem) {
+    .form-compact .field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+      min-height: 3rem;
+      padding-block: 0.55rem; /* about 48px tall: still a full-size target */
+    }
+    .form-compact .input-icon {
+      height: 3rem;
+    }
+    .form-compact .input-toggle {
+      top: 0;
+    }
+  }
+
+  /*
+    ---------- Home hero (Xefag product page, ref): a saturated yolk stage, one centred subject, big type ----------
+  */
+  .hero-stage {
+    @apply relative isolate mx-2 mt-2 flex flex-col overflow-hidden rounded-[2rem] text-charcoal sm:mx-3 sm:mt-3 md:rounded-[2.5rem];
+    background: radial-gradient(70% 80% at 50% 45%, #ffd25e 0%, #f5b82e 55%, #e5a417 100%);
+  }
+  .hero-leaf {
+    @apply pointer-events-none absolute -z-10 text-yolk-500;
+    opacity: 0.55;
+  }
+  .hero-bar {
+    @apply relative z-10 flex flex-nowrap items-center justify-between gap-2 px-3 pt-3 sm:px-5 lg:px-8 lg:pt-5;
+  }
+  /* the menu on yolk: tinted pills, the current page in a white pill (reference) */
+  .on-yolk .pillnav {
+    @apply bg-white/35;
+  }
+  .on-yolk .nav-link {
+    @apply text-charcoal hover:bg-white/60;
+  }
+  .on-yolk .nav-link[aria-current="page"] {
+    @apply bg-white text-charcoal shadow-soft hover:bg-white;
+  }
+  .on-yolk .lang-pill {
+    @apply border-charcoal bg-white/90 text-charcoal hover:bg-white;
+  }
+  .icon-round {
+    @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/45 text-xl text-charcoal no-underline transition-colors
+      duration-150 hover:bg-white;
+  }
+  .hero-subject {
+    @apply relative mx-auto w-[min(72vw,22rem)] lg:w-[min(26vw,24rem)];
+  }
+  .hero-subject-shadow {
+    @apply absolute -bottom-6 left-1/2 h-8 w-4/5 -translate-x-1/2 rounded-[50%];
+    background: radial-gradient(closest-side, rgb(120 70 0 / 0.45), transparent);
+    filter: blur(6px);
+  }
+  .hero-title {
+    @apply font-bold tracking-tight;
+    font-size: clamp(2.25rem, 4.6vw, 4.5rem);
+    line-height: 1.02;
+  }
+  .glass-chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/40 px-4 py-2 text-base font-semibold text-charcoal
+      backdrop-blur-md;
+  }
+  .btn-white {
+    @apply inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-white py-2 pr-2 pl-7 text-lg font-semibold text-charcoal
+      no-underline shadow-lift transition-colors duration-150 hover:bg-cream;
+  }
+  .btn-white .btn-icon {
+    @apply h-11 w-11 bg-charcoal text-white;
+  }
+
+  /*
+    ---------- Events near you: tall photo cards (profile-card refs) in a product-style grid (Gozney ref) ----------
+    Two looks that alternate: dark glass and light. A dark or light fade under the words keeps them readable on any photo.
+  */
+  .ev-grid {
+    @apply grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6;
+  }
+  .ev-shell {
+    @apply relative rounded-[2.25rem] p-2 shadow-lift;
+  }
+  .ev-shell.is-dark {
+    @apply bg-[#26213a];
+  }
+  .ev-shell.is-light {
+    @apply bg-white;
+  }
+  .ev-card {
+    /* tall (portrait) by default, but it grows when the words need room, so nothing overlaps the badge band */
+    @apply relative isolate flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-[1.75rem] sm:min-h-[28rem];
+    padding-top: 6.5rem;
+  }
+  .ev-card > picture img,
+  .ev-card > img {
+    @apply absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-300;
+  }
+  .ev-card::before {
+    content: "";
+    @apply absolute inset-0 -z-10;
+  }
+  /* a soft vignette on the whole photo; the strong fade sits right behind the words (.ev-body), so they are always readable */
+  .is-dark .ev-card::before {
+    background: linear-gradient(to top, rgb(22 18 36 / 0.55) 0%, transparent 55%);
+  }
+  .is-light .ev-card::before {
+    background: linear-gradient(to top, rgb(248 246 252 / 0.5) 0%, transparent 55%);
+  }
+  .ev-body {
+    @apply px-5 pt-12 pb-5;
+  }
+  .is-dark .ev-body {
+    background: linear-gradient(to top, rgb(22 18 36 / 0.97) 0%, rgb(22 18 36 / 0.92) 72%, rgb(22 18 36 / 0) 100%);
+  }
+  .is-light .ev-body {
+    background: linear-gradient(to top, rgb(248 246 252 / 0.99) 0%, rgb(248 246 252 / 0.95) 72%, rgb(248 246 252 / 0) 100%);
+  }
+  .is-dark .ev-body {
+    @apply text-white;
+  }
+  /* headings take the card colour, not the page heading colour */
+  .ev-body h3 {
+    color: inherit;
+  }
+  .is-dark .ev-body .ev-muted {
+    @apply text-on-primary-muted;
+  }
+  .is-light .ev-body {
+    @apply text-charcoal;
+  }
+  .is-light .ev-body .ev-muted {
+    @apply text-muted;
+  }
+  .ev-badges {
+    @apply absolute top-4 left-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2;
+  }
+  .ev-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-charcoal shadow-soft backdrop-blur-sm;
+  }
+  .ev-badge.is-free {
+    @apply bg-eucalyptus-100 text-eucalyptus-800;
+  }
+  .ev-join {
+    @apply inline-flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-white px-5 text-base font-semibold text-charcoal no-underline shadow-soft
+      transition-colors duration-150 hover:bg-cream;
+  }
+  .is-light .ev-join {
+    @apply bg-charcoal text-white hover:bg-indigo-900;
+  }
+  /* the info button opens a details panel over the photo; works with no JavaScript (details/summary) */
+  .ev-info > summary {
+    @apply absolute top-3 right-3 z-30 flex h-12 w-12 cursor-pointer list-none items-center justify-center rounded-full bg-white/90 text-xl text-charcoal
+      shadow-soft backdrop-blur-sm transition-colors hover:bg-white;
+  }
+  .ev-info > summary::-webkit-details-marker {
+    display: none;
+  }
+  .ev-info .when-open {
+    display: none;
+  }
+  .ev-info[open] .when-open {
+    display: inline;
+  }
+  .ev-info[open] .when-closed {
+    display: none;
+  }
+  .ev-info-panel {
+    @apply absolute inset-0 z-20 flex flex-col justify-center gap-4 overflow-y-auto bg-white/95 p-6 pt-16 text-charcoal backdrop-blur-md;
+  }
+  .ev-info-panel dt {
+    @apply flex items-center gap-2 text-sm font-semibold text-muted;
+  }
+  .ev-info-panel dd {
+    @apply text-lg font-semibold;
+  }
+
+  /* ---------- tables (staff area). Wrap wide tables in .table-wrap so the page itself never scrolls sideways ---------- */
+  .table-wrap {
+    @apply relative overflow-x-auto rounded-2xl;
+  }
   .admin-table {
-    @apply w-full border-collapse text-[0.95rem];
+    @apply w-full border-collapse text-base;
+  }
+  .admin-table caption {
+    @apply pb-3 text-left text-lg font-semibold;
   }
   .admin-table th {
-    @apply border-b border-gray-200 px-3 py-2.5 text-left text-[0.8rem] font-semibold uppercase tracking-wide text-gray-500;
+    @apply border-b-2 border-border-strong bg-lavender px-3 py-3 text-left text-base font-semibold text-body;
   }
   .admin-table td {
-    @apply border-b border-gray-100 px-3 py-3 text-left align-top;
+    @apply border-b border-hairline px-3 py-3 text-left align-top;
   }
-
-  
 }
 
-/* readable weight everywhere: nothing heavier than semibold */
-.font-bold { font-weight: 600; }
-
-/* ---------- motion ---------- */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
-}
-@keyframes drift {
-  from { background-position: 0 0; }
-  to { background-position: 56px 56px; }
-}
-.float { animation: float 6s ease-in-out infinite; }
-.float-slow { animation: float 9s ease-in-out infinite; }
-.dots-drift { animation: drift 12s linear infinite; }
-
-/* sections slide in as you scroll (the class is added by public/js/reveal.js) */
-.js [data-reveal] {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.js [data-reveal="left"] { transform: translateX(-36px); }
-.js [data-reveal="right"] { transform: translateX(36px); }
-.js [data-reveal].revealed {
-  opacity: 1;
-  transform: none;
+/* arch mask (Lightyear, ref 5): round top, gently rounded bottom. A utility so it works with md: and other variants */
+@utility arch {
+  border-radius: 999px 999px 1.5rem 1.5rem;
+  overflow: hidden;
 }
 
-/* ---------- swipe cards (Find events, Find seniors) ---------- */
+/*
+  Chat bubbles. public/js/chat.js builds new bubbles with the classes bg-primary / bg-surface-muted, so the bubble
+  shape is styled here from those same classes: nothing in the script needs to change, and live messages look identical.
+*/
+#thread > li > div {
+  border-radius: 1.5rem;
+  padding: 0.85rem 1.15rem;
+  max-width: min(100%, 34rem);
+  box-shadow: var(--shadow-soft);
+}
+#thread > li > div.bg-primary {
+  border-bottom-right-radius: 0.5rem;
+}
+#thread > li > div.bg-surface-muted {
+  border-bottom-left-radius: 0.5rem;
+  background: var(--color-indigo-50);
+}
+#thread > li > div .sr-only + p {
+  font-size: 1.125rem;
+}
+
+/*
+  "Skip to main content" link: hidden until a keyboard user focuses it.
+  Written outside any layer on purpose: the Font Awesome stylesheet defines an unlayered .sr-only that would beat a layered rule.
+*/
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 60;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  padding: 0.75rem 1.25rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: underline;
+  box-shadow: var(--shadow-lift);
+}
+
+/* ---------- swipe cards (Find events, Find seniors). The buttons always work; the swipe is an extra ---------- */
 .swipe-stack {
   position: relative;
 }
@@ -185,7 +1237,7 @@
   position: relative;
   z-index: 2;
   touch-action: pan-y;
-  transition: transform 0.35s ease, opacity 0.35s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
   will-change: transform;
 }
 .swipe-card.dragging {
@@ -208,11 +1260,308 @@
   transition: opacity 0.1s;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .float, .float-slow, .dots-drift { animation: none; }
-  .js [data-reveal] { opacity: 1; transform: none; transition: none; }
-  * { transition: none !important; }
+/* a short, one-time shake when a phone number is wrong (public/js/phone-input.js toggles this class) */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+.phone-shake {
+  animation: shake 0.3s ease-in-out 1;
+}
 
-  .dots-drift { animation: drift 12s linear infinite; }
-  
+/* very short screens (phone on its side, or 400% zoom): bars stop sticking so they cannot cover the page */
+@media (max-height: 30rem) {
+  .site-header,
+  .tabbar,
+  .send-bar {
+    position: static;
+  }
+}
+
+/*
+  =================================================================================================================
+  MOTION. Every effect below is CSS only: with JavaScript off the pages look and work the same, just without the
+  top loader. Entrance animations use fill-mode "backwards" so they hold nothing once finished (the swipe script's
+  own transforms and the pop-ups' positioning are never overridden).
+  =================================================================================================================
+*/
+
+/* ---------- top loader: a 3px (4px on computers) bar above everything while the next page loads ---------- */
+.top-loader {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  z-index: 70;
+  height: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--color-yolk-400), var(--color-indigo-600));
+  /* hiding: a quick fade, then the bar resets to nothing while invisible */
+  transition: opacity 200ms var(--ease-in), transform 0s linear 200ms;
+}
+@media (min-width: 48rem) {
+  .top-loader {
+    height: 4px;
+  }
+}
+/* started (public/js/top-loader.js): appears at once and eases towards 90% over a few seconds, never reaching the end */
+.top-loader.is-loading {
+  opacity: 1;
+  transform: scaleX(0.9);
+  transition: opacity 120ms var(--ease-out), transform 8s cubic-bezier(0.08, 0.6, 0.2, 1);
+}
+/* the next page is arriving: fill to 100%, then fade */
+.top-loader.is-done {
+  opacity: 0;
+  transform: scaleX(1);
+  transition: transform 150ms var(--ease-out), opacity 250ms var(--ease-in) 150ms;
+}
+
+/* ---------- page entrance: the main content fades in with an 8px rise. The bars never animate ---------- */
+#main {
+  animation: var(--animate-page-in);
+}
+/*
+  A pop-up page does not animate the main area: an ancestor with a transform would, for that moment, make the
+  pop-up position itself inside the main area instead of on the screen. The pop-up has its own entrance instead.
+*/
+#main:has([data-dialog]) {
+  animation: none;
+}
+/* the account pages fill the screen exactly: they fade in without moving, so no scrollbar can flicker */
+.auth-page #main {
+  animation: var(--animate-fade-in);
+}
+
+/* ---------- pop-ups: backdrop fades, the sheet slides up on phones and scales in on computers ---------- */
+.dialog-backdrop {
+  animation: var(--animate-fade-in);
+}
+.dialog {
+  animation: var(--animate-sheet-up);
+}
+@media (min-width: 48rem) {
+  .dialog {
+    animation: var(--animate-dialog-in);
+  }
+}
+/* Registered pop-up: the circle scales in, the check draws itself, then the two volunteer buttons rise in turn */
+.success-mark .success-circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: var(--animate-scale-in);
+  animation-delay: 120ms;
+}
+.success-mark .success-check {
+  stroke-dasharray: 48;
+  animation: var(--animate-draw);
+  animation-delay: 300ms;
+}
+.dialog .enter-up {
+  animation: var(--animate-fade-up);
+  animation-delay: 420ms;
+}
+.dialog .enter-up + .enter-up {
+  animation-delay: 480ms;
+}
+
+/* ---------- buttons: colour and a gentle press. Focus rings appear at once (outline is never transitioned) ---------- */
+.btn,
+.btn-primary,
+.btn-accent,
+.btn-coral,
+.btn-volunteer,
+.btn-plain,
+.btn-secondary,
+.btn-ghost,
+.btn-danger,
+.btn-danger-soft,
+.lang-pill,
+.chip {
+  transition:
+    background-color var(--duration-micro) var(--ease-out),
+    color var(--duration-micro) var(--ease-out),
+    border-color var(--duration-micro) var(--ease-out),
+    transform var(--duration-micro) var(--ease-out);
+}
+:is(.btn, .btn-primary, .btn-accent, .btn-coral, .btn-volunteer, .btn-plain, .btn-secondary, .btn-ghost, .btn-danger, .btn-danger-soft, .lang-pill, .chip):active:not([disabled], [aria-disabled="true"]) {
+  transform: scale(0.97);
+}
+/* list rows, menu items and tiles: pressed state only */
+.tab-link .tab-icon {
+  transition: background-color var(--duration-micro) var(--ease-out), color var(--duration-micro) var(--ease-out);
+}
+
+/* ---------- Home tiles: rise in one after another, press to 0.98, lift 2px under a mouse ---------- */
+.tile-list > li {
+  animation: var(--animate-fade-up);
+}
+.tile-list > li:nth-child(2) {
+  animation-delay: 70ms;
+}
+.tile-list > li:nth-child(3) {
+  animation-delay: 140ms;
+}
+.tile {
+  position: relative;
+  transition:
+    transform var(--duration-micro) var(--ease-out),
+    border-color var(--duration-micro) var(--ease-out),
+    background-color var(--duration-micro) var(--ease-out);
+}
+/* the bigger shadow sits on a pseudo-element and only its opacity changes (blur is never animated) */
+.tile::after,
+.lift::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--shadow-lift);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-micro) var(--ease-out);
+}
+.tile:active {
+  transform: scale(0.98);
+}
+/* links that look like cards (event previews, conversation rows, account cards): press feedback, lift under a mouse */
+.lift {
+  position: relative;
+  transition: transform var(--duration-micro) var(--ease-out), background-color var(--duration-micro) var(--ease-out);
+}
+.lift:active {
+  transform: scale(0.99);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tile:hover,
+  .lift:hover {
+    transform: translateY(-2px);
+  }
+  .tile:hover::after,
+  .lift:hover::after {
+    opacity: 1;
+  }
+}
+
+/* ---------- Find events / Find seniors: the next card slides in a little from the right ---------- */
+.swipe-card {
+  animation: var(--animate-slide-in-x);
+}
+
+/* ---------- chat: only NEW bubbles (added live by chat.js) pop in; messages already on the page do not move ---------- */
+#thread > li:not(.msg-past) {
+  animation: var(--animate-pop-in);
+}
+
+/* ---------- forms and messages ---------- */
+.field .error:not([hidden]) {
+  animation: var(--animate-nudge-in);
+}
+.alert {
+  animation: var(--animate-drop-in);
+}
+.alert-success {
+  animation: var(--animate-fade-in);
+}
+
+/*
+  Account pages on computers: the whole frame must fit the window, so the root size follows the window height
+  between 16px (a 720px-tall screen) and the usual 18px. Text never goes under 16px.
+*/
+@media (min-width: 64rem) {
+  html:has(body.auth-page) {
+    font-size: clamp(100%, 2.25vh, 112.5%);
+  }
+  body.auth-page {
+    overflow: hidden;
+  }
+}
+
+/* Home hero: the subject floats gently (off under reduced motion); event cards zoom their photo a touch under a mouse */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.hero-float {
+  animation: float 7s ease-in-out infinite;
+}
+.ev-grid > li {
+  animation: var(--animate-fade-up);
+}
+.ev-grid > li:nth-child(2) { animation-delay: 70ms; }
+.ev-grid > li:nth-child(3) { animation-delay: 140ms; }
+.ev-grid > li:nth-child(4) { animation-delay: 210ms; }
+.ev-shell {
+  transition: transform var(--duration-micro) var(--ease-out);
+}
+.ev-shell:active {
+  transform: scale(0.99);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ev-shell:hover {
+    transform: translateY(-3px);
+  }
+  .ev-shell:hover .ev-card > picture img {
+    transform: scale(1.04);
+  }
+}
+.ev-info[open] .ev-info-panel {
+  animation: var(--animate-fade-in);
+}
+
+/* ---------- busy spinner on a button that is submitting (a fixed ring under reduced motion) ---------- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* while a script-opened pop-up is showing, the page behind does not scroll */
+body.modal-open {
+  overflow: hidden;
+}
+/* the "passwords match" tick and inline errors written by a script fade in like the server ones */
+.field .ok:not([hidden]) {
+  animation: var(--animate-nudge-in);
+}
+
+/* ---------- staff area: calmer still. Page fade, button press, pop-ups and the loader only ---------- */
+.admin-area .lift:hover,
+.admin-area .lift:active {
+  transform: none;
+}
+.admin-area .lift:hover::after {
+  opacity: 0;
+}
+.admin-area .alert {
+  animation: none;
+}
+
+/* ---------- people who asked their device for less motion: no movement at all, the loader is a still bar ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* presses and hovers change colour only, never size or position */
+  :is(.btn, .btn-primary, .btn-accent, .btn-coral, .btn-volunteer, .btn-plain, .btn-secondary, .btn-ghost, .btn-danger, .btn-danger-soft, .lang-pill, .chip, .tile, .lift, .ev-shell):is(:active, :hover),
+  .ev-shell:hover .ev-card > picture img,
+  .nav-link[aria-current="page"] .header-icon,
+  .tab-link[aria-current="page"] .tab-icon i {
+    transform: none !important;
+  }
+  /* the loader shows as a full, still bar while the next page loads: no growing, no fading */
+  .top-loader {
+    transition: none !important;
+  }
+  .top-loader.is-loading {
+    transform: scaleX(1);
+  }
 }

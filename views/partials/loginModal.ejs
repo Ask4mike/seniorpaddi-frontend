@@ -7,18 +7,17 @@
 <% const regId = typeof registerEventId !== 'undefined' && registerEventId ? registerEventId : ''; %>
 <% const goNext = typeof next !== 'undefined' && next ? next : ''; %>
 <% const isSignup = typeof mode !== 'undefined' && mode === 'signup'; %>
-<div class="fixed inset-0 z-40 bg-ink/60" aria-hidden="true"></div>
-<div id="login" role="dialog" aria-modal="true" aria-labelledby="login-title"
-     class="fixed inset-x-0 bottom-0 z-50 max-h-[92vh] overflow-y-auto rounded-t-2xl bg-white p-6
-            md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:w-full md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:p-8">
-  <div class="mb-2 flex items-start justify-between gap-4">
-    <h2 id="login-title" class="text-[1.6rem]"><%= isSignup ? t('modal.title_signup') : heading %></h2>
-    <a href="<%= closeHref %>" class="rounded-lg px-2 text-3xl leading-none text-ink no-underline" aria-label="<%= t('modal.close') %>">&times;</a>
+<div class="dialog-backdrop" aria-hidden="true"></div>
+<div id="login" class="dialog" role="dialog" aria-modal="true" aria-labelledby="login-title" aria-describedby="login-desc" data-dialog>
+  <div class="mb-1 flex justify-end">
+    <a href="<%= closeHref %>" class="dialog-close" aria-label="<%= t('modal.close') %>" data-dialog-close>&times;</a>
   </div>
+  <img src="/images/illustrations/welcome.svg" alt="" class="dialog-art -mt-8" width="112" height="112">
+  <h2 id="login-title" tabindex="-1" class="mb-2 text-center"><%= isSignup ? t('modal.title_signup') : heading %></h2>
 
   <% if (isSignup) { %>
-    <p class="mb-5 text-gray-700"><%= t('modal.signup_note') %></p>
-    <form action="/signup" method="post" novalidate>
+    <p id="login-desc" class="mb-6 text-center text-muted"><%= t('modal.signup_note') %></p>
+    <form action="/signup" method="post" novalidate class="form-soft" data-busy-text="<%= t('auth.creating') %>">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <input type="hidden" name="registerEventId" value="<%= regId %>">
       <input type="hidden" name="next" value="<%= goNext %>">
@@ -36,20 +35,20 @@
       </div>
       <div class="field">
         <label for="modal-password"><%= t('signup.password') %></label>
-        <input type="password" id="modal-password" name="password" autocomplete="new-password" required>
-        <span class="hint"><%= t('signup.password_hint') %></span>
+        <%- include('ui/passwordInput', { id: 'modal-password', name: 'password', autocomplete: 'new-password', required: true, describedBy: 'modal-password-hint' }) %>
+        <span class="hint" id="modal-password-hint"><%= t('signup.password_hint') %></span>
       </div>
-      <label class="field flex items-start gap-3 font-normal">
-        <input type="checkbox" name="ageDeclared" value="yes" class="mt-1 h-7 w-7 shrink-0">
-        <strong><%= t('signup.age') %></strong>
+      <label class="check mb-6">
+        <input type="checkbox" name="ageDeclared" value="yes">
+        <span><strong><%= t('signup.age') %></strong></span>
       </label>
-      <button class="btn w-full sm:w-full"><%= regId ? t('modal.signup_and_register') : t('signup.submit') %></button>
+      <button class="btn btn-block btn-lg"><%= regId ? t('modal.signup_and_register') : t('signup.submit') %></button>
     </form>
     <p class="mt-5"><%= t('modal.have_account') %> <a href="<%= switchHref %>"><%= t('home.login') %></a></p>
 
   <% } else { %>
-    <p class="mb-5 text-gray-700"><%= t('modal.session_note') %></p>
-    <form action="/login" method="post">
+    <p id="login-desc" class="mb-6 text-center text-muted"><%= t('modal.session_note') %></p>
+    <form action="/login" method="post" class="form-soft" data-busy-text="<%= t('auth.logging_in') %>">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <input type="hidden" name="registerEventId" value="<%= regId %>">
       <input type="hidden" name="next" value="<%= goNext %>">
@@ -59,11 +58,11 @@
       </div>
       <div class="field">
         <label for="modal-password"><%= t('signup.password') %></label>
-        <input type="password" id="modal-password" name="password" autocomplete="current-password" required>
+        <%- include('ui/passwordInput', { id: 'modal-password', name: 'password', autocomplete: 'current-password', required: true }) %>
       </div>
-      <button class="btn w-full sm:w-full"><%= regId ? t('modal.login_and_register') : t('login.submit') %></button>
+      <button class="btn btn-block btn-lg"><%= regId ? t('modal.login_and_register') : t('login.submit') %></button>
     </form>
     <p class="mt-5"><%= t('login.no_account') %> <a href="<%= switchHref %>"><%= t('home.create_account') %></a></p>
-    <p class="mt-2"><a href="/forgot-password"><%= t('login.forgot') %></a></p>
+    <p class="mt-2"><a href="/forgot-password" class="inline-flex min-h-12 items-center"><%= t('login.forgot') %></a></p>
   <% } %>
 </div>

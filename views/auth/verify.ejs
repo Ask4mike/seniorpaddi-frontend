@@ -2,42 +2,82 @@
 <%
   const steps = [{ channel: 'phone', done: Boolean(currentUser.phoneVerifiedAt), label: t('verify.phone_label', { phone: currentUser.localPhone() }) }];
   if (currentUser.email) steps.push({ channel: 'email', done: Boolean(currentUser.emailVerifiedAt), label: t('verify.email_label', { email: currentUser.email }) });
+  // the server answers a too-early "send again" with this message; public/js/otp.js shows a friendly note instead of "code sent"
+  const askedTooSoon = flash && flash.message === t('verify.wait');
 %>
 
-<h1 class="mb-2"><%= t('verify.title') %></h1>
-<p class="mb-6"><%= t('verify.intro') %></p>
+<div class="auth-shell max-w-2xl md:grid-cols-1">
+  <div class="auth-panel">
+    <img src="/images/illustrations/shield-id.svg" alt="" class="mx-auto mb-4 h-28 w-28" width="112" height="112">
+    <h1 class="auth-title text-center"><%= t('verify.title') %></h1>
+    <p class="measure mx-auto mb-8 text-center text-lg text-muted"><%= t('verify.intro') %></p>
 
-<ol class="space-y-5">
-  <% steps.forEach(function (step, i) { %>
-    <li class="rounded-xl border-2 <%= step.done ? 'border-leaf bg-green-50' : 'border-gray-300' %> p-4">
-      <p class="mb-2 font-bold"><%= i + 1 %>. <%= step.label %></p>
+    <ol class="space-y-5">
+      <% steps.forEach(function (step, i) { %>
+        <li class="rounded-3xl border-2 p-5 <%= step.done ? 'border-eucalyptus-700 bg-success-bg' : 'border-hairline bg-surface-subtle' %>">
+          <p class="mb-3 flex items-center gap-3 font-bold break-words">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full <%= step.done ? 'bg-success text-white' : 'bg-primary text-white' %>" aria-hidden="true"><%= i + 1 %></span>
+            <span class="min-w-0"><%= step.label %></span>
+          </p>
 
-      <% if (step.done) { %>
-        <p class="font-bold text-leaf"><%= t('verify.done') %></p>
-      <% } else { %>
-        <% if (sent === step.channel) { %>
-          <form action="/verify/check" method="post" class="mb-3">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <input type="hidden" name="channel" value="<%= step.channel %>">
-            <div class="field mb-3">
-              <label for="code-<%= step.channel %>"><%= t('verify.enter_code', { minutes: minutes }) %></label>
-              <input type="text" id="code-<%= step.channel %>" name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required>
-            </div>
-            <button class="btn w-full sm:w-full"><%= t('verify.confirm') %></button>
-          </form>
-        <% } %>
-        <form action="/verify/send" method="post">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <input type="hidden" name="channel" value="<%= step.channel %>">
-          <button class="<%= sent === step.channel ? 'btn-plain' : 'btn' %> w-full sm:w-full">
-            <%= sent === step.channel ? t('verify.send_again') : (step.channel === 'phone' ? t('verify.send_sms') : t('verify.send_email')) %>
-          </button>
-        </form>
-      <% } %>
-    </li>
-  <% }) %>
-</ol>
+          <% if (step.done) { %>
+            <p class="chip-status chip-verified"><i class="fa-solid fa-circle-check" aria-hidden="true"></i><%= t('verify.done') %></p>
+          <% } else { %>
+            <% if (sent === step.channel) { %>
+              <form action="/verify/check" method="post" class="form-soft mb-2" data-otp-form data-busy-text="<%= t('auth.checking') %>"
+                    data-msg-incomplete="<%= t('verify.code_incomplete') %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="channel" value="<%= step.channel %>">
+                <div class="field mb-4">
+                  <label for="code-<%= step.channel %>" id="code-<%= step.channel %>-label"><%= t('verify.enter_code', { minutes: minutes }) %></label>
+                  <%# without JavaScript: this one box. With it: six big boxes that fill this box (public/js/otp.js) %>
+                  <input type="text" id="code-<%= step.channel %>" name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required
+                         aria-describedby="code-<%= step.channel %>-error">
+                  <div class="otp-group" data-otp-for="code-<%= step.channel %>" role="group" aria-labelledby="code-<%= step.channel %>-label"
+                       data-digit-label="<%= t('verify.digit', { n: '{n}' }) %>" hidden></div>
+                  <span class="error" id="code-<%= step.channel %>-error" role="alert" hidden></span>
+                </div>
+                <button class="btn btn-block btn-lg"><%= t('verify.confirm') %></button>
+              </form>
+            <% } %>
 
-<p class="mt-6 text-base text-gray-700"><%= t('verify.help', { phone: supportPhone }) %></p>
+            <form action="/verify/send" method="post" data-send-form data-channel="<%= step.channel %>" data-busy-text="<%= t('auth.sending') %>">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="channel" value="<%= step.channel %>">
+              <% if (sent === step.channel) { %>
+                <%# resend with a countdown: "Resend code in 00:60", then a "Resend code" link (public/js/otp.js) %>
+                <p class="resend-row">
+                  <button class="btn-link" data-resend data-channel="<%= step.channel %>"
+                          data-label-wait="<%= t('verify.resend_in', { time: '{time}' }) %>" data-label-ready="<%= t('verify.resend') %>"
+                          <%= askedTooSoon ? 'data-asked-too-soon' : '' %> data-wait-text="<%= t('verify.wait') %>"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i><span data-resend-label><%= t('verify.send_again') %></span></button>
+                </p>
+                <p class="sr-only" aria-live="polite" data-resend-status></p>
+                <div class="alert alert-warning mt-3" role="alert" data-resend-failed hidden><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span><%= t('verify.resend_failed') %></span></div>
+              <% } else { %>
+                <button class="btn btn-block btn-lg"><i class="fa-solid <%= step.channel === 'phone' ? 'fa-comment-sms' : 'fa-envelope' %>" aria-hidden="true"></i><%= step.channel === 'phone' ? t('verify.send_sms') : t('verify.send_email') %></button>
+              <% } %>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ol>
 
+    <p class="measure mx-auto mt-8 text-center text-muted"><%= t('verify.help', { phone: supportPhone }) %></p>
+  </div>
+</div>
+
+<%# "A new code has been sent" pop-up, opened by public/js/otp.js after a resend %>
+<div class="dialog-backdrop" data-modal-backdrop="resent-modal" hidden></div>
+<div id="resent-modal" class="dialog" role="dialog" aria-modal="true" aria-labelledby="resent-title" aria-describedby="resent-text" data-modal hidden
+     data-msg-phone="<%= t('verify.resent_phone', { phone: '{phone}' }) %>" data-msg-email="<%= t('verify.resent_email', { email: '{email}' }) %>"
+     data-phone="<%= currentUser.localPhone() %>" data-email="<%= currentUser.email || '' %>">
+  <span class="modal-icon mx-auto bg-success-bg text-success" aria-hidden="true"><i class="fa-solid fa-paper-plane"></i></span>
+  <h2 id="resent-title" class="mb-2 text-center text-2xl md:text-3xl"><%= t('verify.resent_title') %></h2>
+  <p id="resent-text" class="text-center text-lg"></p>
+  <div class="modal-actions sm:justify-center">
+    <button type="button" class="btn btn-lg sm:min-w-40" data-modal-close data-modal-initial><%= t('common.ok') %></button>
+  </div>
+</div>
+
+<script src="/js/otp.js?v=ui1" defer></script>
 <%- include('../partials/footer') %>

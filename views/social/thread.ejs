@@ -1,13 +1,16 @@
 <%- include('../partials/header') %>
 
-<p class="mb-4"><a href="/messages"><%= t('messages.back') %></a></p>
-<h1 class="mb-3"><%= other.firstName() %></h1>
+<p class="mb-4"><a href="/messages" class="back-link"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i><%= t('messages.back') %></a></p>
+<div class="mb-4 flex items-center gap-4">
+  <span class="avatar h-16 w-16 text-2xl" aria-hidden="true"><% if (other.profilePictureUrl) { %><img src="<%= other.profilePictureUrl %>" alt="" class="h-full w-full object-cover" width="64" height="64"><% } else { %><%= other.fullName.charAt(0) %><% } %></span>
+  <h1 class="min-w-0"><%= other.firstName() %></h1>
+</div>
 
 <%# swap phone numbers %>
 <div class="mb-6">
   <% if (exchange && exchange.status === 'accepted') { %>
     <p class="panel"><%= t('exchange.their_number', { name: other.firstName() }) %>
-      <a href="tel:<%= other.localPhone() %>" class="font-bold"><%= other.localPhone() %></a></p>
+      <a href="tel:<%= other.localPhone() %>" class="inline-block py-2 font-bold"><%= other.localPhone() %></a></p>
   <% } else if (exchange && exchange.status === 'pending' && exchange.requesterId === currentUser.id) { %>
     <p class="panel"><%= t('exchange.waiting', { name: other.firstName() }) %></p>
   <% } else if (!incomingRequest) { %>
@@ -18,58 +21,58 @@
   <% } %>
 </div>
 
-<% if (olderLink) { %><p class="mb-4 text-center"><a href="<%= olderLink %>"><%= t('messages.older') %></a></p><% } %>
+<% if (olderLink) { %><p class="mb-4 text-center"><a href="<%= olderLink %>" class="btn-link"><%= t('messages.older') %></a></p><% } %>
 
 <% if (messages.length === 0) { %>
-  <p id="thread-empty" class="panel mb-6"><%= t("messages.start", { name: other.firstName() }) %></p>
+  <p id="thread-empty" class="empty-state mb-6 text-lg"><%= t("messages.start", { name: other.firstName() }) %></p>
 <% } %>
 
 <ol id="thread" class="mb-6 space-y-3" aria-label="<%= t('messages.title') %>" aria-live="polite"
     data-me="<%= currentUser.id %>" data-other="<%= other.id %>" data-other-name="<%= other.firstName() %>"
     data-you="<%= t('messages.you') %>" data-just-now="<%= t('messages.just_now') %>">
   <% messages.forEach(function (m) { const mine = m.senderId === currentUser.id; %>
-    <li id="msg-<%= m.id %>" class="flex <%= mine ? 'justify-end' : 'justify-start' %>">
-      <div class="max-w-[85%] rounded-xl px-4 py-3 <%= mine ? 'bg-indigo text-white' : 'bg-mist text-ink' %>">
+    <li id="msg-<%= m.id %>" class="msg-past flex <%= mine ? 'justify-end pl-8 sm:pl-16' : 'justify-start pr-8 sm:pr-16' %>">
+      <div class="min-w-0 max-w-full break-words rounded-xl px-4 py-3 <%= mine ? 'bg-primary text-white' : 'bg-surface-muted text-body' %>">
         <p class="sr-only"><%= mine ? t('messages.you') : other.firstName() + ':' %></p>
-        <p class="whitespace-pre-line"><%= m.body %></p>
-        <p class="mt-1 text-base <%= mine ? 'text-white/80' : 'text-gray-700' %>"><%= formatDate(m.createdAt) %>, <%= formatTime(m.createdAt) %></p>
+        <p class="whitespace-pre-line text-base"><%= m.body %></p>
+        <p class="mt-1 text-base <%= mine ? 'text-on-primary-muted' : 'text-muted' %>"><%= formatDate(m.createdAt) %>, <%= formatTime(m.createdAt) %></p>
       </div>
     </li>
   <% }) %>
 </ol>
 
-<form action="/messages/<%= other.id %>" method="post" id="latest" data-chat-form>
+<%# sticky send bar (chat screen, ref 11): big box, big Send button %>
+<form action="/messages/<%= other.id %>" method="post" id="latest" data-chat-form class="send-bar">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <div class="field">
+  <div class="field mb-3">
     <label for="body"><%= t('messages.write', { name: other.firstName() }) %></label>
-    <textarea id="body" name="body" rows="3" maxlength="1000" required></textarea>
+    <textarea id="body" name="body" rows="3" maxlength="1000" required class="min-h-24"></textarea>
   </div>
-  <button class="btn"><%= t('messages.send') %></button>
+  <button class="btn btn-block btn-lg"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i><%= t('messages.send') %></button>
 </form>
 
-<p class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-base">
-  <a href="/report/<%= other.id %>"><%= t('find.report') %></a>
-  <a href="/block/<%= other.id %>"><%= t('block.link', { name: other.firstName() }) %></a>
+<p class="mt-8 flex flex-wrap gap-3 text-base">
+  <a href="/report/<%= other.id %>" class="btn-danger-soft w-auto py-2"><i class="fa-solid fa-flag" aria-hidden="true"></i><%= t('find.report') %></a>
+  <a href="/block/<%= other.id %>" class="btn-link-danger"><%= t('block.link', { name: other.firstName() }) %></a>
 </p>
 
 <%# optional: live messages. If these fail to load, the form above still works. %>
 <script src="/socket.io/socket.io.js" defer></script>
-<script src="/js/chat.js" defer></script>
+<script src="/js/chat.js?v=ui1" defer></script>
 <% if (incomingRequest) { %>
-  <%# pop-up: the other senior asked for their number %>
-  <div class="fixed inset-0 z-40 bg-ink/60" aria-hidden="true"></div>
-  <div role="dialog" aria-modal="true" aria-labelledby="ex-title"
-       class="fixed left-1/2 top-1/2 z-50 w-[92%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 text-center">
-    <h2 id="ex-title" class="mb-2 text-[1.5rem]"><%= t('exchange.popup_title', { name: other.firstName() }) %></h2>
-    <p class="mb-2"><%= t('exchange.popup_text', { name: other.firstName() }) %></p>
-    <p class="mb-5 text-base text-gray-700"><%= t('exchange.safety') %></p>
+  <%# pop-up: the other senior asked for their number. No close link: they must answer, so no data-dialog-close %>
+  <div class="dialog-backdrop" aria-hidden="true"></div>
+  <div role="dialog" aria-modal="true" aria-labelledby="ex-title" aria-describedby="ex-desc" class="dialog" data-dialog>
+    <h2 id="ex-title" tabindex="-1" class="mb-2"><%= t('exchange.popup_title', { name: other.firstName() }) %></h2>
+    <p id="ex-desc" class="mb-2"><%= t('exchange.popup_text', { name: other.firstName() }) %></p>
+    <p class="mb-5 text-base text-muted"><%= t('exchange.safety') %></p>
     <form action="/messages/<%= other.id %>/exchange/accept" method="post" class="mb-3">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button class="btn-volunteer w-full sm:w-full"><%= t('exchange.accept') %></button>
+      <button class="btn-volunteer btn-block"><%= t('exchange.accept') %></button>
     </form>
     <form action="/messages/<%= other.id %>/exchange/decline" method="post">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button class="btn-plain w-full sm:w-full"><%= t('exchange.decline') %></button>
+      <button class="btn-plain btn-block"><%= t('exchange.decline') %></button>
     </form>
   </div>
 <% } %>

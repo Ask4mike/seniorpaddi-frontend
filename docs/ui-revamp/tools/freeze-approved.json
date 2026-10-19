@@ -1,0 +1,113 @@
+{
+  "views/account/settings.ejs": [
+    "- <input name=email type=email value=<%= currentUser.email || '' %>>",
+    "+ <input autocomplete=email name=email type=email value=<%= currentUser.email || '' %>>",
+    "- <script src=/js/upload.js>",
+    "+ <script src=/js/upload.js?v=ui1>"
+  ],
+  "views/admin/dashboard.ejs": [
+    "- <th>",
+    "- </th>",
+    "+ <td>",
+    "+ </td>",
+    "- <script src=/js/dashboard.js>",
+    "+ <script src=/js/dashboard.js?v=ui1>",
+    "- A: div aria-live=polite"
+  ],
+  "views/admin/event-form.ejs": [
+    "- <img alt=Picture preview src=<%= event && event.imageUrl ? event.imageUrl : '/images/events/' + (values.category || 'social') + '.png' %>>",
+    "+ <img alt=Picture preview src=<%= event && event.imageUrl ? event.imageUrl : '/images/events/' + (values.category || 'social') + '.jpg' %>>",
+    "- <script src=/js/upload.js>",
+    "+ <script src=/js/upload.js?v=ui1>"
+  ],
+  "views/admin/onboarding-video.ejs": [
+    "- <script src=/js/upload.js>",
+    "+ <script src=/js/upload.js?v=ui1>"
+  ],
+  "views/admin/staff.ejs": [
+    "- E: <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone, autocomplete: 'off' }) %>",
+    "+ E: <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone, autocomplete: 'off', describedBy: 'phone-hint' + (errors.phone ? ' phone-server-error' : ''), invalid: Boolean(errors.phone) }) %>"
+  ],
+  "views/admin/system.ejs": [
+    "- E: <% function status(ok, onText, offText) { return ok ? '<span class=\"tag-leaf\">' + onText + '</span>' : '<span class=\"tag-full\">' + offText + '</span>'; } %>",
+    "+ E: <% function status(ok, onText, offText) { return ok ? '<span class=\"tag-leaf\"><i class=\"fa-solid fa-circle-check\" aria-hidden=\"true\"></i>' + onText + '</span>' : '<span class=\"tag-full\"><i class=\"fa-solid fa-circle-xmark\" aria-hidden=\"true\"></i>' + offText + '</span>'; } %>"
+  ],
+  "views/auth/signup.ejs": [
+    "- E: <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone }) %>",
+    "+ E: <%- include('../partials/phoneInput', { id: 'phone', name: 'phone', value: values.phone, describedBy: 'phone-hint' + (errors.phone ? ' phone-server-error' : ''), invalid: Boolean(errors.phone) }) %>"
+  ],
+  "views/call.ejs": [
+    "- <p>",
+    "+ <h2>",
+    "- </p>",
+    "+ </h2>"
+  ],
+  "views/events/registered.ejs": [
+    "- <h2>",
+    "+ <h1>",
+    "- </h2>",
+    "+ </h1>",
+    "- A: h2 id=done-title"
+  ],
+  "views/home.ejs": [
+    "- <img alt= src=/images/events/fitness.png>",
+    "- <img alt= src=/images/events/skills.png>",
+    "- <img alt= src=/images/events/social.png>",
+    "- <img alt= src=/images/events/faith.png>",
+    "+ <img alt= src=/images/events/fitness.jpg>",
+    "+ <img alt= src=/images/events/skills.jpg>",
+    "+ <img alt= src=/images/events/social.jpg>",
+    "+ <img alt= src=/images/events/faith.jpg>"
+  ],
+  "views/partials/eventCard.ejs": [
+    "- </button>",
+    "+ </button>",
+    "- </button>",
+    "+ </button>",
+    "- </a>",
+    "+ </a>",
+    "- A: button aria-label=<%= t('stack.skip') %>",
+    "- A: button aria-label=<%= t('stack.register') %>",
+    "- A: a aria-label=<%= t('stack.register') %>"
+  ],
+  "views/partials/footer.ejs": [
+    "- <script src=/js/swipe.js>",
+    "+ <script src=/js/swipe.js?v=ui1>",
+    "+ <script src=/js/dialog.js?v=ui1>",
+    "+ </script>"
+  ],
+  "views/partials/header.ejs": [
+    "- <link href=https://fonts.googleapis.com rel=preconnect>",
+    "- <link href=https://fonts.gstatic.com rel=preconnect>",
+    "- <link href=https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap rel=stylesheet>",
+    "+ <link href=/fonts/noto-sans-variable.woff2 rel=preload type=font/woff2>",
+    "- <link href=/css/main.css rel=stylesheet>",
+    "- <script src=/js/phone-input.js>",
+    "- </script>",
+    "- <script src=/js/reveal.js>",
+    "+ <link href=/css/main.css?v=ui1 rel=stylesheet>",
+    "+ <script src=/js/phone-input.js?v=ui1>",
+    "- E: <%- include('seniorNav', { placement: '~' }) %>",
+    "+ E: <%- include('seniorNav', { placement: '~' }) %>"
+  ],
+  "views/partials/nav.ejs": [
+    "+ T: Log out"
+  ],
+  "views/partials/phoneInput.ejs": [
+    "- A: input aria-describedby=<%= id %>-error"
+  ],
+  "views/social/find.ejs": [
+    "- </button>",
+    "+ </button>",
+    "- </a>",
+    "+ </a>",
+    "- <script src=/js/upload.js>",
+    "+ <script src=/js/upload.js?v=ui1>",
+    "- A: button aria-label=<%= t('find.skip') %>",
+    "- A: a aria-label=<%= t('find.message_short') %>"
+  ],
+  "views/social/thread.ejs": [
+    "- <script src=/js/chat.js>",
+    "+ <script src=/js/chat.js?v=ui1>"
+  ]
+}

@@ -11,18 +11,25 @@
   const bottom = placement === 'bottom';
 %>
 <nav aria-label="Main"
-     class="<%= bottom ? 'fixed inset-x-0 bottom-0 z-30 border-t border-gray-200 bg-white/95 px-1 py-1 backdrop-blur' : '' %>">
-  <ul class="<%= bottom ? 'grid grid-cols-5' : 'flex items-center gap-1' %>">
+     class="<%= bottom ? 'tabbar' : 'min-w-0 max-w-full' %>">
+  <ul class="<%= bottom ? 'mx-auto flex max-w-lg gap-0 overflow-x-auto px-1 py-1' : 'pillnav' %>">
     <% items.forEach(function (item) { %>
-      <li>
+      <li class="<%= bottom ? 'min-w-0 flex-1' : '' %>">
         <a href="<%= item.href %>" <%= item.active ? 'aria-current=page' : '' %>
-           class="relative flex items-center rounded-full no-underline transition
-                  <%= bottom ? 'flex-col gap-1 rounded-2xl px-1 py-2 text-[0.75rem]' : 'gap-2 px-3.5 py-2 text-[0.95rem]' %>
-                  <%= item.active ? 'bg-mist font-semibold text-indigo' : 'font-medium text-gray-600 hover:bg-mist hover:text-indigo' %>">
-          <i class="fa-solid <%= item.icon %> <%= bottom ? 'text-lg' : '' %>" aria-hidden="true"></i>
-          <span><%= bottom && item.short ? item.short : item.label %></span>
+           class="<%= bottom ? 'tab-link h-full text-center' : 'nav-link' %>">
+          <% if (bottom) { %>
+            <%# icon above the word; the active item's icon sits in an indigo pill %>
+            <span class="tab-icon"><i class="fa-solid <%= item.icon %>" aria-hidden="true"></i></span>
+            <span class="tab-label"><%= item.short ? item.short : item.label %></span>
+          <% } else { %>
+            <%# icons step aside between 768 and 1023px so the five words (and an unread count) fit on one line %>
+            <span class="md:max-lg:hidden" aria-hidden="true"><i class="fa-solid <%= item.icon %> header-icon"></i></span>
+            <%# in the one-line header: the short word on tablets and small laptops, the full words from 1280px %>
+            <span class="whitespace-nowrap <%= item.short ? 'xl:hidden' : '' %>"><%= item.short ? item.short : item.label %></span>
+            <% if (item.short) { %><span class="hidden whitespace-nowrap xl:inline"><%= item.label %></span><% } %>
+          <% } %>
           <% if (item.badge > 0) { %>
-            <span class="absolute right-1 top-0.5 rounded-full bg-coral px-1.5 text-[0.7rem] font-semibold text-white"><%= item.badge %></span>
+            <span class="count-badge <%= bottom ? 'absolute right-0.5 top-0.5' : '' %>"><%= item.badge %></span>
           <% } %>
         </a>
       </li>

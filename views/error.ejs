@@ -1,5 +1,10 @@
 <%- include('partials/header') %>
-<h1 class="mb-4"><%= title %></h1>
-<p class="mb-6"><%= message %></p>
-<a href="/" class="btn-plain"><%= t('error.go_home') %></a>
+<%# friendly error: illustration, one sentence, one action %>
+<div class="empty-state mx-auto max-w-xl">
+  <div class="pattern-ankara pointer-events-none absolute -top-8 -right-8 h-32 w-32 rounded-full" aria-hidden="true"></div>
+  <img src="/images/illustrations/welcome.svg" alt="" class="empty-art relative" width="144" height="144">
+  <h1 class="relative mb-3"><%= title %></h1>
+  <p class="measure relative mx-auto mb-6 text-lg"><%= message %></p>
+  <a href="/" class="btn btn-lg relative"><i class="fa-solid fa-house" aria-hidden="true"></i><%= t('error.go_home') %></a>
+</div>
 <%- include('partials/footer') %>

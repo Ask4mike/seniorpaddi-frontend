@@ -1,38 +1,41 @@
 <%- include('../partials/header') %>
 <%
   function status(ok, onText, offText) {
-    return ok ? '<span class="tag-leaf">' + onText + '</span>' : '<span class="tag-full">' + offText + '</span>';
+    return ok ? '<span class="tag-leaf"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>' + onText + '</span>' : '<span class="tag-full"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>' + offText + '</span>';
   }
 %>
 
-<h1 class="mb-2">System</h1>
-<p class="mb-8">A quick check that everything is working. If something is red, see the "Fixing problems" part of the handover guide.</p>
+<h1 id="system-title" class="mb-2">System</h1>
+<p class="measure mb-8">A quick check that everything is working. If something is red, see the "Fixing problems" part of the handover guide.</p>
 
 <% if (warnings.length > 0) { %>
-  <section class="mb-8 rounded-lg border-l-8 border-amber-tag bg-amber-bg p-4">
-    <h2 class="mb-2">Needs attention</h2>
-    <ul class="list-disc space-y-1 pl-6">
-      <% warnings.forEach(function (w) { %><li><%= w %></li><% }) %>
-    </ul>
+  <section class="alert alert-warning mb-8">
+    <i class="fa-solid fa-triangle-exclamation mt-1" aria-hidden="true"></i>
+    <div class="min-w-0">
+      <h2 class="mb-2 text-xl">Needs attention</h2>
+      <ul class="list-disc space-y-1 pl-6 font-normal">
+        <% warnings.forEach(function (w) { %><li><%= w %></li><% }) %>
+      </ul>
+    </div>
   </section>
 <% } %>
 
-<div class="overflow-x-auto">
-  <table class="admin-table mb-10">
+<div class="table-wrap mb-10" role="region" aria-labelledby="system-title" tabindex="0">
+  <table class="admin-table" aria-labelledby="system-title">
     <tbody>
-      <tr><th>Website</th><td><%= appUrl %><br><span class="text-base">Running since <%= startedAt ? formatDate(startedAt) + ', ' + formatTime(startedAt) : '–' %></span></td></tr>
-      <tr><th>Database</th><td><%- status(dbOk, 'Connected', 'Not reachable') %> <span class="text-base"><%= dbHost %></span></td></tr>
-      <tr><th>Database updates</th><td>
-        <% if (migrations.pending.length === 0) { %><%- status(true, 'Up to date', '') %> <span class="text-base"><%= migrations.executed.length %> applied</span>
-        <% } else { %><%- status(false, '', migrations.pending.length + ' waiting') %> <span class="text-base">Restart the app to apply them.</span><% } %>
+      <tr><th scope="row">Website</th><td><%= appUrl %><br><span class="text-base text-muted">Running since <%= startedAt ? formatDate(startedAt) + ', ' + formatTime(startedAt) : '–' %></span></td></tr>
+      <tr><th scope="row">Database</th><td><%- status(dbOk, 'Connected', 'Not reachable') %> <span class="text-base text-muted"><%= dbHost %></span></td></tr>
+      <tr><th scope="row">Database updates</th><td>
+        <% if (migrations.pending.length === 0) { %><%- status(true, 'Up to date', '') %> <span class="text-base text-muted"><%= migrations.executed.length %> applied</span>
+        <% } else { %><%- status(false, '', migrations.pending.length + ' waiting') %> <span class="text-base text-muted">Restart the app to apply them.</span><% } %>
       </td></tr>
-      <tr><th>Texts and emails (Brevo)</th><td>
+      <tr><th scope="row">Texts and emails (Brevo)</th><td>
         <% if (brevo === 'on') { %><%- status(true, 'Sending', '') %>
-        <% } else if (brevo === 'test') { %><span class="tag-amber">Test mode, not sending</span>
+        <% } else if (brevo === 'test') { %><span class="tag-amber"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>Test mode, not sending</span>
         <% } else { %><%- status(false, '', 'Not set up') %><% } %>
       </td></tr>
-      <tr><th>Uploads (Cloudinary)</th><td><%- status(cloudinary, 'On', 'Not set up') %></td></tr>
-      <tr><th>Reminder texts</th><td>Every day at 8am. <span class="text-base">
+      <tr><th scope="row">Uploads (Cloudinary)</th><td><%- status(cloudinary, 'On', 'Not set up') %></td></tr>
+      <tr><th scope="row">Reminder texts</th><td>Every day at 8am. <span class="text-base text-muted">
         <%= lastRuns.reminders ? 'Last run ' + formatDate(lastRuns.reminders) + ', ' + formatTime(lastRuns.reminders) + ' (' + lastRuns.remindersSent + ' sent)' : 'Not run since the last restart.' %></span></td></tr>
     </tbody>
   </table>

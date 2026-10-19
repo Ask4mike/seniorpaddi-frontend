@@ -4,45 +4,47 @@
 %>
 
 <div class="mx-auto max-w-5xl">
-  <div class="mb-5 flex flex-wrap items-end justify-between gap-3" data-reveal>
+  <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
     <div>
       <h1><%= t('stack.title') %></h1>
-      <% if (event) { %><p class="text-gray-600"><%= t('stack.counter', { n: position, total: total }) %></p><% } %>
+      <% if (event) { %><p class="text-muted"><%= t('stack.counter', { n: position, total: total }) %></p><% } %>
     </div>
     <% if (currentUser) { %>
-      <a href="/registrations" class="btn-plain"><i class="fa-solid fa-ticket" aria-hidden="true"></i><%= t('stack.my_tickets') %></a>
+      <a href="/registrations" class="btn-plain w-auto py-2"><i class="fa-solid fa-ticket" aria-hidden="true"></i><%= t('stack.my_tickets') %></a>
     <% } %>
   </div>
 
   <%# filter by type of event %>
-  <nav aria-label="<%= t('events.filter') %>" class="-mx-4 mb-6 overflow-x-auto px-4" data-reveal>
-    <ul class="flex gap-2 pb-1">
-      <li><a href="/events" class="inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[0.95rem] no-underline transition <%= category ? 'bg-white text-indigo shadow-sm ring-1 ring-gray-200 hover:bg-mist' : 'bg-indigo text-white shadow-md' %>"><i class="fa-solid fa-border-all" aria-hidden="true"></i><%= t('events.all_types') %></a></li>
+  <%# one swipeable row of filter chips on phones (so the event stays in view), wrapping rows on bigger screens %>
+  <nav aria-label="<%= t('events.filter') %>" class="mb-5">
+    <ul class="-mx-4 flex gap-3 overflow-x-auto px-4 pt-1 pb-3 md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
+      <li class="shrink-0"><a href="/events" class="chip" aria-current="<%= category ? 'false' : 'true' %>"><i class="fa-solid fa-border-all" aria-hidden="true"></i><%= t('events.all_types') %></a></li>
       <% categories.forEach(function (c) { %>
-        <li><a href="/events?category=<%= c %>" class="inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-[0.95rem] no-underline transition <%= category === c ? 'bg-indigo text-white shadow-md' : 'bg-white text-indigo shadow-sm ring-1 ring-gray-200 hover:bg-mist' %>"><i class="fa-solid <%= catIcons[c] %>" aria-hidden="true"></i><%= t('category.' + c) %></a></li>
+        <li class="shrink-0"><a href="/events?category=<%= c %>" class="chip" aria-current="<%= category === c ? 'true' : 'false' %>"><i class="fa-solid <%= catIcons[c] %>" aria-hidden="true"></i><%= t('category.' + c) %></a></li>
       <% }) %>
     </ul>
   </nav>
 
   <% if (event) { %>
-    <div class="swipe-stack" data-reveal>
+    <div class="swipe-stack">
       <% if (nextEvent) { %>
         <%# the next card peeks out from behind %>
-        <div class="swipe-peek overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-lg" aria-hidden="true">
+        <div class="swipe-peek overflow-hidden rounded-3xl border border-hairline bg-surface shadow-soft" aria-hidden="true">
           <%- include('../partials/eventImage', { event: nextEvent, imgClass: 'h-64 w-full object-cover md:h-full md:w-1/2' }) %>
         </div>
       <% } %>
       <%- include('../partials/eventCard', { event, showButtons: true, category }) %>
     </div>
   <% } else { %>
-    <div class="panel text-center" data-reveal>
-      <span class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl text-indigo shadow"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i></span>
-      <p class="mb-5 text-xl font-medium"><%= canStartAgain ? t('stack.all_seen') : t('stack.none') %></p>
+    <div class="empty-state">
+      <div class="pattern-ankara pointer-events-none absolute -bottom-8 -left-8 h-32 w-32 rounded-full" aria-hidden="true"></div>
+      <img src="/images/illustrations/calendar.svg" alt="" class="empty-art relative" width="144" height="144">
+      <p class="relative mb-5 text-xl font-bold"><%= canStartAgain ? t('stack.all_seen') : t('stack.none') %></p>
       <% if (canStartAgain) { %>
         <form action="/events/start-again" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <input type="hidden" name="category" value="<%= category %>">
-          <button class="btn"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><%= t('stack.start_again') %></button>
+          <button class="btn relative"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i><%= t('stack.start_again') %></button>
         </form>
       <% } %>
     </div>

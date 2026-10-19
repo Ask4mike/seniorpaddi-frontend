@@ -1,16 +1,16 @@
 <%# shows the status tags for an event. needs: state, (optional) isMine %>
 <div class="flex flex-wrap gap-2">
-  <% if (typeof isMine !== 'undefined' && isMine) { %><span class="tag-mine"><%= t('tag.going') %></span><% } %>
-  <% if (event.hostedBySenior) { %><span class="tag-leaf"><%= t('tag.hosted_by_senior') %></span><% } %>
+  <% if (typeof isMine !== 'undefined' && isMine) { %><span class="tag-mine"><i class="fa-solid fa-user-check" aria-hidden="true"></i><%= t('tag.going') %></span><% } %>
+  <% if (event.hostedBySenior) { %><span class="tag-leaf"><i class="fa-solid fa-star" aria-hidden="true"></i><%= t('tag.hosted_by_senior') %></span><% } %>
   <% if (state.isCancelled) { %>
-    <span class="tag-full"><%= t('tag.cancelled') %></span>
+    <span class="tag-full"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><%= t('tag.cancelled') %></span>
   <% } else if (state.attendeeFull) { %>
-    <span class="tag-full"><%= t('tag.full') %></span>
+    <span class="tag-full"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><%= t('tag.full') %></span>
   <% } %>
   <% if (state.closesSoon) { %>
-    <span class="tag-amber"><%= state.daysToDeadline === 1 ? t('tag.closes_tomorrow') : t('tag.closes_in', { days: state.daysToDeadline }) %></span>
+    <span class="tag-amber"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><%= state.daysToDeadline === 1 ? t('tag.closes_tomorrow') : t('tag.closes_in', { days: state.daysToDeadline }) %></span>
   <% } %>
   <% if (state.volunteerEnabled && !state.volunteerFull && !state.isCancelled) { %>
-    <span class="tag-leaf"><%= t('tag.volunteers_needed') %></span>
+    <span class="tag-leaf"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i><%= t('tag.volunteers_needed') %></span>
   <% } %>
 </div>
