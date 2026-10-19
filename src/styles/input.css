@@ -998,10 +998,10 @@
   */
   .hero-stage {
     @apply relative isolate mx-2 mt-2 flex flex-col overflow-hidden rounded-[2rem] text-charcoal sm:mx-3 sm:mt-3 md:rounded-[2.5rem];
-    background: radial-gradient(70% 80% at 50% 45%, #ffd25e 0%, #f5b82e 55%, #e5a417 100%);
+    background-image: linear-gradient(135deg, var(--color-mint-wash) 0%, var(--color-lavender) 55%, var(--color-indigo-100) 100%);
   }
   .hero-leaf {
-    @apply pointer-events-none absolute -z-10 text-yolk-500;
+    @apply pointer-events-none absolute -z-10 text-white;
     opacity: 0.55;
   }
   .hero-bar {
