@@ -1,0 +1,90 @@
+<h1 id="ch12"><span class="num">Chapter 12</span>Glossary</h1>
+
+<p class="lead">Every technical word in this guide, A to Z, in plain English.</p>
+
+<table>
+  <thead><tr><th style="width:26%">Term</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Admin</strong></td><td>A staff account (<code>role: 'admin'</code>). Staff use the pages under <code>/admin</code>.</td></tr>
+    <tr><td><strong>Alt text</strong></td><td>A written description of a picture for people who can't see it (read aloud by screen readers). <code>alt=""</code> means "decoration, skip it".</td></tr>
+    <tr><td><strong>API / API key</strong></td><td>A way for one program to ask another for something over the internet (SeniorPadi asks Brevo to send a text). A key is the password that program uses.</td></tr>
+    <tr><td><strong>async / await</strong></td><td>JavaScript words for "this takes time; wait for the answer before carrying on".</td></tr>
+    <tr><td><strong>Branch</strong></td><td>A separate line of work in Git, so changes can be tried without touching <code>main</code>.</td></tr>
+    <tr><td><strong>Browser</strong></td><td>The program that shows web pages (Chrome, Edge, a phone's browser).</td></tr>
+    <tr><td><strong>bcrypt / hash</strong></td><td>A one-way scramble of a password. The site stores the hash, never the password.</td></tr>
+    <tr><td><strong>Cache / cache-busting</strong></td><td>Browsers keep copies of files to save data. Adding <code>?v=ui5</code> to a file's address and changing it forces a fresh copy.</td></tr>
+    <tr><td><strong>CDN</strong></td><td>A fast file server on the internet. Font Awesome icons come from one.</td></tr>
+    <tr><td><strong>CLI</strong></td><td>Command-line interface: a program you use by typing commands in a terminal.</td></tr>
+    <tr><td><strong>Clone</strong></td><td>Download a copy of a Git repository with its whole history.</td></tr>
+    <tr><td><strong>Column / row / table</strong></td><td>A database table is like a spreadsheet: each row is one thing (a user), each column one detail (their phone).</td></tr>
+    <tr><td><strong>Commit</strong></td><td>A saved snapshot of your changes in Git, with a short message.</td></tr>
+    <tr><td><strong>Component class</strong></td><td>A named bundle of styles in <code>input.css</code>, like <code>.btn-glow</code>.</td></tr>
+    <tr><td><strong>Controller</strong></td><td>In many projects, the code that answers a request. Here that code lives inside the route files.</td></tr>
+    <tr><td><strong>Cookie</strong></td><td>A small label the server gives the browser, which the browser sends back with every request. SeniorPadi's cookie links you to your session.</td></tr>
+    <tr><td><strong>Cron</strong></td><td>A timetable for jobs, written like <code>0 8 * * *</code> (8:00 every day).</td></tr>
+    <tr><td><strong>CSS</strong></td><td>The language that controls how pages look.</td></tr>
+    <tr><td><strong>CSRF / CSRF token</strong></td><td>A trick where another site secretly submits a form as you. The token is a secret in every form that proves it came from the real page.</td></tr>
+    <tr><td><strong>Database</strong></td><td>A program that stores information permanently. SeniorPadi uses PostgreSQL.</td></tr>
+    <tr><td><strong>Deploy</strong></td><td>Put a new version of the site online (Render does it after every push to GitHub).</td></tr>
+    <tr><td><strong>Design token</strong></td><td>A named design value (a colour, a size) in the <code>@theme</code> block.</td></tr>
+    <tr><td><strong>Dry run</strong></td><td>Pretend mode: texts and emails are printed in the terminal instead of sent.</td></tr>
+    <tr><td><strong>EJS</strong></td><td>Embedded JavaScript templates: HTML with holes the server fills in.</td></tr>
+    <tr><td><strong>Environment variable / .env</strong></td><td>A setting given to the program from outside its code. On your computer they live in the <code>.env</code> file.</td></tr>
+    <tr><td><strong>Escaping</strong></td><td>Turning characters like <code>&lt;</code> into harmless text so typed input can't become code. <code>&lt;%= %&gt;</code> escapes.</td></tr>
+    <tr><td><strong>Express</strong></td><td>The web framework: it matches addresses to functions and runs middleware.</td></tr>
+    <tr><td><strong>Flash message</strong></td><td>A one-time message shown on the next page ("Welcome, Ade!"), then forgotten.</td></tr>
+    <tr><td><strong>Framework</strong></td><td>A ready-made skeleton for building a kind of program.</td></tr>
+    <tr><td><strong>GET / POST</strong></td><td>The two kinds of request used here: GET asks to see a page, POST sends a form.</td></tr>
+    <tr><td><strong>Git / GitHub</strong></td><td>Git records every change to the code; GitHub stores that history online.</td></tr>
+    <tr><td><strong>Hard refresh</strong></td><td>Reload ignoring saved copies: <kbd>Ctrl</kbd>+<kbd>F5</kbd> (<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on a Mac).</td></tr>
+    <tr><td><strong>HTML</strong></td><td>The language web pages are written in.</td></tr>
+    <tr><td><strong>i18n</strong></td><td>Short for "internationalisation" (18 letters between i and n): showing the site in several languages.</td></tr>
+    <tr><td><strong>Include / partial</strong></td><td>A small template placed inside others (<code>views/partials/</code>).</td></tr>
+    <tr><td><strong>JavaScript</strong></td><td>The programming language of the server code and the browser scripts.</td></tr>
+    <tr><td><strong>JSON</strong></td><td>A strict text format for data, used by <code>package.json</code> and <code>locales/*.json</code>.</td></tr>
+    <tr><td><strong>Key (locale key)</strong></td><td>The name of a sentence in <code>locales/</code>, like <code>login.submit</code>.</td></tr>
+    <tr><td><strong>Lazy loading</strong></td><td>Waiting to download a picture until it is about to be seen.</td></tr>
+    <tr><td><strong>localhost</strong></td><td>"This computer". <code>localhost:3000</code> is the site running on your own machine.</td></tr>
+    <tr><td><strong>Lock / transaction</strong></td><td>A transaction groups database steps so they all happen or none do; a lock makes others wait. Together they stop overbooking.</td></tr>
+    <tr><td><strong>Middleware</strong></td><td>A function every request passes through before reaching its route (checks, loading the user).</td></tr>
+    <tr><td><strong>Migration</strong></td><td>A file that changes the shape of the database (adds a table or column). Each runs once.</td></tr>
+    <tr><td><strong>Model</strong></td><td>The JavaScript description of one database table (<code>src/models/</code>).</td></tr>
+    <tr><td><strong>Neon</strong></td><td>A company that hosts PostgreSQL databases online; the live site's database.</td></tr>
+    <tr><td><strong>Node.js</strong></td><td>The program that runs JavaScript outside a browser.</td></tr>
+    <tr><td><strong>nodemon</strong></td><td>A helper that restarts the site whenever you save a file.</td></tr>
+    <tr><td><strong>npm / package</strong></td><td>npm downloads packages (code others shared) and runs the project's commands.</td></tr>
+    <tr><td><strong>ORM</strong></td><td>A tool (here Sequelize) that lets you use database tables as JavaScript objects.</td></tr>
+    <tr><td><strong>OTP</strong></td><td>One-time password: the 6-digit code sent to confirm a phone.</td></tr>
+    <tr><td><strong>Port</strong></td><td>A numbered door on a computer that a program listens on (3000 for SeniorPadi).</td></tr>
+    <tr><td><strong>PostgreSQL</strong></td><td>The database program SeniorPadi uses.</td></tr>
+    <tr><td><strong>Pull request (PR)</strong></td><td>A request on GitHub to merge one branch into another, where changes are reviewed.</td></tr>
+    <tr><td><strong>Rate limit</strong></td><td>A cap on how often someone can try something (e.g. logging in).</td></tr>
+    <tr><td><strong>Redirect</strong></td><td>The server telling the browser "go and ask for this other page instead".</td></tr>
+    <tr><td><strong>Render</strong></td><td>The company that runs the live website (configured by <code>render.yaml</code>).</td></tr>
+    <tr><td><strong>Rendering (server-side)</strong></td><td>Building the finished HTML on the server before sending it, as SeniorPadi does.</td></tr>
+    <tr><td><strong>Repository (repo)</strong></td><td>A project folder tracked by Git, with all its history.</td></tr>
+    <tr><td><strong>Request / response</strong></td><td>The browser's question to the server, and the server's answer.</td></tr>
+    <tr><td><strong>res.locals</strong></td><td>Data that Express adds to every template (<code>currentUser</code>, <code>t</code>...).</td></tr>
+    <tr><td><strong>Responsive</strong></td><td>A layout that adapts to screen size, from phones to large monitors.</td></tr>
+    <tr><td><strong>Route</strong></td><td>An address plus the function that answers it, e.g. <code>router.get('/login', ...)</code>.</td></tr>
+    <tr><td><strong>Scriptlet</strong></td><td>An EJS tag that runs code without printing: <code>&lt;% %&gt;</code>.</td></tr>
+    <tr><td><strong>Seed / demo data</strong></td><td>Sample data put into the database for trying the site (<code>npm run seed:local</code>).</td></tr>
+    <tr><td><strong>Sequelize</strong></td><td>The ORM SeniorPadi uses to talk to PostgreSQL.</td></tr>
+    <tr><td><strong>Server</strong></td><td>The program (and computer) that answers requests.</td></tr>
+    <tr><td><strong>Session</strong></td><td>The server's memory of a visitor between requests (who is logged in, which language).</td></tr>
+    <tr><td><strong>Socket.IO / WebSocket</strong></td><td>An always-open line between browser and server, used for live chat.</td></tr>
+    <tr><td><strong>Soft delete</strong></td><td>Marking a row as deleted instead of removing it (<code>paranoid: true</code> on Users).</td></tr>
+    <tr><td><strong>SQL</strong></td><td>The language databases understand. Sequelize writes it for you.</td></tr>
+    <tr><td><strong>SSL</strong></td><td>Encryption for a connection, needed by online databases like Neon.</td></tr>
+    <tr><td><strong>Static files</strong></td><td>Files sent exactly as they are (<code>public/</code>): CSS, fonts, pictures, scripts.</td></tr>
+    <tr><td><strong>SVG</strong></td><td>A picture format made of shapes, so it stays sharp at any size.</td></tr>
+    <tr><td><strong>Tailwind CSS</strong></td><td>A styling tool built from small class names like <code>text-lg</code>.</td></tr>
+    <tr><td><strong>Template</strong></td><td>A page with gaps for data (an <code>.ejs</code> file).</td></tr>
+    <tr><td><strong>Terminal</strong></td><td>A window where you type commands (PowerShell, Terminal).</td></tr>
+    <tr><td><strong>Test</strong></td><td>A small program that checks the site behaves correctly (<code>npm test</code>).</td></tr>
+    <tr><td><strong>UTC / Lagos time</strong></td><td>Times are stored in UTC (world standard time) and shown in Lagos time (one hour ahead).</td></tr>
+    <tr><td><strong>View</strong></td><td>A page template in <code>views/</code>.</td></tr>
+    <tr><td><strong>WebP</strong></td><td>A modern picture format, usually smaller than JPG.</td></tr>
+    <tr><td><strong>XSS</strong></td><td>Cross-site scripting: an attack that sneaks code into a page through typed text. Escaping prevents it.</td></tr>
+  </tbody>
+</table>

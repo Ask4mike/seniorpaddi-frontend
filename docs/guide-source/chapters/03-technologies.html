@@ -95,7 +95,7 @@
 <h2>csrf-sync (form protection)</h2>
 <p><strong>CSRF</strong> (cross-site request forgery) is a trick where another website secretly submits a form to SeniorPadi using your logged-in browser. To stop it, every form carries a secret <strong>token</strong> that only the real page knows, and the server rejects forms without the right one.</p>
 <pre data-file="views/auth/login.ejs" data-find="name=&quot;_csrf&quot;" data-lines="1"></pre>
-<div class="callout warn"><span class="label">Warning</span><p>Every <code>&lt;form method="post"&gt;</code> you add must include this hidden <code>_csrf</code> line, or submitting it shows "This form has expired".</p></div>
+<div class="callout warn"><span class="label">Warning</span><p>Every <code>&lt;form method="post"&gt;</code> you add must include this hidden <code>_csrf</code> line, or submitting it shows the error "This page was open too long. Go back, refresh the page and try again."</p></div>
 
 <h2>express-rate-limit</h2>
 <p>Limits how many times someone can try something in a period of time, so nobody can guess passwords by trying thousands.</p>

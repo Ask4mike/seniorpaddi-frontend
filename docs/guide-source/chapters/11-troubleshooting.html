@@ -1,0 +1,92 @@
+<h1 id="ch11"><span class="num">Chapter 11</span>Troubleshooting</h1>
+
+<p class="lead">When something goes wrong, read the message in the terminal first: SeniorPadi's start-up code tries hard to say what is wrong in plain words. Then find it in the tables below.</p>
+
+<div class="callout tip"><span class="label">Where errors appear</span>
+<ul>
+  <li><strong>The terminal</strong> running the site: start-up problems and crashes (with the file and line number).</li>
+  <li><strong>The browser page</strong>: SeniorPadi shows a friendly error page (<code>views/error.ejs</code>) instead of technical details. The technical details are printed in the terminal at the same moment.</li>
+  <li><strong>The browser's developer tools</strong> (<kbd>F12</kbd> → Console): problems with the small scripts in <code>public/js/</code>.</li>
+</ul></div>
+
+<h2>Pages and templates</h2>
+<table>
+  <thead><tr><th style="width:32%">You see</th><th style="width:30%">Likely cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td>"We couldn't find that page." (in plain Express this would be <code>Cannot GET /page</code>)</td><td>No route answers that address and method.</td><td>Check the spelling of the address; check a <code>router.get('/page', ...)</code> exists and its file is plugged in with <code>app.use</code> in <code>src/app.js</code>; a form with <code>method="post"</code> needs a <code>router.post</code>.</td></tr>
+    <tr><td><code>Failed to lookup view "x" in views directory</code></td><td>The name in <code>res.render('x')</code> does not match a file in <code>views/</code>.</td><td>Use the path inside <code>views/</code> without <code>.ejs</code>, e.g. <code>'auth/login'</code>. Names are case-sensitive on Render (Linux).</td></tr>
+    <tr><td><code>Cannot find module 'ejs'</code> (or "ejs is not defined")</td><td>Packages not installed, or EJS not set as the view engine.</td><td>Run <code>npm install</code>. The engine is set by <code>app.set('view engine', 'ejs')</code> in <code>src/app.js</code>; don't remove it.</td></tr>
+    <tr><td><code>ReferenceError: something is not defined</code>, pointing at an <code>.ejs</code> line</td><td>The template uses a variable the route did not pass.</td><td>Pass it in <code>res.render</code>, or guard it with <code>typeof something !== 'undefined'</code>.</td></tr>
+    <tr><td><code>Could not find the include file</code></td><td>Wrong path in <code>include(...)</code>.</td><td>Paths are relative to the current template (<code>../partials/...</code> from a sub-folder).</td></tr>
+    <tr><td><code>SyntaxError</code> in an <code>.ejs</code> file</td><td>An <code>if</code> or loop is not closed, or a <code>%&gt;</code> is missing.</td><td>Match every <code>{</code> with a <code>&lt;% } %&gt;</code>.</td></tr>
+    <tr><td>Raw HTML code shows as text on the page</td><td><code>&lt;%= include(...) %&gt;</code> used instead of <code>&lt;%-</code>.</td><td>Use the dash for includes.</td></tr>
+    <tr><td>"This page was open too long. Go back, refresh the page and try again."</td><td>The form's security token is missing or old (CSRF check).</td><td>Refresh and send again. For a form you wrote, add the hidden <code>_csrf</code> field.</td></tr>
+    <tr><td>"Too many tries. Please wait a few minutes and try again."</td><td>A rate limit (<code>src/middleware/rateLimit.js</code>), e.g. 10 log-ins in 15 minutes.</td><td>Wait. On your own computer, restarting the site also clears the counts (they are kept in memory).</td></tr>
+    <tr><td>Every page sends you to "Change password"</td><td>Staff reset this account's password, so <code>mustChangePassword</code> is on.</td><td>Choose a new password; that is intended (<code>requirePasswordChanged</code> in <code>src/middleware/auth.js</code>).</td></tr>
+  </tbody>
+</table>
+
+<h2>Starting the site</h2>
+<table>
+  <thead><tr><th style="width:32%">You see</th><th style="width:30%">Likely cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td><code>EADDRINUSE: address already in use :::3000</code></td><td>Another copy of the site (or another program) already uses port 3000.</td><td>Stop the other terminal with <kbd>Ctrl</kbd>+<kbd>C</kbd>. If you can't find it: Windows <code>netstat -ano | findstr :3000</code> then <code>taskkill /PID &lt;number&gt; /F</code>; macOS/Linux <code>lsof -i :3000</code> then <code>kill &lt;PID&gt;</code>. Or use another port (<code>PORT=3001</code> in <code>.env</code>).</td></tr>
+    <tr><td><code>The database address is missing.</code></td><td>No <code>.env</code> file, wrong folder, or the address for your <code>DB_TARGET</code> is empty.</td><td>Create <code>.env</code> next to <code>package.json</code> (chapter 4, step 5).</td></tr>
+    <tr><td><code>SyntaxError: Unexpected token ... in JSON</code> mentioning <code>locales/</code></td><td>A missing comma or quote in <code>en.json</code>/<code>yo.json</code>.</td><td>Open the file; VS Code underlines the mistake in red.</td></tr>
+    <tr><td><code>! There is no admin account yet.</code></td><td><code>ADMIN_PHONE</code>/<code>ADMIN_PASSWORD</code> missing, or the password is under 8 characters.</td><td>Fix <code>.env</code> and restart, or run <code>npm run create-admin -- "Full Name" 08031234567 YOUR_PASSWORD_HERE</code>.</td></tr>
+    <tr><td><code>! The stylesheet is missing and could not be built.</code></td><td><code>public/css/main.css</code> was deleted and Tailwind could not run.</td><td>Run <code>npm install</code>, then <code>npm run build:css</code>.</td></tr>
+    <tr><td><code>Database update ... failed: ...</code></td><td>A migration file has an error, or the database is in an unexpected state.</td><td>Read the message after "failed:"; fix the new migration file (never an old one) and restart.</td></tr>
+  </tbody>
+</table>
+
+<h2>Database connection</h2>
+<p>Run <code>npm run db:check</code> first: it prints which database is being used, whether the name could be found and whether it connected.</p>
+<table>
+  <thead><tr><th style="width:30%">Code in the message</th><th>Meaning and fix</th></tr></thead>
+  <tbody>
+    <tr><td><code>ECONNREFUSED</code></td><td>Nothing is listening at that address: PostgreSQL is not running (start it), or the port in the address is wrong (usually <code>5432</code>).</td></tr>
+    <tr><td><code>28P01</code></td><td>Wrong password in the database address.</td></tr>
+    <tr><td><code>3D000</code> / <code>database "..." does not exist</code></td><td>Create the database (chapter 4, step 4), or fix its name at the end of the address.</td></tr>
+    <tr><td><code>ENOTFOUND</code> / <code>EAI_AGAIN</code></td><td>The host name can't be found: no internet, a typo in a Neon address, or a network blocking it. Try another network, or use <code>DB_TARGET=local</code> for now.</td></tr>
+    <tr><td>SSL / certificate errors</td><td>Only on unusual hosts. Neon is handled automatically; for others see <code>DB_SSL</code> and <code>DB_SSL_STRICT</code> in <code>src/config/database.js</code>.</td></tr>
+    <tr><td>Tests fail with no database</td><td><code>npm test</code> needs <code>TEST_DATABASE_URL</code> pointing at a separate, empty database (it is wiped).</td></tr>
+  </tbody>
+</table>
+
+<h2>Looks and pictures</h2>
+<table>
+  <thead><tr><th style="width:32%">You see</th><th style="width:30%">Likely cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td>Style changes don't show</td><td>The stylesheet wasn't rebuilt, or the browser kept the old copy.</td><td>Run <code>npm run build:css</code>; hard-refresh (<kbd>Ctrl</kbd>+<kbd>F5</kbd>). On the live site raise <code>?v=ui5</code> in <code>header.ejs</code>. Never edit <code>main.css</code> directly.</td></tr>
+    <tr><td>A new Tailwind class does nothing</td><td>It is in a file Tailwind does not scan, or it was built from text joined in code.</td><td>Classes must appear whole in <code>views/</code> or <code>public/js/</code> (see <code>@source</code> in <code>input.css</code>), then rebuild.</td></tr>
+    <tr><td>Page has no styling at all</td><td><code>main.css</code> missing or not loading.</td><td><code>npm run build:css</code>; check the browser's Network tab (<kbd>F12</kbd>) for a 404 on <code>/css/main.css</code>.</td></tr>
+    <tr><td>Icons are empty squares</td><td>Font Awesome loads from the internet (CDN).</td><td>Check the internet connection.</td></tr>
+    <tr><td>A picture doesn't show</td><td>Wrong address, wrong capital letters, or the file was never committed.</td><td>Use <code>/images/...</code> (not <code>/public/images/...</code>); match capitals exactly (Render is case-sensitive); new files in <code>public/images/</code> need <code>git add -f</code> because of <code>.gitignore</code>.</td></tr>
+    <tr><td>Texts and emails don't arrive</td><td>Brevo is not set up, or <code>NOTIFY_DRY_RUN=true</code>.</td><td>Look in the terminal for <code>[sms dry run]</code>; that is where they go in dry-run mode. Add Brevo keys to send for real.</td></tr>
+    <tr><td>Event text stays English in Yorùbá</td><td>No <code>GOOGLE_TRANSLATE_API_KEY</code>.</td><td>Expected; menus and buttons are still Yorùbá (they come from <code>locales/yo.json</code>).</td></tr>
+  </tbody>
+</table>
+
+<h2 id="things-to-know">Things to know: unclear parts and possible bugs</h2>
+<p>These were found while writing this guide. None stops the site working today, but each is worth a decision.</p>
+<table>
+  <thead><tr><th style="width:5%">#</th><th style="width:35%">What</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><code>start-windows.bat</code> copies a missing file</td><td>It runs <code>copy .env.example .env</code>, but there is no <code>.env.example</code> in the project. Adding one (with placeholders only, like chapter 4's) would fix it.</td></tr>
+    <tr><td>2</td><td><code>.gitignore</code> hides new pictures</td><td>The line <code>images/</code> matches <code>public/images/</code> too, so new pictures are silently left out of commits. If it was meant for <code>docs/images/</code> only, change it to <code>/docs/images/</code>.</td></tr>
+    <tr><td>3</td><td>Upload warning is out of date</td><td>Start-up says uploads are "switched off" without Cloudinary, but <code>src/services/cloudinary.js</code> saves them locally instead (<code>public/uploads/</code>, <code>storage/ids/</code>). On Render those local files disappear on every restart, so Cloudinary is still needed there.</td></tr>
+    <tr><td>4</td><td>Two GitHub addresses</td><td><code>README.md</code> and <code>docs/MVP.md</code> point to <code>Otani-ibe/SeniorPadi_Capstone</code>; the project's Git remote is <code>Ask4mike/seniorpaddi-frontend</code>.</td></tr>
+    <tr><td>5</td><td>Confirm password is browser-only</td><td>On Create account, "Confirm password" is checked by <code>public/js/ui.js</code> only; the server never sees it. With JavaScript off, nothing compares the two.</td></tr>
+    <tr><td>6</td><td>Image licences unknown</td><td>The six event photos have no recorded source or licence (<code>IMAGE_CREDITS.md</code>). Verify or replace before launch.</td></tr>
+    <tr><td>7</td><td>Old notes and files</td><td><code>public/images/README.md</code> is partly out of date; <code>public/images/hero.png</code> is unused; the hero's <code>on-yolk</code> class name is left over from the yellow version.</td></tr>
+    <tr><td>8</td><td>Rate limits reset on restart</td><td><code>express-rate-limit</code> keeps its counts in memory, so a restart (or several servers) resets them. Fine for one small server.</td></tr>
+    <tr><td>9</td><td>No "Remember me"</td><td>The log-in page has no "Remember me" box; instead every session lasts 30 days (<code>src/config/session.js</code>).</td></tr>
+  </tbody>
+</table>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li>Read the terminal first; then <code>npm run db:check</code> for database trouble.</li>
+  <li>Most page errors are a missing route, a wrong view name, or a variable the route didn't pass.</li>
+  <li>Most "my change doesn't show" problems are an unbuilt stylesheet or a cached file.</li>
+</ul></div>

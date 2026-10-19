@@ -1,0 +1,81 @@
+<h1 id="ch13"><span class="num">Chapter 13</span>Quick reference</h1>
+
+<div class="cheat">
+<h2>Commands</h2>
+<table>
+  <thead><tr><th style="width:36%">Command</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>npm install</code></td><td>Download the packages (first time, and after <code>package.json</code> changes).</td></tr>
+    <tr><td><code>npm run dev</code></td><td>Start the site; restarts when you save <code>.js</code>/<code>.json</code>. (<code>dev:local</code>, <code>dev:neon</code> force a database.)</td></tr>
+    <tr><td><code>npm start</code></td><td>Start the site once (what Render runs).</td></tr>
+    <tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>Stop the site.</td></tr>
+    <tr><td><code>npm run build:css</code> / <code>dev:css</code></td><td>Rebuild the stylesheet once / on every save.</td></tr>
+    <tr><td><code>npm run db:check</code></td><td>Which database, and can we reach it?</td></tr>
+    <tr><td><code>npm run seed:local</code></td><td>Wipe the local database and add demo data (password <code>password123</code>).</td></tr>
+    <tr><td><code>npm run create-admin -- "Name" 080... PASSWORD</code></td><td>Make a staff account.</td></tr>
+    <tr><td><code>npm test</code></td><td>Run the automated tests (needs <code>TEST_DATABASE_URL</code>).</td></tr>
+    <tr><td><code>npm run translate:ui</code></td><td>Fill missing Yorùbá text with Google Translate.</td></tr>
+    <tr><td><code>node docs/ui-revamp/tools/preview-server.mjs</code></td><td>Look at every page without a database: <code>localhost:4100/__pages</code>.</td></tr>
+    <tr><td><code>node docs/guide-source/build.mjs</code></td><td>Rebuild this guide.</td></tr>
+  </tbody>
+</table>
+
+<h2>Folder map in brief</h2>
+<table>
+  <tbody>
+    <tr><td style="width:30%"><code>src/server.js</code>, <code>src/app.js</code></td><td>Start-up; the order requests are handled in.</td></tr>
+    <tr><td><code>src/routes/</code></td><td>Addresses and what they do (public, events, verify, account, social, onboarding, admin).</td></tr>
+    <tr><td><code>src/services/</code>, <code>src/middleware/</code></td><td>Shared rules; checks before every route.</td></tr>
+    <tr><td><code>src/models/</code>, <code>src/migrations/</code></td><td>Database tables; changes to them.</td></tr>
+    <tr><td><code>views/</code>, <code>views/partials/</code></td><td>EJS pages; shared pieces (header, footer, cards).</td></tr>
+    <tr><td><code>public/</code></td><td>CSS (built), scripts, fonts, pictures.</td></tr>
+    <tr><td><code>src/styles/input.css</code></td><td>The stylesheet you edit.</td></tr>
+    <tr><td><code>locales/en.json</code>, <code>yo.json</code></td><td>Every sentence.</td></tr>
+  </tbody>
+</table>
+
+<h2>Where to make common edits</h2>
+<table>
+  <tbody>
+    <tr><td style="width:36%">Words, button labels</td><td><code>locales/en.json</code> + <code>locales/yo.json</code></td></tr>
+    <tr><td>Colours, font, sizes</td><td><code>@theme</code> in <code>src/styles/input.css</code>, then <code>npm run build:css</code></td></tr>
+    <tr><td>Log in / Create account</td><td><code>views/auth/login.ejs</code>, <code>signup.ejs</code>; logic in <code>src/routes/public.js</code></td></tr>
+    <tr><td>Home hero and event cards</td><td><code>views/home.ejs</code>, <code>views/partials/eventTile.ejs</code></td></tr>
+    <tr><td>Menu, header, footer</td><td><code>views/partials/seniorNav.ejs</code>, <code>header.ejs</code>, <code>footer.ejs</code></td></tr>
+    <tr><td>Event pictures</td><td><code>public/images/events/</code> (+ <code>IMAGE_CREDITS.md</code>)</td></tr>
+    <tr><td>Settings, port</td><td><code>.env</code> (restart after)</td></tr>
+  </tbody>
+</table>
+
+<h2>EJS tags at a glance</h2>
+<table>
+  <tbody>
+    <tr><td style="width:30%"><code>&lt;%= value %&gt;</code></td><td>Print safely (use for anything typed by a person).</td></tr>
+    <tr><td><code>&lt;%- include('partials/x', { a: 1 }) %&gt;</code></td><td>Insert a partial (raw HTML).</td></tr>
+    <tr><td><code>&lt;% if (x) { %&gt; ... &lt;% } %&gt;</code></td><td>Show something only sometimes.</td></tr>
+    <tr><td><code>&lt;% list.forEach(function (item) { %&gt; ... &lt;% }) %&gt;</code></td><td>Repeat for each item.</td></tr>
+    <tr><td><code>&lt;%# note %&gt;</code></td><td>Comment, never sent to the browser.</td></tr>
+    <tr><td><code>t('key')</code>, <code>currentUser</code>, <code>csrfToken</code></td><td>Available in every template (from <code>src/middleware/locals.js</code> and <code>csrf.js</code>).</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="updating-this-guide">How to update this guide</h2>
+<p>The guide is built from files in <code>docs/guide-source/</code>, so it can be kept up to date as the project changes:</p>
+<table>
+  <tbody>
+    <tr><td style="width:32%"><code>guide.html</code></td><td>The cover, the page styles (A4, brand colours) and the contents placeholder.</td></tr>
+    <tr><td><code>chapters/*.html</code></td><td>One file per chapter, joined in name order. Edit the words here.</td></tr>
+    <tr><td><code>assets/*.svg</code></td><td>The four diagrams (edit them in any text editor or vector drawing program).</td></tr>
+    <tr><td><code>filemap.json</code></td><td>One plain-English description per project file, used for chapter 5.</td></tr>
+    <tr><td><code>build.mjs</code></td><td>The builder.</td></tr>
+  </tbody>
+</table>
+<ol class="steps">
+  <li>Edit the chapter or <code>filemap.json</code>. Code snippets are written as <code>&lt;pre data-file="src/app.js" data-find="text on the first line" data-lines="5"&gt;&lt;/pre&gt;</code>: the builder copies the real lines from the project, so they never go stale.</li>
+  <li>From the project folder run <code>node docs/guide-source/build.mjs</code>. It needs Node 20+ and Microsoft Edge or Google Chrome, which it finds by itself (or set <code>GUIDE_BROWSER</code> to the browser's path). Nothing to install.</li>
+  <li>It prints a list of anything to fix: a snippet whose text was not found (the build stops), a project file with no description, or a description for a file that no longer exists.</li>
+  <li>It writes <code>docs/Senior-Paddi-Beginners-Guide.pdf</code>. It prints twice: the first print finds the page of every heading, the second fills those page numbers into the contents.</li>
+  <li>To preview without making a PDF, run it with <code>--html-only</code> and open <code>docs/guide-source/out/guide.html</code> in a browser.</li>
+</ol>
+<p>When you add a file to the project, add one line for it to <code>filemap.json</code>. When you change how a feature works, update its chapter and rebuild.</p>

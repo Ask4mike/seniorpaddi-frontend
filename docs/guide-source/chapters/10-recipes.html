@@ -1,0 +1,182 @@
+<h1 id="ch10"><span class="num">Chapter 10</span>How to change anything: recipes</h1>
+
+<p class="lead">Copy-and-follow instructions for the changes people make most often. Each recipe says which files to open, shows the code before and after, and how to check it worked.</p>
+
+<div class="callout tip"><span class="label">Before every recipe</span>
+<ol>
+  <li>Make a branch so your work is separate and easy to undo: <code>git checkout -b my-change</code>.</li>
+  <li>Run the site with <code>npm run dev</code> (and <code>npm run dev:css</code> in a second terminal if you will touch styles).</li>
+  <li>When done, run <code>npm test</code> if you changed anything in <code>src/</code>.</li>
+</ol></div>
+
+<h2>Recipe 1: Change text on a page</h2>
+<p><strong>Open:</strong> <code>locales/en.json</code> and <code>locales/yo.json</code>. Almost no text is typed straight into the templates; each sentence has a <em>key</em>.</p>
+<ol class="steps">
+  <li>Find the words you want to change. Search the whole project (VS Code: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) for part of the sentence, for example <code>Free to use</code>. You will find it in <code>locales/en.json</code>:
+    <pre data-file="locales/en.json" data-find="&quot;home.tagline&quot;" data-lines="1"></pre></li>
+  <li>Change the text after the colon. Keep the quotes and the comma at the end.
+    <pre class="code solo" data-lang="json">"home.tagline": "Free community events and friendship for people over 60 in Ibadan.",</pre></li>
+  <li>Change the same key in <code>locales/yo.json</code> (or ask a Yorùbá speaker to). If you leave it, Yorùbá users keep the old Yorùbá text.</li>
+  <li>Save. With <code>npm run dev</code> the site restarts by itself. Refresh the page.</li>
+</ol>
+<p><strong>Button labels and headings</strong> work the same way: the log-in button is <code>"login.submit"</code>, the hero headline is <code>"home.hero_title"</code> plus <code>"home.hero_highlight"</code>. To find which key a page uses, open its template and look for <code>t('...')</code>.</p>
+<div class="callout warn"><span class="label">Warning</span><p>JSON is strict: every line but the last needs a comma, and text must be inside straight double quotes. One missing comma stops the site from starting with <code>SyntaxError: Unexpected token</code> in <code>locales/en.json</code>. Some keys contain <code>{name}</code>-style gaps (e.g. <code>{min}</code>); keep those exactly as they are.</p></div>
+<p><strong>Check:</strong> refresh the page in English, press the language button, check Yorùbá.</p>
+
+<h2>Recipe 2: Change colours, fonts and spacing</h2>
+<h3>Site-wide</h3>
+<p><strong>Open:</strong> <code>src/styles/input.css</code>, the <code>@theme</code> block.</p>
+<pre data-file="src/styles/input.css" data-find="--color-primary: #4a3fb0;" data-lines="2"></pre>
+<p>After (a teal brand colour instead of indigo):</p>
+<pre class="code solo" data-lang="css">--color-primary: #1f7a5f; /* teal */
+--color-primary-dark: #175e49;</pre>
+<p>Then <code>npm run build:css</code> and refresh. Every <code>bg-primary</code>, <code>text-primary</code> and button that uses it changes. Check contrast with <code>node docs/ui-revamp/tools/contrast.mjs</code>: text must stay easy to read.</p>
+<p><strong>Text size:</strong> the base size is in <code>@layer base</code> (<code>html { font-size: 112.5%; }</code> = 18px). Raising it makes everything bigger. <strong>Font:</strong> replace the Outfit file and the <code>@font-face</code>/<code>--font-sans</code> lines; check that Yorùbá accents still display.</p>
+
+<h3>One section only</h3>
+<p>Change the classes in that section's template, or its component class in <code>input.css</code>. For example, the hero's soft background is set on <code>.hero-stage</code>:</p>
+<pre data-file="src/styles/input.css" data-find=".hero-stage {" data-lines="4"></pre>
+<p>After (a plain warm cream background):</p>
+<pre class="code solo" data-lang="css">.hero-stage {
+  @apply relative isolate mx-2 mt-2 flex flex-col overflow-hidden rounded-[2rem] text-charcoal sm:mx-3 sm:mt-3 md:rounded-[2.5rem];
+  background-image: none;
+  background-color: var(--color-cream);
+}</pre>
+<p>For spacing inside one part of a page, edit the Tailwind classes in the template: in <code>views/home.ejs</code>, the "Events near you" section is <code>class="mx-auto max-w-6xl px-4 py-10"</code>; changing <code>py-10</code> to <code>py-16</code> gives it more space above and below. <strong>Check:</strong> rebuild the CSS, refresh, and look at a phone-size window too (in the browser: <kbd>F12</kbd>, then the phone icon).</p>
+
+<h2>Recipe 3: Replace the hero image or an event image</h2>
+<h3>An event category cover</h3>
+<ol class="steps">
+  <li>Prepare the new photo (portrait, at least 1000px on the short edge). Save it as a JPG <em>and</em> a WebP with exactly the old names, e.g. <code>skills.jpg</code> and <code>skills.webp</code> (free tools such as squoosh.app convert to WebP).</li>
+  <li>Replace the two files in <code>public/images/events/</code>.</li>
+  <li>Add a row to <code>IMAGE_CREDITS.md</code>: file, where it is used, source link and licence.</li>
+  <li>Hard-refresh (<kbd>Ctrl</kbd>+<kbd>F5</kbd>). Every skills event without its own photo now uses it.</li>
+  <li>When committing a <strong>new</strong> file name in <code>public/images/</code>, Git will ignore it because of <code>.gitignore</code>'s <code>images/</code> line, so add it on purpose: <code>git add -f public/images/events/newname.webp</code>.</li>
+</ol>
+<p>A single event's own photo is uploaded by staff on its edit page (<code>/admin/events/:id/edit</code>); it replaces the cover for that event only.</p>
+
+<h3>The hero photo</h3>
+<p><strong>Open:</strong> <code>views/home.ejs</code>. The photo appears in two places: the preload at the top, and the picture itself.</p>
+<pre data-file="views/home.ejs" data-find="&lt;source srcset=&quot;/images/events/fitness.webp&quot;" data-lines="2"></pre>
+<p>After (a new file you saved as <code>public/images/hero-subject.webp</code> and <code>.jpg</code>, 1200 × 1500):</p>
+<pre class="code solo" data-lang="ejs">&lt;source srcset="/images/hero-subject.webp" type="image/webp"&gt;
+&lt;img src="/images/hero-subject.jpg" alt="&lt;%= t('home.hero_photo_alt') %&gt;" class="aspect-[4/5] w-full object-cover" width="1200" height="1500" fetchpriority="high" decoding="async"&gt;</pre>
+<p>Also change <code>preloadImage: '/images/events/fitness.webp'</code> on the first line of <code>home.ejs</code> to the new WebP, and update the description in <code>"home.hero_photo_alt"</code> (both language files) so it describes the new photo. <strong>Check:</strong> refresh Home on a wide and a narrow window.</p>
+
+<h2>Recipe 4: Add, remove or rename a field on Log in or Create account</h2>
+<p>A form field touches up to five places: the <strong>template</strong> (the box), the <strong>words</strong> (label and hint), the <strong>route</strong> (reading and checking it), the <strong>model</strong> (what is saved) and sometimes a <strong>migration</strong> (a new database column). Example: an optional "Area of Ibadan" box on Create account. The Users table already has an <code>area</code> column (seniors fill it in Settings), so no migration is needed.</p>
+<ol class="steps">
+  <li><strong>Template</strong>, <code>views/auth/signup.ejs</code>: add a field after the email field, using the shared text box:
+    <pre class="code solo" data-lang="ejs">&lt;div class="field"&gt;
+  &lt;label for="area"&gt;&lt;%= t('settings.area') %&gt;&lt;/label&gt;
+  &lt;%- include('../partials/ui/textInput', { id: 'area', name: 'area', value: values.area || '', icon: 'fa-location-dot' }) %&gt;
+&lt;/div&gt;</pre>
+    (It reuses the existing label key <code>settings.area</code>; add a new key to both locale files if you want different words.)</li>
+  <li><strong>Route</strong>, <code>src/routes/public.js</code>, <code>POST /signup</code>. Today it reads these values:
+    <pre data-file="src/routes/public.js" data-find="const values = {" data-lines="6"></pre>
+    Add <code>area: (req.body.area || '').trim(),</code> to that object, and add <code>area: values.area || null,</code> inside <code>User.create({ ... })</code> a few lines further down.</li>
+  <li><strong>Check rules</strong> (optional): add a line such as <code>if (values.area.length &gt; 80) errors.area = req.t('...')</code> next to the other checks, and show <code>errors.area</code> under the box like the other fields do.</li>
+  <li><strong>Check:</strong> create a test account with an area, then open My account → Settings: the area is filled in. Run <code>npm test</code>.</li>
+</ol>
+<p><strong>A brand-new piece of information</strong> (no column yet) also needs Recipe 8. <strong>Removing a field:</strong> delete it from the template, the route's <code>values</code>, its checks and <code>User.create</code>; if it was required by the database (<code>allowNull: false</code>), it needs a migration too. <strong>Renaming:</strong> change the label in <code>locales/</code> only; renaming the <code>name</code> attribute means changing the route to read the new name.</p>
+<div class="callout important"><span class="label">Important</span><p>Log in is checked by phone number and password only (<code>POST /login</code>). Adding a field there means deciding what the server should do with it in <code>router.post('/login', ...)</code>. The project's tests post these forms directly, so run <code>npm test</code> after any change to them.</p></div>
+
+<h2>Recipe 5: Add a new page</h2>
+<p>Example: a "Help" page at <code>/help</code>. Four steps: route, view, words, link.</p>
+<ol class="steps">
+  <li><strong>Route</strong>, in <code>src/routes/public.js</code>, next to the About route:
+    <pre data-file="src/routes/public.js" data-find="router.get('/about', (req, res) =&gt; {" data-lines="3"></pre>
+    Add below it:
+    <pre class="code solo" data-lang="js">router.get('/help', (req, res) =&gt; {
+  res.render('help', { title: req.t('help.title') });
+});</pre>
+    (Need a log-in? Write <code>router.get('/help', requireAuth, (req, res) =&gt; ...)</code>.)</li>
+  <li><strong>View</strong>: create <code>views/help.ejs</code>:
+    <pre class="code solo" data-lang="ejs">&lt;%- include('partials/header') %&gt;
+&lt;h1&gt;&lt;%= t('help.title') %&gt;&lt;/h1&gt;
+&lt;p class="measure text-lg"&gt;&lt;%= t('help.intro') %&gt;&lt;/p&gt;
+&lt;a href="/call" class="btn-primary"&gt;&lt;%= t('call.title') %&gt;&lt;/a&gt;
+&lt;%- include('partials/footer') %&gt;</pre></li>
+  <li><strong>Words</strong>: add <code>"help.title": "Help",</code> and <code>"help.intro": "..."</code> to <code>locales/en.json</code>, and the Yorùbá versions to <code>locales/yo.json</code>.</li>
+  <li><strong>Link</strong>: add a line to the footer list in <code>views/partials/footer.ejs</code>, copying the About line:
+    <pre data-file="views/partials/footer.ejs" data-find="&lt;li&gt;&lt;a href=&quot;/about&quot;" data-lines="1"></pre></li>
+  <li><strong>Check:</strong> open <code>http://localhost:3000/help</code> and click the new footer link.</li>
+</ol>
+<p>To put it in the <strong>main menu</strong> instead, add an item to the <code>items</code> list at the top of <code>views/partials/seniorNav.ejs</code>. The menu is designed for five items on one line, so think twice before adding a sixth.</p>
+
+<h2>Recipe 6: Add an event, or change how event cards show data</h2>
+<p><strong>Adding an event</strong> is not a code change: log in as staff, go to <strong>Organizations</strong> (add the host if it is new), then <strong>Events → Add event</strong> (<code>/admin/events/new</code>). It appears on Home and Find events as soon as it is saved, as long as it is published and in the future. For lots of sample events on your own computer, edit and run <code>npm run seed:local</code> (this wipes your local data).</p>
+<p><strong>Changing a card:</strong> open <code>views/partials/eventTile.ejs</code>. Every field of the event is available as <code>event.something</code> (the list is in <code>src/models/event.js</code>), and its host as <code>event.Organization</code>. For example, to show the place under the title, after the description line:</p>
+<pre data-file="views/partials/eventTile.ejs" data-find="&lt;% if (evText) { %&gt;" data-lines="1"></pre>
+<p>add:</p>
+<pre class="code solo" data-lang="ejs">&lt;% if (event.locationText) { %&gt;&lt;p class="ev-muted mb-3 text-base"&gt;&lt;i class="fa-solid fa-location-dot" aria-hidden="true"&gt;&lt;/i&gt; &lt;%= event.locationText %&gt;&lt;/p&gt;&lt;% } %&gt;</pre>
+<p>Notice the <code>if</code>: some fields can be empty, so always check before printing. To show <strong>more than 4</strong> events on Home, change <code>limit: 4</code> in the Home route in <code>src/routes/public.js</code>. <strong>Check:</strong> refresh Home with demo data loaded.</p>
+
+<h2>Recipe 7: Edit a shared partial (header, footer, navigation)</h2>
+<p>A partial is used by many pages at once, so one change shows up everywhere. Before editing, find out who uses it: search the project for its name, e.g. <code>include('partials/footer'</code> or <code>footer')</code>. Chapter 7 lists the users of each partial.</p>
+<table>
+  <thead><tr><th style="width:30%">Partial</th><th>Changing it affects</th></tr></thead>
+  <tbody>
+    <tr><td><code>header.ejs</code></td><td>Every page: the browser tab title, stylesheet, scripts, top bar. A mistake here breaks the whole site.</td></tr>
+    <tr><td><code>footer.ejs</code></td><td>Every page except log in / create account (they use <code>pageLayout: 'auth'</code>) and staff pages.</td></tr>
+    <tr><td><code>seniorNav.ejs</code></td><td>The top menu on computers, the bottom menu on phones, and the menu in the Home hero.</td></tr>
+    <tr><td><code>flash.ejs</code></td><td>Every success/error message.</td></tr>
+  </tbody>
+</table>
+<p><strong>Check:</strong> after editing, open several kinds of page: Home, Find events, Log in, My account, and (logged in as staff) the dashboard.</p>
+
+<h2>Recipe 8: Change the database: add a column</h2>
+<p>Example: add an optional <code>emergencyContact</code> to Users. You need two things: a <strong>migration</strong> (changes the real table) and a <strong>model</strong> change (tells Sequelize about it).</p>
+<ol class="steps">
+  <li><strong>New migration file</strong> in <code>src/migrations/</code>. The name must start with a date and time later than the newest one (<code>20261003000001-...</code>), e.g. <code>20261020000001-add-emergency-contact.js</code>. Model it on the existing ones, which look like this:
+    <pre data-file="src/migrations/20260929000001-phase3.js" data-find="await queryInterface.addColumn('Users', 'onboardingSeenAt'" data-lines="1"></pre>
+    Your file:
+    <pre class="code solo" data-lang="js">'use strict';
+
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.addColumn('Users', 'emergencyContact', { type: Sequelize.STRING });
+  },
+
+  async down(queryInterface) {
+    await queryInterface.removeColumn('Users', 'emergencyContact');
+  }
+};</pre></li>
+  <li><strong>Model</strong>, <code>src/models/user.js</code>: add <code>emergencyContact: DataTypes.STRING,</code> next to <code>area: DataTypes.STRING,</code>.</li>
+  <li><strong>Restart</strong> the site. On start-up <code>src/services/migrate.js</code> runs the new file once and prints <code>Database updated: 1 change(s) applied</code>. (Or run <code>npm run db:migrate</code>.)</li>
+  <li>Then use the new column in a form (Recipe 4) and in <code>src/routes/account.js</code> (settings) as needed.</li>
+</ol>
+<div class="callout warn"><span class="label">Warning</span><p>Never edit a migration that has already run on the live database: it will not run again, so your change is silently ignored there. Always add a new file. Removing or renaming columns can lose data: back up first (Recipe 11). <code>npm run db:reset</code> undoes <em>every</em> migration, deleting all data; only use it on a throw-away local database.</p></div>
+
+<h2>Recipe 9: Add a new npm package safely</h2>
+<ol class="steps">
+  <li>Check it is well known and maintained (its npmjs.com page: weekly downloads, last update) and that you really need it.</li>
+  <li>Install it from the project folder: <code>npm install package-name</code> (tools only used while developing: <code>npm install --save-dev package-name</code>).</li>
+  <li>Check that <code>package.json</code> and <code>package-lock.json</code> both changed. Commit both, never <code>node_modules/</code>.</li>
+  <li>Use it with <code>const thing = require('package-name');</code> and run <code>npm test</code>.</li>
+  <li>On Render, the next deploy runs <code>npm install</code> automatically (<code>buildCommand</code> in <code>render.yaml</code>).</li>
+</ol>
+
+<h2>Recipe 10: Change settings or the port</h2>
+<p><strong>Open:</strong> <code>.env</code>. Change or add a line, for example <code>PORT=3001</code>, save, then stop (<kbd>Ctrl</kbd>+<kbd>C</kbd>) and start the site again: settings are only read at start-up. The site is now at <code>http://localhost:3001</code>, and <code>APP_URL</code> follows automatically unless you set it yourself. On the live site, change settings in Render (the service → <strong>Environment</strong>); Render restarts the site for you. Chapter 4 lists every setting.</p>
+
+<h2>Recipe 11: Undo a mistake safely</h2>
+<table>
+  <thead><tr><th style="width:42%">Situation</th><th>Command</th></tr></thead>
+  <tbody>
+    <tr><td>See what you changed</td><td><code>git status</code> (which files), <code>git diff</code> (which lines)</td></tr>
+    <tr><td>Throw away changes to one file (not committed yet)</td><td><code>git restore views/home.ejs</code></td></tr>
+    <tr><td>Put all changes aside for later</td><td><code>git stash</code> (bring them back with <code>git stash pop</code>)</td></tr>
+    <tr><td>Undo a commit you already made (keeps history)</td><td><code>git revert &lt;commit-id&gt;</code> (find the id with <code>git log --oneline</code>)</td></tr>
+    <tr><td>Abandon a whole experiment</td><td><code>git checkout main</code>, then <code>git branch -D my-change</code></td></tr>
+    <tr><td>Back up the local database first</td><td><code>pg_dump -U postgres seniorpadi &gt; backup.sql</code> (restore: <code>psql -U postgres seniorpadi &lt; backup.sql</code>)</td></tr>
+  </tbody>
+</table>
+<div class="callout warn"><span class="label">Warning</span><p><code>git restore</code> and <code>git branch -D</code> throw work away for good. Commands with <code>--force</code> or <code>reset --hard</code> can lose work too; avoid them unless you are sure. Neon keeps its own backups of the live database (see its dashboard).</p></div>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li>Words: <code>locales/</code>. Looks: <code>input.css</code> + rebuild. Pages: route + view + words + link.</li>
+  <li>A form field can touch the template, words, route, model and a migration.</li>
+  <li>Database changes always go in a <strong>new</strong> migration file; Git lets you undo almost anything else.</li>
+</ul></div>

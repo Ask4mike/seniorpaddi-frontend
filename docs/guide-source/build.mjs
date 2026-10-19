@@ -52,6 +52,10 @@ html = html.replace(/<pre([^>]*?)data-file="([^"]+)"([^>]*)><\/pre>/g, (all, a, 
   let seen = 0;
   const start = lines.findIndex((l) => l.includes(find) && ++seen === occurrence);
   if (start < 0) { problems.push('Text not found in ' + file + ': ' + find); return all; }
+  const matches = lines.filter((l) => l.includes(find)).length;
+  if (matches > 1 && !/data-nth=/.test(attrs)) {
+    problems.push('"' + find + '" appears ' + matches + ' times in ' + file + '; the first is used (add data-nth="2" etc. to pick another)');
+  }
   const picked = lines.slice(start, start + count);
   // remove the shared indent so snippets start at the left edge
   const indent = Math.min(...picked.filter((l) => l.trim()).map((l) => l.match(/^ */)[0].length));
@@ -122,8 +126,9 @@ function highlightJs(code) {
 }
 
 function highlightHtml(text) {
-  return text.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9-]*)/g, '$1<span class="tk-tag">$2</span>')
-    .replace(/\s([a-zA-Z-:]+)=("[^"\n]*")/g, ' <span class="tk-attr">$1</span>=<span class="tk-s">$2</span>');
+  // attributes first: colouring tag names adds class="..." markup that the attribute pattern would otherwise match
+  return text.replace(/\s([a-zA-Z-:]+)=("[^"\n]*")/g, ' <span class="tk-attr">$1</span>=<span class="tk-s">$2</span>')
+    .replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9-]*)/g, '$1<span class="tk-tag">$2</span>');
 }
 
 function highlightEjs(code) {
@@ -170,7 +175,7 @@ html = html.replace(/<(h[1-3])(\s[^>]*)?>([\s\S]*?)<\/\1>/g, (all, tag, attrs = 
     attrs += ' id="' + id + '"';
   }
   usedIds.add(id);
-  if (!/data-no-toc/.test(attrs)) headings.push({ level: Number(tag[1]), id, text: inner.replace(/<[^>]+>/g, '').trim() });
+  if (!/data-no-toc/.test(attrs)) headings.push({ level: Number(tag[1]), id, text: inner.replace(/<span class="num">([^<]*)<\/span>/, '$1: ').replace(/<[^>]+>/g, '').trim() });
   return '<' + tag + attrs + '>' + inner + '</' + tag + '>';
 });
 
@@ -263,13 +268,45 @@ async function withBrowser(fn) {
   }
 }
 
-async function printPdf(htmlFile) {
+// Finds code blocks, tables and pictures wider than the printed text area (A4 minus margins = 176mm).
+const OVERFLOW_CHECK = `(() => {
+  const found = [];
+  for (const el of document.querySelectorAll('pre, table, figure, img, .conn, .callout, h1, h2, h3')) {
+    if (el.closest('.cover')) continue;
+    const r = el.getBoundingClientRect();
+    if (el.scrollWidth > el.clientWidth + 1 || r.right > document.documentElement.clientWidth + 1) {
+      found.push(el.tagName.toLowerCase() + ' near "' + ((el.previousElementSibling || el).textContent || '').trim().slice(0, 60) + '"');
+    }
+  }
+  return found;
+})()`;
+
+async function printPdf(htmlFile, attempt = 1) {
+  try {
+    return await printOnce(htmlFile);
+  } catch (err) {
+    // Edge sometimes answers "Printing is not available" while it updates itself; another try usually works
+    if (attempt < 3) {
+      console.log('  (the browser said "' + err.message + '"; trying again)');
+      await new Promise((r) => setTimeout(r, 2000));
+      return printPdf(htmlFile, attempt + 1);
+    }
+    throw err;
+  }
+}
+
+async function printOnce(htmlFile) {
   return withBrowser(async ({ send, once }) => {
     await send('Page.enable');
+    // lay the page out at the printed text width, in print mode, so the overflow check matches the PDF
+    await send('Emulation.setDeviceMetricsOverride', { width: Math.round(176 / 25.4 * 96), height: 1000, deviceScaleFactor: 1, mobile: false });
+    await send('Emulation.setEmulatedMedia', { media: 'print' });
     const loaded = once('Page.loadEventFired');
     await send('Page.navigate', { url: pathToFileURL(htmlFile).href });
     await loaded;
     await send('Runtime.evaluate', { expression: 'document.fonts.ready.then(() => true)', awaitPromise: true });
+    const overflow = (await send('Runtime.evaluate', { expression: OVERFLOW_CHECK, returnByValue: true })).result.value || [];
+    await send('Emulation.clearDeviceMetricsOverride');
     const { data } = await send('Page.printToPDF', {
       printBackground: true,
       preferCSSPageSize: true,
@@ -279,7 +316,7 @@ async function printPdf(htmlFile) {
       footerTemplate: '<div style="width:100%;font-family:Segoe UI,Arial,sans-serif;font-size:8.5px;color:#6b6585;padding:0 16mm;display:flex;justify-content:space-between">' +
         '<span>SeniorPadi: Beginner\'s Project Guide</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>'
     });
-    return Buffer.from(data, 'base64');
+    return { pdf: Buffer.from(data, 'base64'), overflow };
   });
 }
 
@@ -319,7 +356,13 @@ function outlinePages(pdf) {
 
 (async () => {
   console.log('Printing (first pass, to find page numbers)...');
-  const first = await printPdf(OUT_HTML);
+  const { pdf: first, overflow } = await printPdf(OUT_HTML);
+  if (overflow.length) {
+    console.log('  ! These are wider than the page and may be cut off:');
+    for (const o of overflow) console.log('    - ' + o);
+  } else {
+    console.log('  Nothing is wider than the page.');
+  }
   const { items, pages } = outlinePages(first);
   // bookmarks come from every h1..h6 in page order, so line them up with the headings in the built page
   const built = fs.readFileSync(OUT_HTML, 'utf8');
@@ -331,7 +374,7 @@ function outlinePages(pdf) {
   order.forEach((id, i) => { if (id && items[i]) pageMap[id] = items[i]; });
   fs.writeFileSync(OUT_HTML, withToc(pageMap));
   console.log('Printing (second pass, with page numbers in the contents)...');
-  const second = await printPdf(OUT_HTML);
+  const { pdf: second } = await printPdf(OUT_HTML);
   fs.writeFileSync(PDF_FILE, second);
   const check = outlinePages(second);
   console.log('Wrote ' + path.relative(ROOT, PDF_FILE) + ': ' + check.pages + ' pages, ' + (second.length / 1024 / 1024).toFixed(1) + ' MB');

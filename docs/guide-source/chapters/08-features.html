@@ -53,6 +53,22 @@
   <li>Cancel from <code>/registrations</code> (<code>src/routes/account.js</code>); reminders go out at 8:00 (<code>src/services/cron.js</code>); staff mark attendance through <code>src/services/attendance.js</code>.</li>
 </ol>
 
+<div class="callout important"><span class="label">Important</span><p>The Home cards deliberately show no attendee counts: the project avoids numbers that pressure people. Every SeniorPadi event is free, so the "Free" pill is always shown. "Register" on a card always leads to the event's own page, where the real registration happens.</p></div>
+
+<h2>Other major features</h2>
+<table>
+  <thead><tr><th style="width:22%">Feature</th><th>How it works, with the files</th></tr></thead>
+  <tbody>
+    <tr><td>Language switch</td><td>The button in <code>partials/langToggle.ejs</code> posts to <code>/language</code> (<code>src/routes/public.js</code>), which saves the choice on the account (or in the session for visitors) and returns to the same page. <code>src/services/i18n.js</code> then reads <code>locales/yo.json</code>.</td></tr>
+    <tr><td>Reminders</td><td>Every day at 8:00 Lagos time <code>src/services/cron.js</code> texts everyone whose reminder day is today (2 days before by default; each senior can change it or switch reminders off in Settings).</td></tr>
+    <tr><td>Find seniors and ID check</td><td><code>/find-seniors</code> (<code>src/routes/social.js</code>). Unverified seniors see an ID upload (<code>src/middleware/upload.js</code> → <code>src/services/cloudinary.js</code>); staff approve or reject it at <code>/admin/ids</code>. Approved seniors see other seniors one at a time and can skip, message, report or block (<code>src/services/social.js</code>).</td></tr>
+    <tr><td>Messages</td><td>The form posts to <code>/messages/:seniorId</code>; <code>src/services/messaging.js</code> applies the rules and saves it. With live chat connected (<code>public/js/chat.js</code> ↔ <code>src/sockets/index.js</code>) the other person sees it at once.</td></tr>
+    <tr><td>Swapping phone numbers</td><td><code>/messages/:seniorId/exchange</code>; the number is shown only after the other person accepts (<code>src/services/phoneExchange.js</code>).</td></tr>
+    <tr><td>Staff: events and attendance</td><td><code>/admin/events</code> to add, edit or cancel (cancelling texts everyone registered); <code>/admin/events/:id/attendance</code> to tick who came, scan a QR code or type a ticket number (<code>src/services/attendance.js</code>).</td></tr>
+    <tr><td>System page</td><td><code>/admin/system</code> shows whether the database, migrations, Brevo, Cloudinary and the scheduled jobs are working.</td></tr>
+  </tbody>
+</table>
+
 <div class="learned"><span class="label">What you learned</span>
 <ul>
   <li>Sign up and log in live in <code>src/routes/public.js</code>; the session remembers <code>userId</code>.</li>

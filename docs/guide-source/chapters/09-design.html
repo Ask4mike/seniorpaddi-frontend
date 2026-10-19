@@ -1,0 +1,114 @@
+<h1 id="ch9"><span class="num">Chapter 9</span>The design and image system</h1>
+
+<p class="lead">How SeniorPadi gets its look: one stylesheet you edit, a set of named colours, one font, shared component classes, and a small folder of pictures.</p>
+
+<h2>How the styles are organised</h2>
+<p>There is exactly <strong>one</strong> stylesheet you edit: <code>src/styles/input.css</code> (about 1,560 lines). Tailwind reads it, scans every template in <code>views/</code> and script in <code>public/js/</code> for class names, and writes the finished file <code>public/css/main.css</code>, which the header loads on every page.</p>
+<table>
+  <thead><tr><th style="width:30%">Part of input.css</th><th>What lives there</th></tr></thead>
+  <tbody>
+    <tr><td><code>@import</code> and <code>@source</code> (top)</td><td>Load Tailwind and say which files to scan.</td></tr>
+    <tr><td><code>@font-face</code></td><td>The Outfit font from <code>public/fonts/outfit-variable.woff2</code>.</td></tr>
+    <tr><td><code>@theme { ... }</code></td><td><strong>Design tokens</strong>: named values for the font, text sizes and every colour. A token named <code>--color-primary</code> automatically creates classes such as <code>bg-primary</code>, <code>text-primary</code> and <code>border-primary</code>.</td></tr>
+    <tr><td><code>@utility</code> blocks</td><td>A few custom one-job classes (fluid header text, entrance delays).</td></tr>
+    <tr><td><code>@layer base</code></td><td>Rules for plain HTML tags: the 18px base text size, headings, links, focus outlines.</td></tr>
+    <tr><td><code>@layer components</code></td><td>The shared pieces, each a class: buttons (<code>.btn-primary</code>, <code>.btn-glow</code>, <code>.btn-white</code>), cards, chips, alerts, form fields, pop-ups, the auth pages, the hero and the event cards.</td></tr>
+    <tr><td><code>@media</code> blocks (end)</td><td>Responsive rules, hover-only effects, and <code>prefers-reduced-motion</code> (see below).</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warn"><span class="label">Warning</span><p><strong>Never edit <code>public/css/main.css</code>.</strong> It is rebuilt from <code>input.css</code> and your change would be lost. After editing <code>input.css</code> (or adding a new class name to a template) run <code>npm run build:css</code>, or keep <code>npm run dev:css</code> running while you work.</p></div>
+
+<h3>Colours</h3>
+<p>Every colour has a name in the <code>@theme</code> block, so the whole site changes when you change one line. The main ones:</p>
+<pre data-file="src/styles/input.css" data-find="--color-primary: #4a3fb0;" data-lines="5"></pre>
+<table>
+  <thead><tr><th style="width:30%">Token</th><th style="width:16%">Value</th><th>Used for</th></tr></thead>
+  <tbody>
+    <tr><td><code>--color-primary</code></td><td><span class="pill" style="background:#4a3fb0;color:#fff">#4a3fb0</span></td><td>Indigo: main buttons, links, the logo circle.</td></tr>
+    <tr><td><code>--color-secondary</code></td><td><span class="pill" style="background:#231d5c;color:#fff">#231d5c</span></td><td>Deep indigo: the dark footer.</td></tr>
+    <tr><td><code>--color-accent</code> / <code>yolk-400</code></td><td><span class="pill" style="background:#f5b82e;color:#1f1b2e">#f5b82e</span></td><td>Warm yellow highlights (always with dark text).</td></tr>
+    <tr><td><code>--color-charcoal</code> / <code>body</code></td><td><span class="pill" style="background:#1f1b2e;color:#fff">#1f1b2e</span></td><td>Body text, the dark "Create account" button.</td></tr>
+    <tr><td><code>--color-rose-500</code></td><td><span class="pill" style="background:#c42a85;color:#fff">#c42a85</span></td><td>The pink "Log in" button.</td></tr>
+    <tr><td><code>--color-mint-wash</code>, <code>lavender</code>, <code>indigo-100</code></td><td><span class="pill" style="background:#ddf5ee">#ddf5ee</span> <span class="pill" style="background:#f4f2fc">#f4f2fc</span></td><td>The soft hero background gradient.</td></tr>
+    <tr><td><code>--color-success</code>, <code>error</code></td><td><span class="pill" style="background:#1f7a5f;color:#fff">#1f7a5f</span> <span class="pill" style="background:#a8380a;color:#fff">#a8380a</span></td><td>Green ticks and messages; red errors.</td></tr>
+  </tbody>
+</table>
+<p>The colours were chosen and measured for strong contrast, which matters for older eyes. <code>docs/ui-revamp/palette.md</code> lists the measured contrast of each pair, and <code>node docs/ui-revamp/tools/contrast.mjs</code> re-checks them. If you change a colour, run it again.</p>
+
+<h3>Font, text size and spacing</h3>
+<ul>
+  <li><strong>One font:</strong> Outfit, for everything (<code>--font-sans</code>). It includes the Yorùbá accented letters.</li>
+  <li><strong>Big base size:</strong> the page root is 18px (<code>html { font-size: 112.5% }</code> in <code>@layer base</code>), so <code>1rem</code> = 18px. The text-size tokens are set so nothing is smaller than about 16px.</li>
+  <li><strong>Spacing</strong> uses Tailwind's normal scale in the templates: <code>p-4</code> is padding of 1rem, <code>gap-6</code> a gap of 1.5rem, <code>mt-2</code> a small top margin.</li>
+  <li><strong>Tap targets</strong> are at least 48px tall (<code>min-h-12</code>) so they are easy to press.</li>
+</ul>
+
+<h3>Responsive rules (phones to large screens)</h3>
+<p>Tailwind classes can start with a screen-size prefix: <code>md:</code> means "from 768px wide", <code>lg:</code> "from 1024px", <code>xl:</code> "from 1280px". Without a prefix, a class applies to phones and up. So <code>grid gap-4 md:grid-cols-3</code> is one column on a phone and three on a tablet or computer. On phones the main menu moves to a bar at the bottom of the screen (<code>partials/seniorNav.ejs</code> with <code>placement: 'bottom'</code>).</p>
+
+<h3>Motion</h3>
+<p>Animations are short and calm, and they switch off completely for people who have asked their device for less motion:</p>
+<pre data-file="src/styles/input.css" data-find="@media (prefers-reduced-motion: reduce) {" data-lines="10"></pre>
+
+<h3>Making sure browsers load the new stylesheet</h3>
+<p>Browsers keep copies of files to save data. The header loads the stylesheet as <code>/css/main.css?v=ui5</code>; the <code>?v=ui5</code> part is a version label. On the live site, after a style change, raise it (<code>ui6</code>) in <code>views/partials/header.ejs</code> so everyone's browser fetches the new file. The scripts have the same kind of label (<code>?v=ui1</code>).</p>
+
+<h2>The images</h2>
+<table>
+  <thead><tr><th style="width:36%">Folder</th><th>What is in it</th></tr></thead>
+  <tbody>
+    <tr><td><code>public/images/events/</code></td><td>One cover photo per event category: <code>fitness</code>, <code>faith</code>, <code>learning</code>, <code>skills</code>, <code>social</code>, <code>health</code>. Each as <code>.jpg</code> plus a smaller <code>.webp</code>. <code>fitness</code> is also the Home hero photo.</td></tr>
+    <tr><td><code>public/images/illustrations/</code></td><td>Nine small original SVG drawings (elders chatting, a calendar, a phone call...). Made by <code>docs/ui-revamp/tools/make-illustrations.mjs</code>.</td></tr>
+    <tr><td><code>public/images/hero.png</code></td><td>An older picture, not used any more.</td></tr>
+    <tr><td><code>public/uploads/</code> (not in Git)</td><td>Uploaded pictures when Cloudinary is not set up.</td></tr>
+  </tbody>
+</table>
+
+<h3>How pictures are referenced</h3>
+<p>Anything in <code>public/</code> is served from the root of the site, so <code>public/images/events/faith.webp</code> is <code>/images/events/faith.webp</code> in a template. Event pictures always go through one partial, which picks the uploaded photo or the category cover:</p>
+<pre data-file="views/partials/eventImage.ejs" data-find="&lt;% const pic = event.imageUrl" data-lines="8"></pre>
+<ul class="explain">
+  <li><code>&lt;picture&gt;</code> with a <code>&lt;source type="image/webp"&gt;</code>: browsers that understand WebP get the smaller file; the rest get the JPG.</li>
+  <li><code>loading="lazy"</code>: pictures below the screen load only when you scroll to them (saves data). <code>eager</code> is for pictures visible straight away.</li>
+  <li><code>width</code> and <code>height</code> stop the page jumping while the picture loads.</li>
+  <li><code>alt=""</code> marks a picture as decoration that screen readers skip; meaningful pictures get a description from <code>locales/</code> (the hero uses <code>home.hero_photo_alt</code>).</li>
+</ul>
+
+<h3>Recommended sizes and formats</h3>
+<table>
+  <thead><tr><th style="width:30%">Picture</th><th>Recommended</th></tr></thead>
+  <tbody>
+    <tr><td>Hero subject</td><td>Portrait, at least 1600px on the long edge, ideally with a clean or transparent background.</td></tr>
+    <tr><td>Event covers</td><td>Portrait, at least 1000px on the short edge, with a calm area at the bottom where the text sits.</td></tr>
+    <tr><td>Format</td><td>Keep a <code>.jpg</code> and add a <code>.webp</code> with the same name (WebP is usually 10–40% smaller). Keep files small for slow phones.</td></tr>
+  </tbody>
+</table>
+<div class="callout important"><span class="label">Important: IMAGE_CREDITS.md</span><p>Every picture's source and licence is recorded in <code>IMAGE_CREDITS.md</code> at the project root, along with a "shopping list" of better photos to find. When you add or replace a picture, add a row there with where it came from and its licence. The six current event photos are marked "unknown, please verify" because nobody recorded where they came from; check them before the site launches.</p></div>
+
+<h2>How the redesigned parts are built</h2>
+<table>
+  <thead><tr><th style="width:20%">Part</th><th style="width:34%">Files</th><th>Main classes in input.css</th></tr></thead>
+  <tbody>
+    <tr><td>Log in</td><td><code>views/auth/login.ejs</code>, <code>partials/ui/passwordInput.ejs</code>, <code>partials/phoneInput.ejs</code>, <code>public/js/ui.js</code></td><td><code>.auth-page</code>, <code>.auth-frame</code> (the big rounded frame), <code>.auth-art</code> + <code>.auth-orb</code> + <code>.auth-bigword</code> (the colourful panel), <code>.auth-card</code> (frosted form card), <code>.btn-glow</code> (pink button), <code>.auth-strip</code></td></tr>
+    <tr><td>Create account</td><td><code>views/auth/signup.ejs</code>, <code>partials/ui/textInput.ejs</code>, <code>illustrations/elders-chat.svg</code></td><td><code>.auth-frame-register</code>, <code>.auth-form-panel</code>, <code>.auth-beige</code>, <code>.chat-card</code>, <code>.btn-dark</code></td></tr>
+    <tr><td>Hero</td><td><code>views/home.ejs</code> (top section), <code>partials/seniorNav.ejs</code>, <code>partials/langToggle.ejs</code></td><td><code>.hero-stage</code> (the soft gradient box), <code>.hero-leaf</code>, <code>.hero-bar</code>, <code>.hero-subject</code> + <code>.hero-float</code>, <code>.hero-title</code>, <code>.glass-chip</code>, <code>.btn-white</code></td></tr>
+    <tr><td>Events near you</td><td><code>views/home.ejs</code>, <code>partials/eventTile.ejs</code>, <code>partials/eventImage.ejs</code></td><td><code>.ev-grid</code> (1, 2 or 3 columns), <code>.ev-shell.is-dark</code> / <code>.is-light</code>, <code>.ev-card</code>, <code>.ev-badge</code>, <code>.ev-info</code>, <code>.ev-body</code>, <code>.ev-join</code></td></tr>
+  </tbody>
+</table>
+<p>A component class is just a bundle of Tailwind classes with a name. The pink button, for example:</p>
+<pre data-file="src/styles/input.css" data-find=".btn-glow {" data-lines="5"></pre>
+<ul class="explain">
+  <li><code>@apply</code> pulls in ordinary Tailwind classes: full width, very rounded (<code>rounded-full</code>), pink background, white text.</li>
+  <li><code>hover:bg-rose-600</code>: a slightly darker pink under the mouse.</li>
+  <li><code>box-shadow</code>: the soft pink glow underneath.</li>
+</ul>
+<div class="callout know"><span class="label">Things to know</span><p>The hero's top bar still has the class name <code>on-yolk</code> (in <code>views/home.ejs</code> and <code>input.css</code>), left over from when the hero was yellow. It works fine on the soft background; the name is just out of date. <code>DESIGN-NOTES.md</code> explains every design decision in detail.</p></div>
+
+<div class="learned"><span class="label">What you learned</span>
+<ul>
+  <li>Edit <code>src/styles/input.css</code>, then <code>npm run build:css</code>. Never edit <code>main.css</code>.</li>
+  <li>Colours, font and sizes are named tokens in <code>@theme</code>; components are named classes in <code>@layer components</code>.</li>
+  <li>Pictures live in <code>public/images/</code>, are shown as <code>/images/...</code>, and must be recorded in <code>IMAGE_CREDITS.md</code>.</li>
+</ul></div>
+<div class="callout try"><span class="label">Try it yourself</span><p>In <code>input.css</code>, change <code>--color-rose-500</code> to <code>#1f7a5f</code> (green), run <code>npm run build:css</code> and refresh the log-in page: the button is now green. Change it back and rebuild.</p></div>
